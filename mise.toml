@@ -1,10 +1,15 @@
-[tools]
-hk = "1.36"
-pkl = "0.30"
-
-[tasks]
-pre-commit = { run = "" }
+experimental_monorepo_root = true
 
 [settings]
 auto_install = true
 lockfile = true
+
+[monorepo]
+config_roots = ["web"]
+
+[tools]
+hk = "1.36"
+pkl = "0.30"
+
+[tasks.pre-commit]
+run = "hk fix"

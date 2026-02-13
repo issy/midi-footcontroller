@@ -1,0 +1,47 @@
+amends "package://github.com/jdx/hk/releases/download/v1.36.0/hk@1.36.0#/Config.pkl"
+import "package://github.com/jdx/hk/releases/download/v1.36.0/hk@1.36.0#/Builtins.pkl"
+
+local web = new Group {
+  steps {
+    ["prettier"] {
+      dir = "web"
+      glob = List(
+        "**/*.js",
+        "**/*.ts",
+        "**/*.tsx",
+      )
+      batch = true
+      check = "mise x -- pnpm exec prettier --check {{ files }}"
+      check_list_files = "mise x -- pnpm exec prettier --list-different {{ files }}"
+      fix = "mise x -- pnpm exec prettier --write {{ files }}"
+    }
+    ["eslint"] {
+      dir = "web"
+      glob = List("**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx")
+      batch = true
+      check = "mise x -- pnpm exec eslint {{ files }}"
+      fix = "mise x -- pnpm exec eslint --fix {{ files }}"
+    }
+  }
+}
+
+hooks {
+  ["pre-commit"] {
+    fix = true
+    stash = "git"
+    steps {
+      ["web"] = web
+    }
+  }
+  ["fix"] {
+    fix = true
+      steps {
+        ["web"] = web
+      }
+  }
+  ["check"] {
+    steps {
+      ["web"] = web
+    }
+  }
+}

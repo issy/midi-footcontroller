@@ -1,3 +1,9 @@
 [tools]
 node = "24"
 pnpm = "10.29.3"
+
+[tasks]
+dev = "pnpm dev"
+lint = "eslint"
+lint-fix = "eslint --fix"
+format = "pnpm prettier"

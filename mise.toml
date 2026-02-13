@@ -4,6 +4,7 @@ pnpm = "10.29.3"
 
 [settings]
 auto_install = true
+lockfile = true
 
 [task_config]
 includes = ["web", "firmware"]

@@ -30,7 +30,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
-          path: firmware
+          sparse-checkout: 'firmware'
+      - run: cd firmware
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@v1

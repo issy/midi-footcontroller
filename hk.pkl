@@ -3,6 +3,13 @@ import "package://github.com/jdx/hk/releases/download/v1.36.0/hk@1.36.0#/Builtin
 
 local web = new Group {
   steps {
+    ["eslint"] {
+      dir = "web"
+      glob = List("**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx")
+      batch = true
+      check = "mise x -- pnpm exec eslint {{ files }}"
+      fix = "mise x -- pnpm exec eslint --fix {{ files }}"
+    }
     ["prettier"] {
       dir = "web"
       glob = List(
@@ -11,16 +18,10 @@ local web = new Group {
         "**/*.tsx",
       )
       batch = true
+      depends = List("eslint")
       check = "mise x -- pnpm exec prettier --check {{ files }}"
       check_list_files = "mise x -- pnpm exec prettier --list-different {{ files }}"
       fix = "mise x -- pnpm exec prettier --write {{ files }}"
-    }
-    ["eslint"] {
-      dir = "web"
-      glob = List("**/*.js", "**/*.jsx", "**/*.ts", "**/*.tsx")
-      batch = true
-      check = "mise x -- pnpm exec eslint {{ files }}"
-      fix = "mise x -- pnpm exec eslint --fix {{ files }}"
     }
   }
 }

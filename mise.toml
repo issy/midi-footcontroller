@@ -1,11 +1,11 @@
 experimental_monorepo_root = true
 
+[monorepo]
+config_roots = ["web"]
+
 [settings]
 auto_install = true
 lockfile = true
-
-[monorepo]
-config_roots = ["web"]
 
 [tools]
 hk = "1.36"

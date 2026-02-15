@@ -12,7 +12,7 @@ node = "24"
 pnpm = "10.29.3"
 
 [tasks]
-pre-commit = ["git stash -k", "hk fix", "git stash pop"]
+pre-commit = ["hk fix"]
 
 web-dev = { dir = "web", run = "pnpm dev" }
 web-lint = {dir = "web", run = "eslint" }

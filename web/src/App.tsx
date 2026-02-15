@@ -3,6 +3,7 @@ import HomeView from './views/home/HomeView';
 import DeviceLayout from './views/device/DeviceLayout';
 import DeviceUpdateView from './views/device/update/DeviceUpdateView';
 import DeviceEditorView from './views/device/editor/DeviceEditorView';
+import NotFoundView from './views/NotFoundView';
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="update" Component={DeviceUpdateView} />
         <Route path="editor" Component={DeviceEditorView} />
       </Route>
+      <Route path="*" Component={NotFoundView} />
     </Routes>
   );
 }

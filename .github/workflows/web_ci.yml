@@ -25,7 +25,12 @@ jobs:
         with:
           node-version: '24.x'
           check-latest: true
-          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: 'web/package.json'
 
       - name: Install dependencies
         run: pnpm install

@@ -37,3 +37,34 @@ jobs:
 
       - name: Build project
         run: pnpm build
+
+  lint:
+    name: Linting
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24.x'
+          check-latest: true
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          package_json_file: 'web/package.json'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: ESLint
+        run: pnpm lint
+
+      - name: Prettier
+        run: pnpm prettier:ci

@@ -1,19 +1,21 @@
-import { Route, Routes } from 'react-router';
-import HomeView from './views/home/HomeView';
-import DeviceLayout from './views/device/DeviceLayout';
+import { Navigate, Route, Routes } from 'react-router';
 import DeviceUpdateView from './views/device/update/DeviceUpdateView';
 import DeviceEditorView from './views/device/editor/DeviceEditorView';
 import NotFoundView from './views/NotFoundView';
+import AppLayout from '@/views/AppLayout';
+import DeviceConnectView from './views/device/DeviceConnectView';
 
 function App() {
   return (
     <Routes>
-      <Route index Component={HomeView} />
-      <Route path="device" Component={DeviceLayout}>
-        <Route path="update" Component={DeviceUpdateView} />
-        <Route path="editor" Component={DeviceEditorView} />
+      <Route Component={AppLayout}>
+        <Route index element={<Navigate to="device" replace />} />
+        <Route path="device" Component={DeviceConnectView}>
+          <Route path="editor" Component={DeviceEditorView} />
+          <Route path="update" Component={DeviceUpdateView} />
+        </Route>
+        <Route path="*" Component={NotFoundView} />
       </Route>
-      <Route path="*" Component={NotFoundView} />
     </Routes>
   );
 }

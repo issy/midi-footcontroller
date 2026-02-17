@@ -1,7 +1,30 @@
+use std::env;
+use std::fs::File;
+use std::io::Write;
+
 fn main() {
+    generate_firmware_version();
     linker_be_nice();
     // make sure linkall.x is the last linker script (otherwise might cause problems with flip-link)
     println!("cargo:rustc-link-arg=-Tlinkall.x");
+}
+
+fn generate_firmware_version() {
+    let out_dir = env::var("OUT_DIR").unwrap();
+
+    let version_major = env!("CARGO_PKG_VERSION_MAJOR");
+    let version_minor = env!("CARGO_PKG_VERSION_MINOR");
+    let version_patch = env!("CARGO_PKG_VERSION_PATCH");
+
+    let dest_path = std::path::Path::new(&out_dir).join("version.rs");
+    let mut f = File::create(dest_path).unwrap();
+
+    writeln!(
+        f,
+        "pub const FIRMWARE_VERSION: (u32, u32, u32) = ({}, {}, {});",
+        version_major, version_minor, version_patch
+    )
+    .unwrap();
 }
 
 fn linker_be_nice() {

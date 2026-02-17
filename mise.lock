@@ -1,3 +1,16 @@
+[[tools.buf]]
+version = "1.65.0"
+backend = "aqua:bufbuild/buf"
+"platforms.linux-arm64" = { checksum = "sha256:53b4854a5ce61e02915e134370ad9c85f85cc3c906cbc464dddba5c450dee1ff", url = "https://github.com/bufbuild/buf/releases/download/v1.65.0/buf-Linux-aarch64.tar.gz"}
+"platforms.linux-x64" = { checksum = "sha256:15dfd76f882f6648aa3b9fcd23eaa149826cc9000a35bc89ced50ddca689e890", url = "https://github.com/bufbuild/buf/releases/download/v1.65.0/buf-Linux-x86_64.tar.gz"}
+"platforms.macos-arm64" = { checksum = "sha256:86e233aa35a1763dd00fd7651c0b0cb0067395260c337bb064b68c4c85a46e38", url = "https://github.com/bufbuild/buf/releases/download/v1.65.0/buf-Darwin-arm64.tar.gz"}
+"platforms.macos-x64" = { checksum = "sha256:c70d364478f61cd444455f03cfc44b503afd4cb0a47be045bad4553f117fbf7c", url = "https://github.com/bufbuild/buf/releases/download/v1.65.0/buf-Darwin-x86_64.tar.gz"}
+"platforms.windows-x64" = { checksum = "sha256:ca122b8ca406140e2f795d9fbb578e124773d50094df26e4a337f3735b7cf753", url = "https://github.com/bufbuild/buf/releases/download/v1.65.0/buf-Windows-x86_64.zip"}
+
+[[tools.cargo]]
+version = "1.93.1"
+backend = "cargo"
+
 [[tools.hk]]
 version = "1.36.0"
 backend = "aqua:jdx/hk"
@@ -32,3 +45,7 @@ backend = "aqua:pnpm/pnpm"
 "platforms.macos-arm64" = { checksum = "sha256:a248c56b0ab20443e18d0c8ee3207c6c564ee342bd3fc8694b3569a060cecece", url = "https://github.com/pnpm/pnpm/releases/download/v10.29.3/pnpm-macos-arm64"}
 "platforms.macos-x64" = { checksum = "sha256:569877025e8894d88b1756fdbc0675330dfcd9c01ece4ab26685baafffa8e303", url = "https://github.com/pnpm/pnpm/releases/download/v10.29.3/pnpm-macos-x64"}
 "platforms.windows-x64" = { checksum = "sha256:51a217ad98e138a346da4a43c81bbc64a8ba6df7e2afa7bf5456a163f9105635", url = "https://github.com/pnpm/pnpm/releases/download/v10.29.3/pnpm-win-x64.exe"}
+
+[[tools.rust]]
+version = "1.93.1"
+backend = "core:rust"

@@ -1,0 +1,105 @@
+syntax = "proto3";
+
+package device.v1;
+
+message ButtonEvent {
+  uint32 button_id = 1;
+  bool pressed = 2;
+}
+
+message PresetChange {
+  uint32 preset_id = 1;
+}
+
+message RequestPresets {}
+
+enum Colour {
+  COLOUR_UNSPECIFIED = 0;
+  COLOUR_RED   = 1;
+  COLOUR_GREEN = 2;
+  COLOUR_BLUE  = 3;
+  COLOUR_YELLOW = 4;
+  COLOUR_ORANGE = 5;
+  COLOUR_PURPLE = 6;
+  COLOUR_CYAN = 7;
+  COLOUR_WHITE = 8;
+}
+
+// TODO: Define actual MIDI commands and their parameters.
+message MidiCommand {
+  string placeholder = 1;
+}
+
+message ButtonConfig {
+  string text = 1;
+  Colour colour = 2;
+  repeated MidiCommand commands = 3;
+}
+
+message DevicePreset {
+  uint32 id = 1;
+  repeated ButtonConfig buttons = 2;
+}
+
+message Presets {
+  repeated DevicePreset presets = 1;
+}
+
+message Ack {
+  uint32 id = 1;
+}
+
+message Error {
+  string message = 1;
+}
+
+message Envelope {
+  uint32 protocol_version = 1;
+
+  oneof payload {
+    // Handshake
+    Hello hello = 2;
+    ClientHello client_hello = 3;
+    Ready ready = 4;
+
+    // System
+    Ack ack = 5;
+    Error error = 6;
+
+    // Real-time
+    ButtonEvent button_event = 7;
+    PresetChange preset_change = 8;
+
+    // Config
+    RequestPresets request_presets = 9;
+    Presets all_presets = 10;
+  }
+}
+
+message Hello {
+  uint32 firmware_version_major = 1;
+  uint32 firmware_version_minor = 2;
+  uint32 firmware_version_patch = 3;
+
+  string device_model = 4;
+  uint32 hardware_revision = 5;
+
+  Capabilities capabilities = 6;
+}
+
+message ClientHello {
+  uint32 supported_protocol_version = 1;
+  string client_name = 2;
+  string client_version = 3;
+}
+
+message Ready {}
+
+message Capabilities {
+  uint32 button_count = 1;
+  uint32 display_count = 2;
+  uint32 preset_capacity = 3;
+
+  bool supports_firmware_update = 4;
+  bool supports_live_preview = 5;
+}

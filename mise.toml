@@ -7,6 +7,15 @@ lockfile = true
 hk = "1.36"
 pkl = "0.30"
 
+# Firmware
+rust = {
+  version = "1.93.1",
+  targets = "riscv32imac-unknown-none-elf"
+}
+
+# Proto
+buf = "1.65.0"
+
 # Web
 node = "24"
 pnpm = "10.29.3"

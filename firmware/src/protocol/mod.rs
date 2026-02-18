@@ -26,7 +26,7 @@ pub struct MidiCommand {
     placeholder: String,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug, Clone)]
 enum Colour {
     Red = 1,
     Green = 2,

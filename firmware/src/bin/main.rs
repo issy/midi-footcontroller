@@ -9,6 +9,10 @@
 
 use embassy_executor::Spawner;
 use embassy_time::{Duration, Timer};
+#[allow(
+    unused_imports,
+    reason = "esp-backtrace is required for backtraces to work."
+)]
 use esp_backtrace as _;
 use esp_hal::clock::CpuClock;
 use esp_hal::timer::timg::TimerGroup;

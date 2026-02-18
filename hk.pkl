@@ -12,16 +12,50 @@ local web = new Group {
     }
     ["prettier"] {
       dir = "web"
-      glob = List(
-        "**/*.js",
-        "**/*.ts",
-        "**/*.tsx",
-      )
+      glob =
+        List(
+          "**/*.js",
+          "**/*.ts",
+          "**/*.tsx",
+        )
       batch = true
       depends = List("eslint")
       check = "mise x -- pnpm exec prettier --check {{ files }}"
       check_list_files = "mise x -- pnpm exec prettier --list-different {{ files }}"
       fix = "mise x -- pnpm exec prettier --write {{ files }}"
+    }
+  }
+}
+
+local firmware = new Group {
+  steps {
+    ["cargo-check"] {
+      dir = "firmware"
+      glob = List("**/*.rs")
+      check = "mise x -- cargo check --workspace --all-targets"
+    }
+  ["cargo-clippy"] {
+    dir = "firmware"
+    glob = List("**/*.rs")
+    check = "mise x -- cargo clippy --workspace --all-targets -- -D warnings"
+  }
+  ["cargo-fmt"] {
+    dir = "firmware"
+    glob = List("**/*.rs")
+    batch = true
+    check = "mise x -- cargo fmt --check -- {{ files }}"
+    fix = "mise x -- cargo fmt -- {{ files }}"
+  }
+  }
+}
+
+local pkl = new Group {
+  steps {
+    ["pkl-format"] {
+      dir = "."
+      glob = List("**/*.pkl")
+      check = "mise x -- pkl format --diff-name-only {{ files }}"
+      fix = "mise x -- pkl format --write {{ files }}"
     }
   }
 }
@@ -32,17 +66,22 @@ hooks {
     stash = "git"
     steps {
       ["web"] = web
+      ["firmware"] = firmware
+      ["pkl"] = pkl
     }
   }
   ["fix"] {
-    fix = true
-      steps {
-        ["web"] = web
-      }
+    steps {
+      ["web"] = web
+      ["firmware"] = firmware
+      ["pkl"] = pkl
+    }
   }
   ["check"] {
     steps {
       ["web"] = web
+      ["firmware"] = firmware
+      ["pkl"] = pkl
     }
   }
 }

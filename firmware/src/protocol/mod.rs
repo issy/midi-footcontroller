@@ -8,8 +8,8 @@ const PROTOCOL_VERSION: u32 = 1;
 
 #[derive(Debug)]
 pub struct ButtonEvent {
-    pub button_id: u8,
-    pub pressed: bool,
+    button_id: u8,
+    pressed: bool,
 }
 
 #[derive(Debug)]
@@ -26,16 +26,45 @@ pub struct MidiCommand {
     placeholder: String,
 }
 
-#[derive(Debug)]
-pub struct ButtonConfig {
-    pub text: String,
-    pub colour: u32,
-    pub commands: Vec<MidiCommand>,
+#[derive(Clone, Debug)]
+enum Colour {
+    Red = 1,
+    Green = 2,
+    Blue = 3,
+    Yellow = 4,
+    Orange = 5,
+    Purple = 6,
+    Cyan = 7,
+    White = 8,
+}
+
+impl Into<pb::Colour> for Option<Colour> {
+    fn into(self) -> pb::Colour {
+        match self {
+            Some(Colour::Red) => pb::Colour::Red,
+            Some(Colour::Green) => pb::Colour::Green,
+            Some(Colour::Blue) => pb::Colour::Blue,
+            Some(Colour::Yellow) => pb::Colour::Yellow,
+            Some(Colour::Orange) => pb::Colour::Orange,
+            Some(Colour::Purple) => pb::Colour::Purple,
+            Some(Colour::Cyan) => pb::Colour::Cyan,
+            Some(Colour::White) => pb::Colour::White,
+            None => pb::Colour::Unspecified,
+        }
+    }
 }
 
 #[derive(Debug)]
-pub struct DeviceConfig {
-    pub buttons: Vec<ButtonConfig>,
+pub struct ButtonConfig {
+    text: String,
+    colour: Option<Colour>,
+    commands: Vec<MidiCommand>,
+}
+
+#[derive(Debug)]
+pub struct DevicePreset {
+    preset_id: u8,
+    buttons: Vec<ButtonConfig>,
 }
 
 #[derive(Debug)]
@@ -45,7 +74,8 @@ pub enum Message {
     Ack(u32),
     // Device -> Client
     Button(ButtonEvent),
-    Preset(DeviceConfig),
+    PresetChange(u8),
+    ListPresets(Vec<DevicePreset>),
     Hello {
         device_model: String,
         capabilities: Capabilities,
@@ -93,6 +123,38 @@ impl Message {
             Message::Ready => pb::Envelope {
                 protocol_version: PROTOCOL_VERSION,
                 payload: Some(pb::envelope::Payload::Ready(pb::Ready {})),
+            },
+            Message::PresetChange(preset_id) => pb::Envelope {
+                protocol_version: PROTOCOL_VERSION,
+                payload: Some(pb::envelope::Payload::PresetChange(pb::PresetChange {
+                    preset_id: preset_id.clone() as u32,
+                })),
+            },
+            Message::ListPresets(presets) => pb::Envelope {
+                protocol_version: PROTOCOL_VERSION,
+                payload: Some(pb::envelope::Payload::AllPresets(pb::Presets {
+                    presets: presets
+                        .iter()
+                        .map(|preset| pb::DevicePreset {
+                            id: preset.preset_id as u32,
+                            buttons: preset
+                                .buttons
+                                .iter()
+                                .map(|btn| pb::ButtonConfig {
+                                    text: btn.text.clone(),
+                                    colour: Into::<pb::Colour>::into(btn.colour.clone()) as i32,
+                                    commands: btn
+                                        .commands
+                                        .iter()
+                                        .map(|cmd| pb::MidiCommand {
+                                            placeholder: cmd.placeholder.clone(),
+                                        })
+                                        .collect(),
+                                })
+                                .collect(),
+                        })
+                        .collect(),
+                })),
             },
             _ => todo!(),
         }

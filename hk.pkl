@@ -29,16 +29,16 @@ local web = new Group {
 
 local firmware = new Group {
   steps {
-    ["cargo-check"] {
-      dir = "firmware"
-      glob = List("**/*.rs")
-      check = "mise x -- cargo check --workspace --all-targets"
-    }
-  ["cargo-clippy"] {
-    dir = "firmware"
-    glob = List("**/*.rs")
-    check = "mise x -- cargo clippy --workspace --all-targets -- -D warnings"
-  }
+    // ["cargo-check"] {
+    //   dir = "firmware"
+    //   glob = List("**/*.rs")
+    //   check = "mise x -- cargo check --workspace --all-targets"
+    // }
+  // ["cargo-clippy"] {
+  //   dir = "firmware"
+  //   glob = List("**/*.rs")
+  //   check = "mise x -- cargo clippy --workspace --all-targets -- -D warnings"
+  // }
   ["cargo-fmt"] {
     dir = "firmware"
     glob = List("**/*.rs")

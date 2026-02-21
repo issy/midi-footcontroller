@@ -38,9 +38,9 @@ enum Colour {
     White = 8,
 }
 
-impl Into<pb::Colour> for Option<Colour> {
-    fn into(self) -> pb::Colour {
-        match self {
+impl From<Option<Colour>> for pb::Colour {
+    fn from(colour: Option<Colour>) -> Self {
+        match colour {
             Some(Colour::Red) => pb::Colour::Red,
             Some(Colour::Green) => pb::Colour::Green,
             Some(Colour::Blue) => pb::Colour::Blue,

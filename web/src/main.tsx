@@ -13,7 +13,7 @@ if (!rootElement) throw new Error('root element not found');
 createRoot(rootElement).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <BrowserRouter basename="midi-footcontroller">
         <App />
       </BrowserRouter>
     </QueryClientProvider>

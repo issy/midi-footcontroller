@@ -128,7 +128,7 @@ impl Message {
             Message::PresetChange(preset_id) => pb::Envelope {
                 protocol_version: PROTOCOL_VERSION,
                 payload: Some(pb::envelope::Payload::PresetChange(pb::PresetChange {
-                    preset_id: preset_id.clone() as u32,
+                    preset_id: *preset_id as u32,
                 })),
             },
             Message::ListPresets(presets) => pb::Envelope {

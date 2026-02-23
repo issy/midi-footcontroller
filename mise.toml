@@ -24,6 +24,6 @@ pnpm = "10.29.3"
 pre-commit = ["hk fix"]
 
 web-dev = { dir = "web", run = "pnpm dev" }
-web-lint = {dir = "web", run = "eslint" }
+web-lint = {dir = "web", run = "pnpm lint" }
 web-format = { dir = "web", run = "pnpm prettier" }
 web-typecheck = { dir = "web", run = "pnpm typecheck" }

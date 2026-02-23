@@ -26,6 +26,7 @@ pub struct MidiCommand {
     placeholder: String,
 }
 
+#[allow(dead_code)] // Remove this later
 #[derive(Debug, Clone)]
 enum Colour {
     Red = 1,

@@ -84,7 +84,7 @@ impl MidiPacket {
         }
     }
 
-    /// Control Change (CC) message
+    /// Control Change (CC) message (channel 0-15)
     pub fn control_change(channel: u8, controller: u8, value: u8) -> Self {
         MidiPacket {
             len: 3,

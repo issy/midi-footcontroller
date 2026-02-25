@@ -15,7 +15,6 @@ use esp_backtrace as _;
 
 use embassy_executor::{Spawner, task};
 use embassy_sync::{blocking_mutex::raw::NoopRawMutex, channel::Channel};
-use embassy_time::{Duration, Timer};
 use esp_hal::Async;
 use esp_hal::clock::CpuClock;
 use esp_hal::timer::timg::TimerGroup;
@@ -83,12 +82,12 @@ async fn main(spawner: Spawner) -> ! {
     spawner
         .spawn(midi_thru_task(rx))
         .expect("Unable to spawn MIDI thru task");
+    info!("MIDI thru task spawned");
     spawner
         .spawn(midi_out_task(tx))
         .expect("Unable to spawn MIDI out task");
+    info!("MIDI out task spawned");
 
-    loop {
-        info!("Hello world!");
-        Timer::after(Duration::from_secs(1)).await;
-    }
+    info!("Startup complete.");
+    loop {}
 }

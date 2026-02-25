@@ -7,20 +7,46 @@
 )]
 #![deny(clippy::large_stack_frames)]
 
-use embassy_executor::Spawner;
-use embassy_time::{Duration, Timer};
 #[allow(
     unused_imports,
     reason = "esp-backtrace is required for backtraces to work."
 )]
 use esp_backtrace as _;
+
+use embassy_executor::{Spawner, task};
+use embassy_sync::{blocking_mutex::raw::NoopRawMutex, channel::Channel};
+use embassy_time::{Duration, Timer};
+use esp_hal::Async;
 use esp_hal::clock::CpuClock;
 use esp_hal::timer::timg::TimerGroup;
+use esp_hal::uart::{Config as UartConfig, DataBits, Parity, StopBits, Uart, UartRx, UartTx};
 use log::info;
 
 // This creates a default app-descriptor required by the esp-idf bootloader.
 // For more information see: <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/app_image_format.html#application-description>
 esp_bootloader_esp_idf::esp_app_desc!();
+
+const MIDI_OUT_CHANNEL: Channel<NoopRawMutex, u8, 256> = Channel::new();
+
+// Forward MIDI messages IN to the MIDI_OUT_CHANNEL
+#[task]
+async fn midi_thru_task(mut uart: UartRx<'static, Async>) {
+    let mut buf = [0u8; 1];
+
+    loop {
+        uart.read_async(&mut buf).await.unwrap();
+        MIDI_OUT_CHANNEL.send(buf[0]).await;
+    }
+}
+
+// Read MIDI messages from the MIDI_OUT_CHANNEL and send them out over UART
+#[task]
+async fn midi_out_task(mut uart: UartTx<'static, Async>) {
+    loop {
+        let byte = MIDI_OUT_CHANNEL.receive().await;
+        uart.write_async(&[byte]).await.unwrap();
+    }
+}
 
 #[allow(
     clippy::large_stack_frames,
@@ -40,8 +66,26 @@ async fn main(spawner: Spawner) -> ! {
 
     info!("Embassy initialized!");
 
-    // TODO: Spawn some tasks
-    let _ = spawner;
+    let uart = Uart::new(
+        peripherals.UART1,
+        UartConfig::default()
+            .with_baudrate(31_250)
+            .with_data_bits(DataBits::_8)
+            .with_parity(Parity::None)
+            .with_stop_bits(StopBits::_1),
+    )
+    .expect("Failed to initialize UART0")
+    .with_rx(peripherals.GPIO7)
+    .with_tx(peripherals.GPIO8)
+    .into_async();
+    let (rx, tx) = uart.split();
+
+    spawner
+        .spawn(midi_thru_task(rx))
+        .expect("Unable to spawn MIDI thru task");
+    spawner
+        .spawn(midi_out_task(tx))
+        .expect("Unable to spawn MIDI out task");
 
     loop {
         info!("Hello world!");

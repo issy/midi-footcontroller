@@ -7,6 +7,8 @@
 )]
 #![deny(clippy::large_stack_frames)]
 
+mod midi;
+
 #[allow(
     unused_imports,
     reason = "esp-backtrace is required for backtraces to work."
@@ -20,21 +22,26 @@ use esp_hal::clock::CpuClock;
 use esp_hal::timer::timg::TimerGroup;
 use esp_hal::uart::{Config as UartConfig, DataBits, Parity, StopBits, Uart, UartRx, UartTx};
 use log::info;
+use midi::{MidiPacket, MidiParser};
 
 // This creates a default app-descriptor required by the esp-idf bootloader.
 // For more information see: <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/app_image_format.html#application-description>
 esp_bootloader_esp_idf::esp_app_desc!();
 
-const MIDI_OUT_CHANNEL: Channel<NoopRawMutex, u8, 256> = Channel::new();
+const MIDI_OUT_CHANNEL: Channel<NoopRawMutex, MidiPacket, 128> = Channel::new();
 
 // Forward MIDI messages IN to the MIDI_OUT_CHANNEL
 #[task]
 async fn midi_thru_task(mut uart: UartRx<'static, Async>) {
+    let mut parser = MidiParser::new();
     let mut buf = [0u8; 1];
 
     loop {
         uart.read_async(&mut buf).await.unwrap();
-        MIDI_OUT_CHANNEL.send(buf[0]).await;
+
+        if let Some(packet) = parser.feed(buf[0]) {
+            MIDI_OUT_CHANNEL.send(packet).await;
+        }
     }
 }
 
@@ -42,8 +49,10 @@ async fn midi_thru_task(mut uart: UartRx<'static, Async>) {
 #[task]
 async fn midi_out_task(mut uart: UartTx<'static, Async>) {
     loop {
-        let byte = MIDI_OUT_CHANNEL.receive().await;
-        uart.write_async(&[byte]).await.unwrap();
+        let packet = MIDI_OUT_CHANNEL.receive().await;
+        uart.write_async(&packet.data[..packet.len as usize])
+            .await
+            .unwrap();
     }
 }
 

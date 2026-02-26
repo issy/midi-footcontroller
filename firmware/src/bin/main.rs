@@ -67,8 +67,7 @@ async fn midi_out_task(mut uart: UartTx<'static, Async>) {
 async fn main(spawner: Spawner) -> ! {
     esp_println::logger::init_logger_from_env();
 
-    let config = esp_hal::Config::default().with_cpu_clock(CpuClock::max());
-    let peripherals = esp_hal::init(config);
+    let peripherals = esp_hal::init(esp_hal::Config::default().with_cpu_clock(CpuClock::max()));
 
     let timg0 = TimerGroup::new(peripherals.TIMG0);
     let sw_interrupt =
@@ -76,6 +75,17 @@ async fn main(spawner: Spawner) -> ! {
     esp_rtos::start(timg0.timer0, sw_interrupt.software_interrupt0);
 
     info!("Embassy initialized!");
+
+    let miso_mosi = peripherals.GPIO23;
+    let miso = unsafe { miso_mosi.clone_unchecked() };
+    let spi = esp_hal::spi::master::Spi::new(
+        peripherals.SPI2,
+        esp_hal::spi::master::Config::default().with_frequency(esp_hal::time::Rate::from_mhz(40)),
+    )
+    .expect("Failed to initialize SPI2")
+    .with_sck(peripherals.GPIO18)
+    .with_miso(miso)
+    .with_mosi(miso_mosi);
 
     let uart = Uart::new(
         peripherals.UART1,
@@ -85,7 +95,7 @@ async fn main(spawner: Spawner) -> ! {
             .with_parity(Parity::None)
             .with_stop_bits(StopBits::_1),
     )
-    .expect("Failed to initialize UART0")
+    .expect("Failed to initialize UART1")
     .with_rx(peripherals.GPIO7)
     .with_tx(peripherals.GPIO8)
     .into_async();

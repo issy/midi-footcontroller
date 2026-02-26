@@ -7,8 +7,11 @@
 )]
 #![deny(clippy::large_stack_frames)]
 
-mod midi;
-
+#[allow(
+    unused_imports,
+    reason = "esp-alloc is required for heap allocation to work."
+)]
+use esp_alloc as _;
 #[allow(
     unused_imports,
     reason = "esp-backtrace is required for backtraces to work."
@@ -21,8 +24,8 @@ use esp_hal::Async;
 use esp_hal::clock::CpuClock;
 use esp_hal::timer::timg::TimerGroup;
 use esp_hal::uart::{Config as UartConfig, DataBits, Parity, StopBits, Uart, UartRx, UartTx};
+use firmware::midi::{MidiPacket, MidiParser};
 use log::info;
-use midi::{MidiPacket, MidiParser};
 
 // This creates a default app-descriptor required by the esp-idf bootloader.
 // For more information see: <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/app_image_format.html#application-description>

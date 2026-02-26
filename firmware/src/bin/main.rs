@@ -22,6 +22,8 @@ use embassy_executor::{Spawner, task};
 use embassy_sync::{blocking_mutex::raw::NoopRawMutex, channel::Channel};
 use esp_hal::Async;
 use esp_hal::clock::CpuClock;
+use esp_hal::spi::Mode;
+use esp_hal::spi::slave::Spi;
 use esp_hal::timer::timg::TimerGroup;
 use esp_hal::uart::{Config as UartConfig, DataBits, Parity, StopBits, Uart, UartRx, UartTx};
 use firmware::midi::{MidiPacket, MidiParser};
@@ -76,16 +78,10 @@ async fn main(spawner: Spawner) -> ! {
 
     info!("Embassy initialized!");
 
-    let miso_mosi = peripherals.GPIO23;
-    let miso = unsafe { miso_mosi.clone_unchecked() };
-    let spi = esp_hal::spi::master::Spi::new(
-        peripherals.SPI2,
-        esp_hal::spi::master::Config::default().with_frequency(esp_hal::time::Rate::from_mhz(40)),
-    )
-    .expect("Failed to initialize SPI2")
-    .with_sck(peripherals.GPIO18)
-    .with_miso(miso)
-    .with_mosi(miso_mosi);
+    let spi = Spi::new(peripherals.SPI2, Mode::_0)
+        .with_sck(peripherals.GPIO18)
+        .with_mosi(peripherals.GPIO19)
+        .with_cs(peripherals.GPIO20);
 
     let uart = Uart::new(
         peripherals.UART1,

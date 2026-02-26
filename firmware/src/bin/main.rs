@@ -26,7 +26,11 @@ use embassy_sync::{
     channel::Channel,
 };
 use embassy_time::Delay;
-use embedded_graphics::pixelcolor::Rgb565;
+use embedded_graphics::draw_target::DrawTarget;
+use embedded_graphics::mono_font::MonoTextStyle;
+use embedded_graphics::mono_font::ascii::FONT_10X20;
+use embedded_graphics::prelude::*;
+use embedded_graphics::{pixelcolor::Rgb565, text::Text};
 use esp_hal::Async;
 use esp_hal::clock::CpuClock;
 use esp_hal::gpio::{Level, Output, OutputConfig};
@@ -75,8 +79,6 @@ async fn midi_out_task(mut uart: UartTx<'static, Async>) {
     clippy::large_stack_frames,
     reason = "it's not unusual to allocate larger buffers etc. in main"
 )]
-use embedded_graphics::draw_target::DrawTarget;
-use embedded_graphics::prelude::RgbColor;
 #[esp_rtos::main]
 async fn main(spawner: Spawner) -> ! {
     esp_println::logger::init_logger_from_env();
@@ -112,6 +114,10 @@ async fn main(spawner: Spawner) -> ! {
         .expect("Failed to initialise ST7789 display");
 
     display.clear(Rgb565::BLACK).unwrap();
+    let style = MonoTextStyle::new(&FONT_10X20, Rgb565::GREEN);
+    Text::new("Hello, world!", Point::new(10, 30), style)
+        .draw(&mut display)
+        .unwrap();
 
     let uart = Uart::new(
         peripherals.UART1,
@@ -137,5 +143,6 @@ async fn main(spawner: Spawner) -> ! {
     info!("MIDI out task spawned");
 
     info!("Startup complete.");
+
     loop {}
 }

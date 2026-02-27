@@ -109,9 +109,9 @@ impl Message {
             } => pb::Envelope {
                 protocol_version: PROTOCOL_VERSION,
                 payload: Some(pb::envelope::Payload::Hello(pb::Hello {
-                    firmware_version_major,
-                    firmware_version_minor,
-                    firmware_version_patch,
+                    firmware_version_major: *firmware_version_major,
+                    firmware_version_minor: *firmware_version_minor,
+                    firmware_version_patch: *firmware_version_patch,
                     device_model: device_model.clone(),
                     capabilities: Some(pb::Capabilities {
                         button_count: capabilities.button_count,

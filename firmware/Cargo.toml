@@ -4,16 +4,10 @@ name = "midi-controller"
 rust-version = "1.88"
 version = "0.1.0"
 
+[lib]
+
 [workspace]
 members = ["firmware", "foundation"]
-
-[lib]
-test = false
-
-[[bin]]
-name = "firmware"
-path = "firmware/src/bin/main.rs"
-test = false
 
 [profile.dev]
 # Rust debug is too slow.

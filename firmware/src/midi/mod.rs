@@ -197,3 +197,9 @@ impl MidiParser {
         None
     }
 }
+
+impl Default for MidiParser {
+    fn default() -> Self {
+        Self::new()
+    }
+}

@@ -7,6 +7,7 @@ pub mod generated {
     pub mod device_v1;
 }
 
+pub mod layout;
 pub mod midi;
 pub mod protocol;
 

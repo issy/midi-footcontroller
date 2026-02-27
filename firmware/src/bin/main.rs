@@ -18,17 +18,39 @@ use esp_alloc as _;
 )]
 use esp_backtrace as _;
 
+use core::cell::RefCell;
+use core::ops::Add;
+use core::str::FromStr;
+use embassy_embedded_hal::shared_bus::blocking::spi::SpiDevice;
 use embassy_executor::{Spawner, task};
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
-use embassy_sync::channel::Channel;
+use embassy_sync::{
+    blocking_mutex::{Mutex, raw::NoopRawMutex},
+    channel::Channel,
+};
+use embassy_time::Delay;
 use embassy_time::Timer;
+use embedded_graphics::draw_target::DrawTarget;
+use embedded_graphics::mono_font::{MonoTextStyleBuilder, ascii::FONT_10X20};
+use embedded_graphics::prelude::*;
+use embedded_graphics::primitives::PrimitiveStyleBuilder;
+use embedded_graphics::text::{Alignment, Baseline, TextStyleBuilder};
+use embedded_graphics::{pixelcolor::Rgb565, text::Text};
 use esp_hal::Async;
 use esp_hal::clock::CpuClock;
+use esp_hal::gpio::{Level, Output, OutputConfig};
+use esp_hal::spi::master::Spi;
+use esp_hal::time::Rate;
 use esp_hal::timer::timg::TimerGroup;
 use esp_hal::uart::{Config as UartConfig, DataBits, Parity, StopBits, Uart, UartRx, UartTx};
 use esp_println::println;
+use firmware::layout::DisplayLayout;
 use firmware::midi::{MidiPacket, MidiParser};
+use heapless::String;
 use log::info;
+use mipidsi::models::ST7789;
+use mipidsi::options::Rotation::Deg270;
+use mipidsi::options::{ColorInversion, Orientation};
 
 // This creates a default app-descriptor required by the esp-idf bootloader.
 // For more information see: <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/app_image_format.html#application-description>
@@ -70,8 +92,7 @@ async fn midi_out_task(mut uart: UartTx<'static, Async>) {
 async fn main(spawner: Spawner) -> ! {
     esp_println::logger::init_logger_from_env();
 
-    let config = esp_hal::Config::default().with_cpu_clock(CpuClock::max());
-    let peripherals = esp_hal::init(config);
+    let peripherals = esp_hal::init(esp_hal::Config::default().with_cpu_clock(CpuClock::max()));
 
     let timg0 = TimerGroup::new(peripherals.TIMG0);
     let sw_interrupt =
@@ -79,6 +100,83 @@ async fn main(spawner: Spawner) -> ! {
     esp_rtos::start(timg0.timer0, sw_interrupt.software_interrupt0);
 
     info!("Embassy initialized!");
+
+    let spi = Spi::new(
+        peripherals.SPI2,
+        esp_hal::spi::master::Config::default().with_frequency(Rate::from_mhz(40)),
+    )
+    .expect("Failed to initialise SPI2 peripheral")
+    .with_sck(peripherals.GPIO18)
+    .with_mosi(peripherals.GPIO19)
+    .with_cs(peripherals.GPIO20);
+
+    let cs = Output::new(peripherals.GPIO5, Level::High, OutputConfig::default());
+    let spi_bus: Mutex<NoopRawMutex, _> = Mutex::new(RefCell::new(spi));
+    let spi_device = SpiDevice::new(&spi_bus, cs);
+
+    let dc = Output::new(peripherals.GPIO21, Level::Low, OutputConfig::default());
+    let di = display_interface_spi::SPIInterface::new(spi_device, dc);
+    let mut display = mipidsi::Builder::new(ST7789, di)
+        .display_size(240, 280)
+        .orientation(Orientation::default().rotate(Deg270))
+        .display_offset(0, 20)
+        .invert_colors(ColorInversion::Inverted)
+        // TODO: Add reset pin
+        .init(&mut Delay)
+        .expect("Failed to initialise ST7789 display");
+
+    display.clear(Rgb565::BLACK).unwrap();
+
+    embedded_graphics::primitives::Rectangle::new(
+        Point::zero(),
+        Size::new(display.size().width, display.size().height / 3),
+    )
+    .into_styled(
+        PrimitiveStyleBuilder::new()
+            .fill_color(Rgb565::CSS_ORANGE)
+            .build(),
+    )
+    .draw(&mut display)
+    .unwrap();
+    embedded_graphics::primitives::Rectangle::new(
+        Point::new(
+            0,
+            display.size().height as i32 - display.size().height as i32 / 3,
+        ),
+        Size::new(display.size().width, display.size().height / 3),
+    )
+    .into_styled(
+        PrimitiveStyleBuilder::new()
+            .fill_color(Rgb565::BLUE)
+            .build(),
+    )
+    .draw(&mut display)
+    .unwrap();
+
+    let text_style = TextStyleBuilder::new()
+        .alignment(Alignment::Center)
+        .baseline(Baseline::Middle)
+        .build();
+    let character_style = MonoTextStyleBuilder::new()
+        .font(&FONT_10X20)
+        .text_color(Rgb565::GREEN)
+        .build();
+    Text::with_text_style(
+        "Hello, world!",
+        display
+            .bounding_box()
+            .top_left
+            .add(Point::new(display.size().width as i32 / 2, 60)),
+        character_style,
+        text_style,
+    )
+    .draw(&mut display)
+    .unwrap();
+
+    let mut layout = DisplayLayout::new(&mut display);
+    layout.set_top_text(String::from_str("Foo").unwrap());
+    layout.set_bottom_text(String::from_str("Bar").unwrap());
+    layout.draw().unwrap();
 
     let uart = Uart::new(
         peripherals.UART1,
@@ -88,7 +186,7 @@ async fn main(spawner: Spawner) -> ! {
             .with_parity(Parity::None)
             .with_stop_bits(StopBits::_1),
     )
-    .expect("Failed to initialize UART0")
+    .expect("Failed to initialise UART1")
     .with_rx(peripherals.GPIO7)
     .with_tx(peripherals.GPIO8)
     .into_async();
@@ -106,7 +204,7 @@ async fn main(spawner: Spawner) -> ! {
     info!("Startup complete.");
 
     loop {
-        Timer::after_secs(1).await;
+        Timer::after_secs(5).await;
         println!("Heartbeat");
     }
 }

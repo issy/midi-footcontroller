@@ -804,6 +804,27 @@ dependencies = [
 [[package]]
 name = "firmware"
 version = "0.1.0"
+dependencies = [
+ "critical-section",
+ "display-interface-spi",
+ "embassy-embedded-hal",
+ "embassy-executor",
+ "embassy-sync 0.7.2",
+ "embassy-time",
+ "embedded-graphics",
+ "esp-alloc",
+ "esp-backtrace",
+ "esp-bootloader-esp-idf",
+ "esp-hal",
+ "esp-println",
+ "esp-rtos",
+ "foundation",
+ "heapless 0.9.2",
+ "log",
+ "mipidsi",
+ "prost",
+ "static_cell",
+]
 
 [[package]]
 name = "float-cmp"
@@ -1032,30 +1053,6 @@ name = "micromath"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c3c8dda44ff03a2f238717214da50f65d5a53b45cd213a7370424ffdb6fae815"
-
-[[package]]
-name = "midi-controller"
-version = "0.1.0"
-dependencies = [
- "critical-section",
- "display-interface-spi",
- "embassy-embedded-hal",
- "embassy-executor",
- "embassy-sync 0.7.2",
- "embassy-time",
- "embedded-graphics",
- "esp-alloc",
- "esp-backtrace",
- "esp-bootloader-esp-idf",
- "esp-hal",
- "esp-println",
- "esp-rtos",
- "heapless 0.9.2",
- "log",
- "mipidsi",
- "prost",
- "static_cell",
-]
 
 [[package]]
 name = "mipidsi"

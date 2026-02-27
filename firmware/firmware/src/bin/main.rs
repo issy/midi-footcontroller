@@ -42,10 +42,12 @@ use esp_hal::gpio::{Level, Output, OutputConfig};
 use esp_hal::spi::master::Spi;
 use esp_hal::time::Rate;
 use esp_hal::timer::timg::TimerGroup;
-use esp_hal::uart::{Config as UartConfig, DataBits, Parity, StopBits, Uart, UartRx, UartTx};
+use esp_hal::uart::{
+    Config as UartConfig, DataBits, Parity, RxError, StopBits, Uart, UartRx, UartTx,
+};
 use esp_println::println;
 use foundation::layout::DisplayLayout;
-use foundation::midi::{MidiPacket, MidiParser};
+use foundation::midi::{AsyncMidiReader, MidiPacket, MidiParser};
 use heapless::String;
 use log::info;
 use mipidsi::models::ST7789;
@@ -58,22 +60,43 @@ esp_bootloader_esp_idf::esp_app_desc!();
 
 static MIDI_OUT_CHANNEL: Channel<CriticalSectionRawMutex, MidiPacket, 128> = Channel::new();
 
-// Forward MIDI messages IN to the MIDI_OUT_CHANNEL
+struct AsyncUartMidiReader<'a> {
+    uart: &'a mut UartRx<'static, Async>,
+    parser: MidiParser,
+}
+
+impl AsyncUartMidiReader<'_> {
+    fn new(uart: &mut UartRx<'static, Async>) -> Self {
+        Self {
+            uart,
+            parser: MidiParser::default(),
+        }
+    }
+}
+
+impl AsyncMidiReader for AsyncUartMidiReader<'_> {
+    type Error = RxError;
+
+    async fn read_midi_packet(&mut self) -> Result<Option<MidiPacket>, Self::Error> {
+        let mut buf = [0u8; 1];
+        self.uart.read_async(&mut buf).await?;
+
+        Ok(self.parser.feed(buf[0]))
+    }
+}
+
+/// Forward MIDI messages IN to the MIDI_OUT_CHANNEL
 #[task]
 async fn midi_thru_task(mut uart: UartRx<'static, Async>) {
-    let mut parser = MidiParser::new();
-    let mut buf = [0u8; 1];
-
+    let mut reader = AsyncUartMidiReader::new(&mut uart);
     loop {
-        uart.read_async(&mut buf).await.unwrap();
-
-        if let Some(packet) = parser.feed(buf[0]) {
+        if let Some(packet) = reader.read_midi_packet().await.unwrap() {
             MIDI_OUT_CHANNEL.send(packet).await;
         }
     }
 }
 
-// Read MIDI messages from the MIDI_OUT_CHANNEL and send them out over UART
+/// Read MIDI messages from the MIDI_OUT_CHANNEL and send them out over UART
 #[task]
 async fn midi_out_task(mut uart: UartTx<'static, Async>) {
     loop {

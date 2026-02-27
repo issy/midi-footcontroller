@@ -145,6 +145,16 @@ pub struct MidiParser {
     index: usize,  // number of data bytes collected
 }
 
+impl Default for MidiParser {
+    fn default() -> Self {
+        Self {
+            running_status: None,
+            data: [0; 2],
+            index: 0,
+        }
+    }
+}
+
 impl MidiParser {
     pub const fn new() -> Self {
         Self {
@@ -198,20 +208,14 @@ impl MidiParser {
     }
 }
 
-impl Default for MidiParser {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-trait AsyncMidiReader {
+pub trait AsyncMidiReader {
     type Error;
 
     /// Asynchronously read a MIDI packet, returning None if the stream ends
     async fn read_midi_packet(&mut self) -> Result<Option<MidiPacket>, Self::Error>;
 }
 
-trait AsyncMidiWriter {
+pub trait AsyncMidiWriter {
     type Error;
 
     /// Asynchronously write a MIDI packet

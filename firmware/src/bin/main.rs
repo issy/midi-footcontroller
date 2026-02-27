@@ -19,6 +19,7 @@ use esp_alloc as _;
 use esp_backtrace as _;
 
 use embassy_executor::{Spawner, task};
+use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use embassy_sync::{blocking_mutex::raw::NoopRawMutex, channel::Channel};
 use esp_hal::Async;
 use esp_hal::clock::CpuClock;
@@ -31,7 +32,7 @@ use log::info;
 // For more information see: <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/app_image_format.html#application-description>
 esp_bootloader_esp_idf::esp_app_desc!();
 
-const MIDI_OUT_CHANNEL: Channel<NoopRawMutex, MidiPacket, 128> = Channel::new();
+static MIDI_OUT_CHANNEL: Channel<CriticalSectionRawMutex, MidiPacket, 128> = Channel::new();
 
 // Forward MIDI messages IN to the MIDI_OUT_CHANNEL
 #[task]

@@ -20,6 +20,7 @@ use esp_backtrace as _;
 
 use core::cell::RefCell;
 use core::ops::Add;
+use core::str::FromStr;
 use embassy_embedded_hal::shared_bus::blocking::spi::SpiDevice;
 use embassy_executor::{Spawner, task};
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
@@ -87,7 +88,6 @@ async fn midi_out_task(mut uart: UartTx<'static, Async>) {
     clippy::large_stack_frames,
     reason = "it's not unusual to allocate larger buffers etc. in main"
 )]
-use core::str::FromStr;
 #[esp_rtos::main]
 async fn main(spawner: Spawner) -> ! {
     esp_println::logger::init_logger_from_env();

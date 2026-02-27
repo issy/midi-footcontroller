@@ -21,7 +21,7 @@ use esp_backtrace as _;
 use embassy_executor::{Spawner, task};
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use embassy_sync::channel::Channel;
-use embassy_time::{Delay, Timer};
+use embassy_time::Timer;
 use esp_hal::Async;
 use esp_hal::clock::CpuClock;
 use esp_hal::timer::timg::TimerGroup;

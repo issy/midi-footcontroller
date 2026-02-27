@@ -19,11 +19,14 @@ use esp_alloc as _;
 use esp_backtrace as _;
 
 use embassy_executor::{Spawner, task};
-use embassy_sync::{blocking_mutex::raw::NoopRawMutex, channel::Channel};
+use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
+use embassy_sync::channel::Channel;
+use embassy_time::Timer;
 use esp_hal::Async;
 use esp_hal::clock::CpuClock;
 use esp_hal::timer::timg::TimerGroup;
 use esp_hal::uart::{Config as UartConfig, DataBits, Parity, StopBits, Uart, UartRx, UartTx};
+use esp_println::println;
 use firmware::midi::{MidiPacket, MidiParser};
 use log::info;
 
@@ -31,7 +34,7 @@ use log::info;
 // For more information see: <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/app_image_format.html#application-description>
 esp_bootloader_esp_idf::esp_app_desc!();
 
-const MIDI_OUT_CHANNEL: Channel<NoopRawMutex, MidiPacket, 128> = Channel::new();
+static MIDI_OUT_CHANNEL: Channel<CriticalSectionRawMutex, MidiPacket, 128> = Channel::new();
 
 // Forward MIDI messages IN to the MIDI_OUT_CHANNEL
 #[task]
@@ -101,5 +104,9 @@ async fn main(spawner: Spawner) -> ! {
     info!("MIDI out task spawned");
 
     info!("Startup complete.");
-    loop {}
+
+    loop {
+        Timer::after_secs(1).await;
+        println!("Heartbeat");
+    }
 }

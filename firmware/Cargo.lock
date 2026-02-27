@@ -818,6 +818,7 @@ dependencies = [
  "esp-hal",
  "esp-println",
  "esp-rtos",
+ "heapless 0.9.2",
  "log",
  "mipidsi",
  "prost",

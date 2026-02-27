@@ -43,11 +43,11 @@ use esp_hal::spi::master::Spi;
 use esp_hal::time::Rate;
 use esp_hal::timer::timg::TimerGroup;
 use esp_hal::uart::{
-    Config as UartConfig, DataBits, Parity, RxError, StopBits, Uart, UartRx, UartTx,
+    Config as UartConfig, DataBits, Parity, RxError, StopBits, TxError, Uart, UartRx, UartTx,
 };
 use esp_println::println;
 use foundation::layout::DisplayLayout;
-use foundation::midi::{AsyncMidiReader, MidiPacket, MidiParser};
+use foundation::midi::{AsyncMidiReader, AsyncMidiWriter, MidiPacket, MidiParser};
 use heapless::String;
 use log::info;
 use mipidsi::models::ST7789;
@@ -85,6 +85,27 @@ impl AsyncMidiReader for AsyncUartMidiReader<'_> {
     }
 }
 
+struct AsyncUartMidiWriter<'a> {
+    uart: &'a mut UartTx<'static, Async>,
+}
+
+impl AsyncUartMidiWriter<'_> {
+    fn new(uart: &mut UartTx<'static, Async>) -> Self {
+        Self { uart }
+    }
+}
+
+impl AsyncMidiWriter for AsyncUartMidiWriter<'_> {
+    type Error = TxError;
+
+    async fn write_midi_packet(&mut self, packet: &MidiPacket) -> Result<(), Self::Error> {
+        self.uart
+            .write_async(&packet.data[..packet.len as usize])
+            .await?;
+        Ok(())
+    }
+}
+
 /// Forward MIDI messages IN to the MIDI_OUT_CHANNEL
 #[task]
 async fn midi_thru_task(mut uart: UartRx<'static, Async>) {
@@ -99,11 +120,11 @@ async fn midi_thru_task(mut uart: UartRx<'static, Async>) {
 /// Read MIDI messages from the MIDI_OUT_CHANNEL and send them out over UART
 #[task]
 async fn midi_out_task(mut uart: UartTx<'static, Async>) {
+    let mut writer = AsyncUartMidiWriter::new(&mut uart);
+
     loop {
         let packet = MIDI_OUT_CHANNEL.receive().await;
-        uart.write_async(&packet.data[..packet.len as usize])
-            .await
-            .unwrap();
+        writer.write_midi_packet(&packet).await.unwrap();
     }
 }
 

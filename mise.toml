@@ -28,8 +28,8 @@ web-lint = {dir = "web", run = "pnpm lint" }
 web-format = { dir = "web", run = "pnpm prettier" }
 web-typecheck = { dir = "web", run = "pnpm typecheck" }
 
-firmware-build-firmware = { dir = "firmware", run = "cargo build -p firmware --target riscv32imac-unknown-none-elf" }
-firmware-build-foundation-riscv = { dir = "firmware", run = "cargo build -p foundation --target riscv32imac-unknown-none-elf" }
-firmware-build-foundation-aarch64 = { dir = "firmware", run = "cargo build -p foundation --target aarch64-apple-darwin" }
-firmware-build-simulator = { dir = "firmware", run = "cargo -p build -p simulator --target aarch64-apple-darwin" }
-firmware-build = { dir = "firmware", depends = ["firmware-build-firmware", "firmware-build-foundation-riscv", "firmware-build-foundation-aarch64", "firmware-build-simulator"] }
+firmware-build-firmware = { dir = "firmware/firmware", run = "cargo build --target riscv32imac-unknown-none-elf" }
+firmware-build-foundation-riscv = { dir = "firmware/foundation", run = "cargo build --target riscv32imac-unknown-none-elf" }
+firmware-build-foundation-aarch64 = { dir = "firmware/foundation", run = "cargo build --target aarch64-apple-darwin" }
+firmware-build-simulator = { dir = "firmware/simulator", run = "cargo -p build --target aarch64-apple-darwin" }
+firmware-build = { depends = ["firmware-build-firmware", "firmware-build-foundation-riscv", "firmware-build-foundation-aarch64", "firmware-build-simulator"] }

@@ -4,7 +4,7 @@ package = { edition = "2024" }
 members = [
     "firmware",
     "foundation"
-]
+, "simulator"]
 # Ignore firmware when compiling the whole workspace
 default-members = ["foundation"]
 

@@ -203,3 +203,17 @@ impl Default for MidiParser {
         Self::new()
     }
 }
+
+trait AsyncMidiReader {
+    type Error;
+
+    /// Asynchronously read a MIDI packet, returning None if the stream ends
+    async fn read_midi_packet(&mut self) -> Result<Option<MidiPacket>, Self::Error>;
+}
+
+trait AsyncMidiWriter {
+    type Error;
+
+    /// Asynchronously write a MIDI packet
+    async fn write_midi_packet(&mut self, packet: &MidiPacket) -> Result<(), Self::Error>;
+}

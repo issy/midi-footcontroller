@@ -20,11 +20,13 @@ use esp_backtrace as _;
 
 use embassy_executor::{Spawner, task};
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
-use embassy_sync::{blocking_mutex::raw::NoopRawMutex, channel::Channel};
+use embassy_sync::channel::Channel;
+use embassy_time::{Delay, Timer};
 use esp_hal::Async;
 use esp_hal::clock::CpuClock;
 use esp_hal::timer::timg::TimerGroup;
 use esp_hal::uart::{Config as UartConfig, DataBits, Parity, StopBits, Uart, UartRx, UartTx};
+use esp_println::println;
 use firmware::midi::{MidiPacket, MidiParser};
 use log::info;
 
@@ -102,5 +104,9 @@ async fn main(spawner: Spawner) -> ! {
     info!("MIDI out task spawned");
 
     info!("Startup complete.");
-    loop {}
+
+    loop {
+        Timer::after_secs(1).await;
+        println!("Heartbeat");
+    }
 }

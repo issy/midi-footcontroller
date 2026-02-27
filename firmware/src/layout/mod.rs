@@ -11,11 +11,13 @@ use embedded_graphics::{
 };
 use heapless::String;
 
+type DisplayText = String<16>;
+
 pub struct DisplayLayout<'a, D> {
     display: &'a mut D,
-    top_text: String<16>,
+    top_text: DisplayText,
     top_box_color: Rgb565,
-    bottom_text: String<16>,
+    bottom_text: DisplayText,
     bottom_box_color: Rgb565,
     text_style: embedded_graphics::mono_font::MonoTextStyle<'a, Rgb565>,
 }
@@ -73,13 +75,18 @@ where
         Ok(())
     }
 
-    pub fn draw_top_text(&mut self, text: &str) -> Result<(), D::Error> {
-        Text::new(text, Point::new(5, 10), self.text_style).draw(self.display)?;
+    pub fn draw_top_text(&mut self) -> Result<(), D::Error> {
+        Text::new(self.top_text.as_str(), Point::new(5, 10), self.text_style).draw(self.display)?;
         Ok(())
     }
 
-    pub fn draw_bottom_text(&mut self, text: &str) -> Result<(), D::Error> {
-        Text::new(text, Point::new(5, 210), self.text_style).draw(self.display)?;
+    pub fn draw_bottom_text(&mut self) -> Result<(), D::Error> {
+        Text::new(
+            self.bottom_text.as_str(),
+            Point::new(5, 210),
+            self.text_style,
+        )
+        .draw(self.display)?;
         Ok(())
     }
 
@@ -101,10 +108,18 @@ where
         self.bottom_box_color = colour;
     }
 
-    pub fn draw(&mut self, top_text: &str, bottom_text: &str) -> Result<(), D::Error> {
+    pub fn set_top_text(&mut self, text: DisplayText) {
+        self.top_text = text;
+    }
+
+    pub fn set_bottom_text(&mut self, text: DisplayText) {
+        self.bottom_text = text;
+    }
+
+    pub fn draw(&mut self) -> Result<(), D::Error> {
         self.draw_boxes()?;
-        self.draw_top_text(top_text)?;
-        self.draw_bottom_text(bottom_text)?;
+        self.draw_top_text()?;
+        self.draw_bottom_text()?;
         self.clear_middle()?;
         Ok(())
     }

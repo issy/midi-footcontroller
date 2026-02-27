@@ -45,9 +45,10 @@ use esp_hal::uart::{Config as UartConfig, DataBits, Parity, StopBits, Uart, Uart
 use esp_println::println;
 use firmware::layout::DisplayLayout;
 use firmware::midi::{MidiPacket, MidiParser};
+use heapless::String;
 use log::info;
 use mipidsi::models::ST7789;
-use mipidsi::options::Rotation::{Deg90, Deg270};
+use mipidsi::options::Rotation::Deg270;
 use mipidsi::options::{ColorInversion, Orientation};
 
 // This creates a default app-descriptor required by the esp-idf bootloader.
@@ -86,6 +87,7 @@ async fn midi_out_task(mut uart: UartTx<'static, Async>) {
     clippy::large_stack_frames,
     reason = "it's not unusual to allocate larger buffers etc. in main"
 )]
+use core::str::FromStr;
 #[esp_rtos::main]
 async fn main(spawner: Spawner) -> ! {
     esp_println::logger::init_logger_from_env();
@@ -172,10 +174,9 @@ async fn main(spawner: Spawner) -> ! {
     .unwrap();
 
     let mut layout = DisplayLayout::new(&mut display);
-    layout.clear_middle().expect("Clear middle");
-    layout.draw_boxes().expect("Draw boxes");
-    layout.draw_top_text("Foo").expect("Top");
-    layout.draw_bottom_text("Bar").expect("Bottom");
+    layout.set_top_text(String::from_str("Foo").unwrap());
+    layout.set_bottom_text(String::from_str("Bar").unwrap());
+    layout.draw().unwrap();
 
     let uart = Uart::new(
         peripherals.UART1,

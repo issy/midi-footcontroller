@@ -10,5 +10,3 @@ pub mod generated {
 pub mod layout;
 pub mod midi;
 pub mod protocol;
-
-include!(concat!(env!("OUT_DIR"), "/version.rs"));

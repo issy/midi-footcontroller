@@ -1,9 +1,12 @@
 [workspace]
 resolver = "3"
+package = { edition = "2024" }
 members = [
     "firmware",
     "foundation"
 ]
+# Ignore firmware when compiling the whole workspace
+default-members = ["foundation"]
 
 [profile.dev]
 # Rust debug is too slow.

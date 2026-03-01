@@ -2,7 +2,7 @@
 
 extern crate alloc;
 
-pub mod generated {
+mod generated {
     #[path = "device/v1/device.v1.rs"]
     pub mod device_v1;
 }

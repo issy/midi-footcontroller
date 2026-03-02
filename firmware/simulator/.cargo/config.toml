@@ -1,2 +1,5 @@
 [build]
-target = "aarch64-apple-darwin"
+target = "wasm32-unknown-unknown"
+
+[alias]
+serve = "trunk serve --open"

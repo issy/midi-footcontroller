@@ -50,16 +50,11 @@ fn main() {
         .unwrap();
     text_display.flush().unwrap();
 
-    if embedded_graphics::primitives::Circle::new(Point::new(29, 29), 70)
+    embedded_graphics::primitives::Circle::new(Point::new(29, 29), 70)
         .into_styled(embedded_graphics::primitives::PrimitiveStyle::with_stroke(
             Rgb565::CSS_WHITE,
             1,
         ))
         .draw(&mut text_display)
-        .is_err()
-    {
-        web_sys::console::log_1(&"Couldn't draw circle".into());
-    }
-
-    web_sys::console::log_1(&"What da hell".into());
+        .unwrap();
 }

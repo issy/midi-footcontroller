@@ -10,7 +10,7 @@ pkl = "0.30"
 # Firmware
 rust = {
   version = "1.93.1",
-  targets = "riscv32imac-unknown-none-elf"
+  targets = "riscv32imac-unknown-none-elf,wasm32-unknown-unknown"
 }
 
 # Proto
@@ -33,3 +33,4 @@ firmware-build-foundation-riscv = { dir = "firmware/foundation", run = "cargo bu
 firmware-build-foundation-aarch64 = { dir = "firmware/foundation", run = "cargo build --target aarch64-apple-darwin" }
 firmware-build-simulator = { dir = "firmware/simulator", run = "cargo build" }
 firmware-build = { depends = ["firmware-build-firmware", "firmware-build-foundation-riscv", "firmware-build-foundation-aarch64", "firmware-build-simulator"] }
+firmware-run-simulator = { dir = "firmware/simulator", run = "trunk serve --open" }

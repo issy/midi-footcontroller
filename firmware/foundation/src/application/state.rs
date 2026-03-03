@@ -2,7 +2,7 @@ use crate::application::{Displays, MidiStreams};
 use crate::midi::{MidiReader, MidiWriter};
 use embedded_graphics::draw_target::DrawTarget;
 
-pub struct Application<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter> {
+struct Application<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter> {
     displays: Displays<'a, D>,
     midi_streams: MidiStreams<'a, MR, MW>,
     // TODO: Add protocol streams

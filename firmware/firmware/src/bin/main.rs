@@ -48,7 +48,7 @@ use esp_hal::uart::{
 use esp_println::println;
 use foundation::layout::DisplayLayout;
 use foundation::{
-    application::ApplicationBuilder,
+    application::state::ApplicationBuilder,
     midi::{MidiPacket, MidiParser, MidiReader, MidiWriter},
 };
 use heapless::String;

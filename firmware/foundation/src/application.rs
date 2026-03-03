@@ -7,14 +7,14 @@ struct Displays<D: DrawTarget> {
     display_4: D,
 }
 
-pub struct AppState<D: DrawTarget> {
+pub struct Application<D: DrawTarget> {
     displays: Displays<D>,
     // TODO: Add MIDI streams
     // TODO: Add protocol streams
     // TODO: Add buttons
 }
 
-impl<D: DrawTarget> AppState<D> {
+impl<D: DrawTarget> Application<D> {
     pub fn new(display_1: D, display_2: D, display_3: D, display_4: D) -> Self {
         Self {
             displays: Displays {

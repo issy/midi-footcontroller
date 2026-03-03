@@ -47,7 +47,10 @@ use esp_hal::uart::{
 };
 use esp_println::println;
 use foundation::layout::DisplayLayout;
-use foundation::midi::{MidiPacket, MidiParser, MidiReader, MidiWriter};
+use foundation::{
+    application::ApplicationBuilder,
+    midi::{MidiPacket, MidiParser, MidiReader, MidiWriter},
+};
 use heapless::String;
 use log::info;
 use mipidsi::models::ST7789;
@@ -60,12 +63,12 @@ esp_bootloader_esp_idf::esp_app_desc!();
 
 static MIDI_OUT_CHANNEL: Channel<CriticalSectionRawMutex, MidiPacket, 128> = Channel::new();
 
-struct AsyncUartMidiReader<'a> {
+struct UartMidiReader<'a> {
     uart: &'a mut UartRx<'static, Async>,
     parser: MidiParser,
 }
 
-impl AsyncUartMidiReader<'_> {
+impl UartMidiReader<'_> {
     fn new(uart: &mut UartRx<'static, Async>) -> Self {
         Self {
             uart,
@@ -74,7 +77,7 @@ impl AsyncUartMidiReader<'_> {
     }
 }
 
-impl MidiReader for AsyncUartMidiReader<'_> {
+impl MidiReader for UartMidiReader<'_> {
     type Error = RxError;
 
     async fn read_midi_packet(&mut self) -> Result<Option<MidiPacket>, Self::Error> {
@@ -85,17 +88,17 @@ impl MidiReader for AsyncUartMidiReader<'_> {
     }
 }
 
-struct AsyncUartMidiWriter<'a> {
+struct UartMidiWriter<'a> {
     uart: &'a mut UartTx<'static, Async>,
 }
 
-impl AsyncUartMidiWriter<'_> {
+impl UartMidiWriter<'_> {
     fn new(uart: &mut UartTx<'static, Async>) -> Self {
         Self { uart }
     }
 }
 
-impl MidiWriter for AsyncUartMidiWriter<'_> {
+impl MidiWriter for UartMidiWriter<'_> {
     type Error = TxError;
 
     async fn write_midi_packet(&mut self, packet: &MidiPacket) -> Result<(), Self::Error> {
@@ -109,7 +112,7 @@ impl MidiWriter for AsyncUartMidiWriter<'_> {
 /// Forward MIDI messages IN to the MIDI_OUT_CHANNEL
 #[task]
 async fn midi_thru_task(mut uart: UartRx<'static, Async>) {
-    let mut reader = AsyncUartMidiReader::new(&mut uart);
+    let mut reader = UartMidiReader::new(&mut uart);
     loop {
         if let Some(packet) = reader.read_midi_packet().await.unwrap() {
             MIDI_OUT_CHANNEL.send(packet).await;
@@ -120,7 +123,7 @@ async fn midi_thru_task(mut uart: UartRx<'static, Async>) {
 /// Read MIDI messages from the MIDI_OUT_CHANNEL and send them out over UART
 #[task]
 async fn midi_out_task(mut uart: UartTx<'static, Async>) {
-    let mut writer = AsyncUartMidiWriter::new(&mut uart);
+    let mut writer = UartMidiWriter::new(&mut uart);
 
     loop {
         let packet = MIDI_OUT_CHANNEL.receive().await;
@@ -246,6 +249,11 @@ async fn main(spawner: Spawner) -> ! {
     info!("MIDI out task spawned");
 
     info!("Startup complete.");
+
+    let app = ApplicationBuilder::new()
+        .with_display(display)
+        .with_midi_reader()
+        .build();
 
     loop {
         Timer::after_secs(5).await;

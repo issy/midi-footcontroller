@@ -44,7 +44,7 @@ impl<D: DrawTarget, MR: MidiReader, MW: MidiWriter> Application<D, MR, MW> {
     }
 }
 
-struct ApplicationBuilder<D: DrawTarget, MR: MidiReader, MW: MidiWriter> {
+pub struct ApplicationBuilder<D: DrawTarget, MR: MidiReader, MW: MidiWriter> {
     display_1: Option<D>,
     display_2: Option<D>,
     display_3: Option<D>,

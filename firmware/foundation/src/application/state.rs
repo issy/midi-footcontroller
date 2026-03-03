@@ -1,17 +1,6 @@
+use crate::application::{Displays, MidiStreams};
 use crate::midi::{MidiReader, MidiWriter};
 use embedded_graphics::draw_target::DrawTarget;
-
-struct Displays<'a, D: DrawTarget> {
-    display_1: &'a mut D,
-    display_2: &'a mut D,
-    display_3: &'a mut D,
-    display_4: &'a mut D,
-}
-
-struct MidiStreams<'a, MR: MidiReader, MW: MidiWriter> {
-    reader: &'a mut MR,
-    writer: &'a mut MW,
-}
 
 pub struct Application<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter> {
     displays: Displays<'a, D>,
@@ -29,6 +18,7 @@ impl<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter> Application<'a, D, MR, M
         midi_reader: &'a mut MR,
         midi_writer: &'a mut MW,
     ) -> Self {
+        // Maybe a good idea to create the channels here?
         Self {
             displays: Displays {
                 display_1,

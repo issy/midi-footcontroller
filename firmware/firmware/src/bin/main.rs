@@ -237,22 +237,23 @@ async fn main(spawner: Spawner) -> ! {
     .with_rx(peripherals.GPIO7)
     .with_tx(peripherals.GPIO8)
     .into_async();
-    let (rx, tx) = uart.split();
+    let (mut rx, mut tx) = uart.split();
 
-    spawner
-        .spawn(midi_thru_task(rx))
-        .expect("Unable to spawn MIDI thru task");
-    info!("MIDI thru task spawned");
-    spawner
-        .spawn(midi_out_task(tx))
-        .expect("Unable to spawn MIDI out task");
-    info!("MIDI out task spawned");
+    // spawner
+    //     .spawn(midi_thru_task(rx))
+    //     .expect("Unable to spawn MIDI thru task");
+    // info!("MIDI thru task spawned");
+    // spawner
+    //     .spawn(midi_out_task(tx))
+    //     .expect("Unable to spawn MIDI out task");
+    // info!("MIDI out task spawned");
 
     info!("Startup complete.");
 
     let app = ApplicationBuilder::new()
-        .with_display(display)
-        .with_midi_reader()
+        .with_display(&mut display)
+        .with_midi_reader(&mut UartMidiReader::new(&mut rx))
+        .with_midi_writer(&mut UartMidiWriter::new(&mut tx))
         .build();
 
     loop {

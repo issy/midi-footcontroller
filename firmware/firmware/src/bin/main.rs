@@ -47,7 +47,7 @@ use esp_hal::uart::{
 };
 use esp_println::println;
 use foundation::layout::DisplayLayout;
-use foundation::midi::{AsyncMidiReader, AsyncMidiWriter, MidiPacket, MidiParser};
+use foundation::midi::{MidiPacket, MidiParser, MidiReader, MidiWriter};
 use heapless::String;
 use log::info;
 use mipidsi::models::ST7789;
@@ -74,7 +74,7 @@ impl AsyncUartMidiReader<'_> {
     }
 }
 
-impl AsyncMidiReader for AsyncUartMidiReader<'_> {
+impl MidiReader for AsyncUartMidiReader<'_> {
     type Error = RxError;
 
     async fn read_midi_packet(&mut self) -> Result<Option<MidiPacket>, Self::Error> {
@@ -95,7 +95,7 @@ impl AsyncUartMidiWriter<'_> {
     }
 }
 
-impl AsyncMidiWriter for AsyncUartMidiWriter<'_> {
+impl MidiWriter for AsyncUartMidiWriter<'_> {
     type Error = TxError;
 
     async fn write_midi_packet(&mut self, packet: &MidiPacket) -> Result<(), Self::Error> {

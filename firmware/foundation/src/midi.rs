@@ -208,16 +208,19 @@ impl MidiParser {
     }
 }
 
-pub trait AsyncMidiReader {
+pub trait MidiReader {
     type Error;
 
     /// Asynchronously read a MIDI packet, returning None if the stream ends
-    async fn read_midi_packet(&mut self) -> Result<Option<MidiPacket>, Self::Error>;
+    fn read_midi_packet(&mut self) -> impl Future<Output = Result<MidiPacket, Self::Error>>;
 }
 
-pub trait AsyncMidiWriter {
+pub trait MidiWriter {
     type Error;
 
     /// Asynchronously write a MIDI packet
-    async fn write_midi_packet(&mut self, packet: &MidiPacket) -> Result<(), Self::Error>;
+    fn write_midi_packet(
+        &mut self,
+        packet: &MidiPacket,
+    ) -> impl Future<Output = Result<(), Self::Error>>;
 }

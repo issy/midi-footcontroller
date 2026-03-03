@@ -1,33 +1,33 @@
 use crate::midi::{MidiReader, MidiWriter};
 use embedded_graphics::draw_target::DrawTarget;
 
-struct Displays<D: DrawTarget> {
-    display_1: D,
-    display_2: D,
-    display_3: D,
-    display_4: D,
+struct Displays<'a, D: DrawTarget> {
+    display_1: &'a mut D,
+    display_2: &'a mut D,
+    display_3: &'a mut D,
+    display_4: &'a mut D,
 }
 
-struct MidiStreams<MR: MidiReader, MW: MidiWriter> {
-    reader: MR,
-    writer: MW,
+struct MidiStreams<'a, MR: MidiReader, MW: MidiWriter> {
+    reader: &'a mut MR,
+    writer: &'a mut MW,
 }
 
-pub struct Application<D: DrawTarget, MR: MidiReader, MW: MidiWriter> {
-    displays: Displays<D>,
-    midi_streams: MidiStreams<MR, MW>,
+pub struct Application<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter> {
+    displays: Displays<'a, D>,
+    midi_streams: MidiStreams<'a, MR, MW>,
     // TODO: Add protocol streams
     // TODO: Add buttons
 }
 
-impl<D: DrawTarget, MR: MidiReader, MW: MidiWriter> Application<D, MR, MW> {
+impl<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter> Application<'a, D, MR, MW> {
     pub fn new(
-        display_1: D,
-        display_2: D,
-        display_3: D,
-        display_4: D,
-        midi_reader: MR,
-        midi_writer: MW,
+        display_1: &'a mut D,
+        display_2: &'a mut D,
+        display_3: &'a mut D,
+        display_4: &'a mut D,
+        midi_reader: &'a mut MR,
+        midi_writer: &'a mut MW,
     ) -> Self {
         Self {
             displays: Displays {
@@ -44,16 +44,16 @@ impl<D: DrawTarget, MR: MidiReader, MW: MidiWriter> Application<D, MR, MW> {
     }
 }
 
-pub struct ApplicationBuilder<D: DrawTarget, MR: MidiReader, MW: MidiWriter> {
-    display_1: Option<D>,
-    display_2: Option<D>,
-    display_3: Option<D>,
-    display_4: Option<D>,
-    midi_reader: Option<MR>,
-    midi_writer: Option<MW>,
+pub struct ApplicationBuilder<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter> {
+    display_1: Option<&'a mut D>,
+    display_2: Option<&'a mut D>,
+    display_3: Option<&'a mut D>,
+    display_4: Option<&'a mut D>,
+    midi_reader: Option<&'a mut MR>,
+    midi_writer: Option<&'a mut MW>,
 }
 
-impl<D: DrawTarget, MR: MidiReader, MW: MidiWriter> ApplicationBuilder<D, MR, MW> {
+impl<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter> ApplicationBuilder<'a, D, MR, MW> {
     pub fn new() -> Self {
         Self {
             display_1: None,
@@ -65,7 +65,7 @@ impl<D: DrawTarget, MR: MidiReader, MW: MidiWriter> ApplicationBuilder<D, MR, MW
         }
     }
 
-    pub fn with_display(mut self, display: D) -> Self {
+    pub fn with_display(mut self, display: &'a mut D) -> Self {
         if self.display_1.is_none() {
             self.display_1 = Some(display);
         } else if self.display_2.is_none() {
@@ -80,17 +80,17 @@ impl<D: DrawTarget, MR: MidiReader, MW: MidiWriter> ApplicationBuilder<D, MR, MW
         self
     }
 
-    pub fn with_midi_reader(mut self, reader: MR) -> Self {
+    pub fn with_midi_reader(mut self, reader: &'a mut MR) -> Self {
         self.midi_reader = Some(reader);
         self
     }
 
-    pub fn with_midi_writer(mut self, writer: MW) -> Self {
+    pub fn with_midi_writer(mut self, writer: &'a mut MW) -> Self {
         self.midi_writer = Some(writer);
         self
     }
 
-    pub fn build(self) -> Application<D, MR, MW> {
+    pub fn build(self) -> Application<'a, D, MR, MW> {
         Application::new(
             self.display_1.expect("Display 1 is required"),
             self.display_2.expect("Display 2 is required"),

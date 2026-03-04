@@ -1,16 +1,27 @@
-{ pkgs ? import <nixpkgs> {} };
+{ pkgs ? import <nixpkgs> {} }:
+
+let
+  rustToolchain = pkgs.rust-bin.stable."1.93.1".override {
+    targets = ["riscv32imac-unknown-none-elf"];
+    components = ["rust-src"];
+  };
+in
 
 pkgs.stdenv.mkDerivation {
-  pname = "web";
+  pname = "footcontroller-firmware";
   version = "0.1.0";
 
-  src = ./.;
+  src = ./..;
 
-  buildInputs = [
-    pkgs.rust-bin.stable."1.93.1"
-  ];
+  buildInputs = [ rustToolchain ];
 
   buildPhase = ''
-    echo "hello world"
+    cd firmware
+    cargo build --release
+  '';
+
+  installPhase = ''
+    mkdir -p $out
+    cp firmware/target/riscv32imac-unknown-none-elf/release/firmware $out/
   '';
 }

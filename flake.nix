@@ -3,24 +3,13 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=25.11";
-    rust-overlay = {
-      url = "github:oxalica/rust-overlay";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, rust-overlay, flake-utils }:
+  outputs = { self, nixpkgs, flake-utils }:
     flake-utils.lib.eachDefaultSystem (system:
       let
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [ rust-overlay.overlays.default ];
-        };
-        rustToolchain = pkgs.rust-bin.stable."1.93.1".override {
-          targets = ["riscv32imac-unknown-none-elf"];
-          components = ["rust-src"];
-        };
+        pkgs = import nixpkgs { inherit system; };
       in
       {
         packages.default = pkgs.stdenv.mkDerivation {
@@ -29,21 +18,23 @@
 
           src = ./.;
 
-          buildInputs = [ rustToolchain ];
+          buildInputs = [ pkgs.rustup pkgs.rustc ];
 
           buildPhase = ''
+            export CARGO_HOME="$NIX_BUILD_TOP/.cargo"
+            export RUSTUP_HOME="$NIX_BUILD_TOP/.rustup"
             cd firmware
-            cargo build --release
+            cargo build --release --target riscv32imac-unknown-none-elf
           '';
 
           installPhase = ''
             mkdir -p $out
-            cp firmware/target/riscv32imac-unknown-none-elf/release/firmware $out/
+            cp target/riscv32imac-unknown-none-elf/release/firmware $out/
           '';
         };
 
         devShells.default = pkgs.mkShell {
-          buildInputs = [ rustToolchain ];
+          buildInputs = [ pkgs.rustup pkgs.rustc ];
         };
       }
     );

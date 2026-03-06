@@ -30,7 +30,7 @@ web-typecheck = { dir = "web", run = "pnpm typecheck" }
 
 firmware-build-firmware = { dir = "firmware/firmware", run = "cargo build --target riscv32imac-unknown-none-elf" }
 firmware-build-foundation-riscv = { dir = "firmware/foundation", run = "cargo build --target riscv32imac-unknown-none-elf" }
-firmware-build-foundation-aarch64 = { dir = "firmware/foundation", run = "cargo build --target aarch64-apple-darwin" }
+firmware-build-foundation-wasm32 = { dir = "firmware/foundation", run = "cargo build --target wasm32-unknown-unknown" }
 firmware-build-simulator = { dir = "firmware/simulator", run = "cargo build" }
-firmware-build = { depends = ["firmware-build-firmware", "firmware-build-foundation-riscv", "firmware-build-foundation-aarch64", "firmware-build-simulator"] }
+firmware-build = { depends = ["firmware-build-firmware", "firmware-build-foundation-riscv", "firmware-build-foundation-wasm32", "firmware-build-simulator"] }
 firmware-run-simulator = { dir = "firmware/simulator", run = "trunk serve --open" }

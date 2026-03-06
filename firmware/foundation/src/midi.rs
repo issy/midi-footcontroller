@@ -212,7 +212,8 @@ pub trait MidiReader {
     type Error;
 
     /// Asynchronously read a MIDI packet, returning None if the stream ends
-    fn read_midi_packet(&mut self) -> impl Future<Output = Result<MidiPacket, Self::Error>>;
+    fn read_midi_packet(&mut self)
+    -> impl Future<Output = Result<Option<MidiPacket>, Self::Error>>;
 }
 
 pub trait MidiWriter {

@@ -64,12 +64,12 @@ esp_bootloader_esp_idf::esp_app_desc!();
 static MIDI_OUT_CHANNEL: Channel<CriticalSectionRawMutex, MidiPacket, 128> = Channel::new();
 
 struct UartMidiReader<'a> {
-    uart: &'a mut UartRx<'static, Async>,
+    uart: &'a mut UartRx<'a, Async>,
     parser: MidiParser,
 }
 
-impl UartMidiReader<'_> {
-    fn new(uart: &mut UartRx<'static, Async>) -> Self {
+impl<'a> UartMidiReader<'a> {
+    fn new(uart: &'a mut UartRx<'a, Async>) -> Self {
         Self {
             uart,
             parser: MidiParser::default(),
@@ -89,11 +89,11 @@ impl MidiReader for UartMidiReader<'_> {
 }
 
 struct UartMidiWriter<'a> {
-    uart: &'a mut UartTx<'static, Async>,
+    uart: &'a mut UartTx<'a, Async>,
 }
 
-impl UartMidiWriter<'_> {
-    fn new(uart: &mut UartTx<'static, Async>) -> Self {
+impl<'a> UartMidiWriter<'a> {
+    fn new(uart: &'a mut UartTx<'a, Async>) -> Self {
         Self { uart }
     }
 }
@@ -111,8 +111,7 @@ impl MidiWriter for UartMidiWriter<'_> {
 
 /// Forward MIDI messages IN to the MIDI_OUT_CHANNEL
 #[task]
-async fn midi_thru_task(mut uart: UartRx<'static, Async>) {
-    let mut reader = UartMidiReader::new(&mut uart);
+async fn midi_thru_task(mut reader: UartMidiReader<'static>) {
     loop {
         if let Some(packet) = reader.read_midi_packet().await.unwrap() {
             MIDI_OUT_CHANNEL.send(packet).await;
@@ -122,12 +121,11 @@ async fn midi_thru_task(mut uart: UartRx<'static, Async>) {
 
 /// Read MIDI messages from the MIDI_OUT_CHANNEL and send them out over UART
 #[task]
-async fn midi_out_task(mut uart: UartTx<'static, Async>) {
-    let mut writer = UartMidiWriter::new(&mut uart);
-
+async fn midi_out_task(mut writer: UartMidiWriter<'static>) {
     loop {
         let packet = MIDI_OUT_CHANNEL.receive().await;
-        writer.write_midi_packet(&packet).await.unwrap();
+        let res: Result<(), TxError> = writer.write_midi_packet(&packet).await;
+        res.unwrap();
     }
 }
 
@@ -250,10 +248,13 @@ async fn main(spawner: Spawner) -> ! {
 
     info!("Startup complete.");
 
+    let mut midi_reader = UartMidiReader::new(&mut rx);
+    let mut midi_writer = UartMidiWriter::new(&mut tx);
+
     let app = ApplicationBuilder::new()
         .with_display(&mut display)
-        .with_midi_reader(&mut UartMidiReader::new(&mut rx))
-        .with_midi_writer(&mut UartMidiWriter::new(&mut tx))
+        .with_midi_reader(&mut midi_reader)
+        .with_midi_writer(&mut midi_writer)
         .build();
 
     loop {

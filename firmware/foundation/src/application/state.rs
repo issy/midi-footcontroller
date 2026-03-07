@@ -13,8 +13,9 @@ struct InternalChannels<'a> {
 pub struct Application<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter> {
     displays: Displays<'a, D>,
     midi_streams: MidiStreams<'a, MR, MW>,
-    channels: InternalChannels<'a>, // TODO: Add protocol streams
-                                    // TODO: Add buttons
+    channels: InternalChannels<'a>,
+    // TODO: Add protocol streams
+    // TODO: Add buttons
 }
 
 impl<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter> Application<'a, D, MR, MW> {

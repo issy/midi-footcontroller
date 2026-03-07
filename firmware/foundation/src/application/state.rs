@@ -34,6 +34,7 @@ impl<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter> Application<'a, D, MR, M
     }
 }
 
+#[derive(Default)]
 pub struct ApplicationBuilder<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter> {
     display_1: Option<&'a mut D>,
     display_2: Option<&'a mut D>,

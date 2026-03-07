@@ -139,20 +139,11 @@ impl MidiPacket {
     }
 }
 
+#[derive(Default)]
 pub struct MidiParser {
     running_status: Option<u8>,
     data: [u8; 2], // store data bytes
     index: usize,  // number of data bytes collected
-}
-
-impl Default for MidiParser {
-    fn default() -> Self {
-        Self {
-            running_status: None,
-            data: [0; 2],
-            index: 0,
-        }
-    }
 }
 
 impl MidiParser {

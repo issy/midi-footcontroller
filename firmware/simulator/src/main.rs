@@ -1,5 +1,6 @@
 mod storage;
 
+use crate::storage::Preset;
 use embedded_graphics::geometry::Dimensions;
 use embedded_graphics::prelude::Primitive;
 use embedded_graphics::prelude::RgbColor;
@@ -14,15 +15,10 @@ use embedded_graphics::{
 use embedded_graphics_web_simulator::{
     display::WebSimulatorDisplay, output_settings::OutputSettingsBuilder,
 };
-use serde::{Deserialize, Serialize};
 use web_sys::window;
 
-const STORAGE_KEY: &str = "presets";
-
-#[derive(Serialize, Deserialize)]
-struct Foo {
-    bar: String,
-}
+const STORAGE_KEY_PRESETS: &str = "presets";
+const STORAGE_KEY_PRESET_ID: &str = "preset_id";
 
 fn main() {
     console_error_panic_hook::set_once();
@@ -33,12 +29,24 @@ fn main() {
         .expect("Failed to access localStorage")
         .expect("No localStorage");
 
-    let presets_config = local_storage
-        .get_item(STORAGE_KEY)
+    let presets: Vec<Preset> = local_storage
+        .get_item(STORAGE_KEY_PRESETS)
         .expect("Failed to get item from localStorage")
-        .expect("No item from localStorage");
-    let preset_bytes = presets_config.as_bytes();
-    let foo: Foo = serde_json::from_slice(preset_bytes).unwrap();
+        .map(|value| {
+            let f: Vec<Preset> = serde_json::from_slice(value.as_bytes())
+                .expect("Failed to parse localStorage value as JSON");
+            return f;
+        })
+        .unwrap_or(Vec::new());
+
+    let initial_preset_id: u8 = local_storage
+        .get_item(STORAGE_KEY_PRESET_ID)
+        .expect("Failed to get item from localStorage")
+        .map(|v| {
+            v.parse::<u8>()
+                .expect("Failed to parse item from localStorage")
+        })
+        .unwrap_or(0);
 
     let document = window()
         .and_then(|win| win.document())

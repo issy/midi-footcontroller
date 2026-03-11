@@ -11,3 +11,4 @@ pub mod application;
 pub mod layout;
 pub mod midi;
 pub mod protocol;
+pub mod storage;

@@ -27,7 +27,7 @@ pub struct MidiCommand {
 
 #[allow(dead_code)] // Remove this later
 #[derive(Debug, Clone)]
-enum Colour {
+pub enum Colour {
     Red = 1,
     Green = 2,
     Blue = 3,

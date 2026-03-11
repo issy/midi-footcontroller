@@ -1,5 +1,7 @@
 use crate::application::{Displays, MidiStreams};
 use crate::midi::{MidiPacket, MidiReader, MidiWriter};
+use crate::storage::StorageManager;
+use crate::storage::state::PresetsState;
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use embassy_sync::channel::Channel;
 use embedded_graphics::draw_target::DrawTarget;
@@ -10,15 +12,19 @@ struct InternalChannels<'a> {
     midi_out: &'a mut MidiOutChannel,
 }
 
-pub struct Application<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter> {
+pub struct Application<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter, SM: StorageManager> {
     displays: Displays<'a, D>,
     midi_streams: MidiStreams<'a, MR, MW>,
     channels: InternalChannels<'a>,
+    storage_manager: &'a mut SM,
+    presets_state: &'a mut PresetsState,
     // TODO: Add protocol streams
     // TODO: Add buttons
 }
 
-impl<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter> Application<'a, D, MR, MW> {
+impl<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter, SM: StorageManager>
+    Application<'a, D, MR, MW, SM>
+{
     pub fn new(
         display_1: &'a mut D,
         display_2: &'a mut D,
@@ -27,6 +33,8 @@ impl<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter> Application<'a, D, MR, M
         midi_reader: &'a mut MR,
         midi_writer: &'a mut MW,
         midi_out_channel: &'a mut MidiOutChannel,
+        storage_manager: &'a mut SM,
+        presets_state: &'a mut PresetsState,
     ) -> Self {
         // Maybe a good idea to create the channels here?
         Self {
@@ -43,12 +51,15 @@ impl<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter> Application<'a, D, MR, M
             channels: InternalChannels {
                 midi_out: midi_out_channel,
             },
+            storage_manager,
+            presets_state,
         }
     }
 }
 
 #[derive(Default)]
-pub struct ApplicationBuilder<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter> {
+pub struct ApplicationBuilder<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter, SM: StorageManager>
+{
     display_1: Option<&'a mut D>,
     display_2: Option<&'a mut D>,
     display_3: Option<&'a mut D>,
@@ -56,9 +67,13 @@ pub struct ApplicationBuilder<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter>
     midi_reader: Option<&'a mut MR>,
     midi_writer: Option<&'a mut MW>,
     midi_out_channel: Option<&'a mut MidiOutChannel>,
+    storage_manager: Option<&'a mut SM>,
+    presets_state: Option<&'a mut PresetsState>,
 }
 
-impl<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter> ApplicationBuilder<'a, D, MR, MW> {
+impl<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter, SM: StorageManager>
+    ApplicationBuilder<'a, D, MR, MW, SM>
+{
     pub fn new() -> Self {
         Self {
             display_1: None,
@@ -68,6 +83,8 @@ impl<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter> ApplicationBuilder<'a, D
             midi_reader: None,
             midi_writer: None,
             midi_out_channel: None,
+            storage_manager: None,
+            presets_state: None,
         }
     }
 
@@ -101,7 +118,17 @@ impl<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter> ApplicationBuilder<'a, D
         self
     }
 
-    pub fn build(self) -> Application<'a, D, MR, MW> {
+    pub fn with_storage_manager(mut self, manager: &'a mut SM) -> Self {
+        self.storage_manager = Some(manager);
+        self
+    }
+
+    pub fn with_initial_storage_state(mut self, presets: &'a mut PresetsState) -> Self {
+        self.presets_state = Some(presets);
+        self
+    }
+
+    pub fn build(self) -> Application<'a, D, MR, MW, SM> {
         Application::new(
             self.display_1.expect("Display 1 is required"),
             self.display_2.expect("Display 2 is required"),
@@ -110,6 +137,8 @@ impl<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter> ApplicationBuilder<'a, D
             self.midi_reader.expect("MIDI reader is required"),
             self.midi_writer.expect("MIDI writer is required"),
             self.midi_out_channel.expect("MIDI out channel is required"),
+            self.storage_manager.expect("Storage manager is required"),
+            self.presets_state.expect("Presets state is required"),
         )
     }
 }

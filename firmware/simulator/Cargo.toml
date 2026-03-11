@@ -9,7 +9,9 @@ wasm-bindgen = { version = "0.2.114" }
 embedded-graphics = { version = "0.8.2" }
 embedded-graphics-web-simulator = { version = "0.4.0" }
 console_error_panic_hook = { version = "0.1.7" }
-web-sys = { version = "0.3.91", features = ["console", "CanvasRenderingContext2d", "Document", "Element", "HtmlCanvasElement", "Window", "Text"] }
+web-sys = { version = "0.3.91", features = ["console", "CanvasRenderingContext2d", "Document", "Element", "HtmlCanvasElement", "Window", "Text", "Storage"] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = { version = "1.0.149" }
 
 [dev-dependencies]
 trunk = { version = "0.21.14" }

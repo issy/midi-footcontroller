@@ -4455,6 +4455,8 @@ dependencies = [
  "embedded-graphics",
  "embedded-graphics-web-simulator",
  "foundation",
+ "serde",
+ "serde_json",
  "trunk",
  "wasm-bindgen",
  "web-sys",

@@ -12,10 +12,31 @@ use embedded_graphics::{
 use embedded_graphics_web_simulator::{
     display::WebSimulatorDisplay, output_settings::OutputSettingsBuilder,
 };
+use serde::{Deserialize, Serialize};
 use web_sys::window;
+
+const STORAGE_KEY: &str = "presets";
+
+#[derive(Serialize, Deserialize)]
+struct Foo {
+    bar: String,
+}
 
 fn main() {
     console_error_panic_hook::set_once();
+
+    let local_storage = window()
+        .unwrap()
+        .local_storage()
+        .expect("Failed to access localStorage")
+        .expect("No localStorage");
+
+    let presets_config = local_storage
+        .get_item(STORAGE_KEY)
+        .expect("Failed to get item from localStorage")
+        .expect("No item from localStorage");
+    let preset_bytes = presets_config.as_bytes();
+    let foo: Foo = serde_json::from_slice(preset_bytes).unwrap();
 
     let document = window()
         .and_then(|win| win.document())

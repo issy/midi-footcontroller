@@ -129,14 +129,14 @@ impl From<ButtonConfig> for foundation::storage::state::ButtonConfig {
                     .on_actions
                     .iter()
                     .map(|m| m.clone().into())
-                    .collect::<Vec<foundation::storage::state::MidiCommand>>(),
+                    .collect::<Vec<_>>(),
             ),
             off_actions: heapless::Vec::from_iter(
                 value
                     .off_actions
                     .iter()
                     .map(|m| m.clone().into())
-                    .collect::<Vec<foundation::storage::state::MidiCommand>>(),
+                    .collect::<Vec<_>>(),
             ),
         }
     }

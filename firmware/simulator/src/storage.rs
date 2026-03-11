@@ -124,8 +124,20 @@ impl From<ButtonConfig> for foundation::storage::state::ButtonConfig {
             name: heapless::String::from_str(value.name.as_str()).unwrap(),
             button_type: value.button_type.into(),
             colour: value.colour.into(),
-            on_actions: heapless::Vec::from_iter(value.on_actions.iter().map(Into::into)),
-            off_actions: heapless::Vec::new(),
+            on_actions: heapless::Vec::from_iter(
+                value
+                    .on_actions
+                    .iter()
+                    .map(|m| m.clone().into())
+                    .collect::<Vec<foundation::storage::state::MidiCommand>>(),
+            ),
+            off_actions: heapless::Vec::from_iter(
+                value
+                    .off_actions
+                    .iter()
+                    .map(|m| m.clone().into())
+                    .collect::<Vec<foundation::storage::state::MidiCommand>>(),
+            ),
         }
     }
 }

@@ -12,6 +12,7 @@ console_error_panic_hook = { version = "0.1.7" }
 web-sys = { version = "0.3.91", features = ["console", "CanvasRenderingContext2d", "Document", "Element", "HtmlCanvasElement", "Window", "Text", "Storage"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1.0.149" }
+heapless = { version = "0.9.2" }
 
 [dev-dependencies]
 trunk = { version = "0.21.14" }

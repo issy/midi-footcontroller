@@ -7,6 +7,7 @@ pub const MAX_STRING_LENGTH: usize = 16;
 pub const NUM_OF_BUTTONS: usize = 8;
 pub const MAX_BUTTON_ACTIONS: usize = 8;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum MidiCommand {
     ProgramChange {
         channel: u8,
@@ -54,26 +55,30 @@ impl Into<MidiPacket> for MidiCommand {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ButtonType {
     Momentary,
     Toggle,
 }
 
+#[derive(Debug, Clone)]
 pub struct ButtonConfig {
-    name: String<MAX_STRING_LENGTH>,
-    button_type: ButtonType,
-    colour: Colour,
+    pub name: String<MAX_STRING_LENGTH>,
+    pub button_type: ButtonType,
+    pub colour: Colour,
     // For momentary buttons, only on_actions are used. For toggle buttons, both on_actions and off_actions are used.
-    on_actions: Vec<String<MAX_STRING_LENGTH>, MAX_BUTTON_ACTIONS>,
-    off_actions: Vec<String<MAX_STRING_LENGTH>, MAX_BUTTON_ACTIONS>,
+    pub on_actions: Vec<MidiCommand, MAX_BUTTON_ACTIONS>,
+    pub off_actions: Vec<MidiCommand, MAX_BUTTON_ACTIONS>,
 }
 
+#[derive(Debug, Clone)]
 pub struct StoredPreset {
-    name: String<MAX_STRING_LENGTH>,
-    buttons: Vec<ButtonConfig, NUM_OF_BUTTONS>,
+    pub name: String<MAX_STRING_LENGTH>,
+    pub buttons: Vec<ButtonConfig, NUM_OF_BUTTONS>,
 }
 
+#[derive(Debug, Clone)]
 pub struct PresetsState {
-    presets: Vec<StoredPreset, MAX_PRESETS>,
-    current_preset_id: u8,
+    pub presets: Vec<StoredPreset, MAX_PRESETS>,
+    pub current_preset_id: u8,
 }

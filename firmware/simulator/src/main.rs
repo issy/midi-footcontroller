@@ -1,3 +1,5 @@
+mod storage;
+
 use embedded_graphics::geometry::Dimensions;
 use embedded_graphics::prelude::Primitive;
 use embedded_graphics::prelude::RgbColor;

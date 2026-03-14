@@ -1,10 +1,8 @@
-use crate::storage::state::MAX_PRESETS;
-use crate::storage::state::StoredPreset;
-use heapless::Vec;
+use crate::storage::state::Presets;
 
 pub mod state;
 
 pub trait StorageManager {
-    fn load_presets(&self) -> Vec<StoredPreset, MAX_PRESETS>;
-    fn save_presets(&mut self, presets: &Vec<StoredPreset, MAX_PRESETS>);
+    fn load_presets(&self) -> Presets;
+    fn save_presets(&mut self, presets: &Presets);
 }

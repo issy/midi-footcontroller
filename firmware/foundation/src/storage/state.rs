@@ -77,6 +77,8 @@ pub struct StoredPreset {
     pub buttons: Vec<ButtonConfig, NUM_OF_BUTTONS>,
 }
 
+pub type Presets = Vec<StoredPreset, MAX_PRESETS>;
+
 #[derive(Debug, Clone)]
 pub struct PresetsState {
     pub presets: Vec<StoredPreset, MAX_PRESETS>,

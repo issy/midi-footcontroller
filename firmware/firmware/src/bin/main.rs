@@ -48,6 +48,7 @@ use esp_hal::uart::{
 use esp_println::println;
 use foundation::layout::DisplayLayout;
 use foundation::storage::StorageManager;
+use foundation::storage::state::Presets;
 use foundation::{
     application::state::ApplicationBuilder,
     midi::{MidiPacket, MidiParser, MidiReader, MidiWriter},
@@ -114,22 +115,11 @@ impl<'a, 'b> MidiWriter for UartMidiWriter<'a, 'b> {
 struct FakeStorageManager<'a> {}
 
 impl<'a> StorageManager for FakeStorageManager<'a> {
-    fn load_presets(
-        &self,
-    ) -> heapless::Vec<
-        foundation::storage::state::StoredPreset,
-        { foundation::storage::state::MAX_PRESETS },
-    > {
+    fn load_presets(&self) -> Presets {
         heapless::Vec::new()
     }
 
-    fn save_presets(
-        &mut self,
-        _presets: &heapless::Vec<
-            foundation::storage::state::StoredPreset,
-            foundation::storage::state::MAX_PRESETS,
-        >,
-    ) {
+    fn save_presets(&mut self, _presets: &Presets) {
         // Do nothing
     }
 }

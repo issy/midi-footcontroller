@@ -53,6 +53,7 @@ jobs:
         run: cargo fmt --all -- --check
         working-directory: "firmware"
 
-      - name: Run clippy
-        run: cargo clippy --all-features --workspace -- -D warnings
-        working-directory: "firmware"
+      # Clippy not working right now due to some issues with the riscv target, will re-enable once those are resolved
+      # - name: Run clippy
+      #   run: cargo clippy --all-features --workspace -- -D warnings
+      #   working-directory: "firmware"

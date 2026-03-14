@@ -1,27 +1,31 @@
+use crate::application::channels::MidiOutChannel;
 use crate::application::{Displays, MidiStreams};
-use crate::midi::{MidiPacket, MidiReader, MidiWriter};
+use crate::midi::{MidiReader, MidiWriter};
 use crate::storage::StorageManager;
-use crate::storage::state::PresetsState;
-use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
-use embassy_sync::channel::Channel;
 use embedded_graphics::draw_target::DrawTarget;
-
-type MidiOutChannel = Channel<CriticalSectionRawMutex, MidiPacket, 128>;
+use embedded_graphics::pixelcolor::Rgb565;
 
 struct InternalChannels<'a> {
     midi_out: &'a mut MidiOutChannel,
 }
 
-pub struct Application<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter, SM: StorageManager> {
-    displays: Displays<'a, D>,
-    midi_streams: MidiStreams<'a, MR, MW>,
-    channels: InternalChannels<'a>,
-    storage_manager: &'a mut SM,
+pub struct Application<
+    'a,
+    D: DrawTarget<Color = Rgb565>,
+    MR: MidiReader,
+    MW: MidiWriter,
+    SM: StorageManager,
+> {
+    // TODO: Make these no longer public eventually?
+    pub(crate) displays: Displays<'a, D>,
+    pub(crate) midi_streams: MidiStreams<'a, MR, MW>,
+    pub(crate) channels: InternalChannels<'a>,
+    pub(crate) storage_manager: &'a mut SM,
     // TODO: Add protocol streams
     // TODO: Add buttons
 }
 
-impl<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter, SM: StorageManager>
+impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: StorageManager>
     Application<'a, D, MR, MW, SM>
 {
     pub fn new(
@@ -55,8 +59,13 @@ impl<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter, SM: StorageManager>
 }
 
 #[derive(Default)]
-pub struct ApplicationBuilder<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter, SM: StorageManager>
-{
+pub struct ApplicationBuilder<
+    'a,
+    D: DrawTarget<Color = Rgb565>,
+    MR: MidiReader,
+    MW: MidiWriter,
+    SM: StorageManager,
+> {
     display_1: Option<&'a mut D>,
     display_2: Option<&'a mut D>,
     display_3: Option<&'a mut D>,
@@ -67,7 +76,7 @@ pub struct ApplicationBuilder<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter,
     storage_manager: Option<&'a mut SM>,
 }
 
-impl<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter, SM: StorageManager>
+impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: StorageManager>
     ApplicationBuilder<'a, D, MR, MW, SM>
 {
     pub fn new() -> Self {

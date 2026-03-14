@@ -1,11 +1,13 @@
+mod button_task;
 mod channels;
 mod display_task;
 pub mod state;
 
 use crate::midi::{MidiReader, MidiWriter};
 use embedded_graphics::draw_target::DrawTarget;
+use embedded_graphics::pixelcolor::Rgb565;
 
-struct Displays<'a, D: DrawTarget> {
+struct Displays<'a, D: DrawTarget<Color = Rgb565>> {
     display_1: &'a mut D,
     display_2: &'a mut D,
     display_3: &'a mut D,

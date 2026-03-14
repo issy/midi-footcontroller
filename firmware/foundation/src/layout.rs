@@ -11,7 +11,7 @@ use embedded_graphics::{
 };
 use heapless::String;
 
-type DisplayText = String<16>;
+pub type DisplayText = String<16>;
 
 pub struct DisplayLayout<'a, D> {
     display: &'a mut D,

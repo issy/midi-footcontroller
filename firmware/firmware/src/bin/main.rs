@@ -47,6 +47,7 @@ use esp_hal::uart::{
 };
 use esp_println::println;
 use foundation::layout::DisplayLayout;
+use foundation::storage::StorageManager;
 use foundation::{
     application::state::ApplicationBuilder,
     midi::{MidiPacket, MidiParser, MidiReader, MidiWriter},
@@ -106,6 +107,30 @@ impl<'a, 'b> MidiWriter for UartMidiWriter<'a, 'b> {
             .write_async(&packet.data[..packet.len as usize])
             .await?;
         Ok(())
+    }
+}
+
+#[derive(Default)]
+struct FakeStorageManager<'a> {}
+
+impl<'a> StorageManager for FakeStorageManager<'a> {
+    fn load_presets(
+        &self,
+    ) -> heapless::Vec<
+        foundation::storage::state::StoredPreset,
+        { foundation::storage::state::MAX_PRESETS },
+    > {
+        heapless::Vec::new()
+    }
+
+    fn save_presets(
+        &mut self,
+        _presets: &heapless::Vec<
+            foundation::storage::state::StoredPreset,
+            foundation::storage::state::MAX_PRESETS,
+        >,
+    ) {
+        // Do nothing
     }
 }
 
@@ -250,11 +275,13 @@ async fn main(spawner: Spawner) -> ! {
 
     let mut midi_reader = UartMidiReader::new(&mut rx);
     let mut midi_writer = UartMidiWriter::new(&mut tx);
+    let mut storage_manager = FakeStorageManager::default();
 
     let app = ApplicationBuilder::new()
         .with_display(&mut display)
         .with_midi_reader(&mut midi_reader)
         .with_midi_writer(&mut midi_writer)
+        .with_storage_manager(&mut storage_manager)
         .build();
 
     loop {

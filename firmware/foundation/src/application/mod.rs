@@ -1,3 +1,4 @@
+mod channels;
 mod display_task;
 pub mod state;
 

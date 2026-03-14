@@ -1,7 +1,6 @@
 use alloc::string::String;
 use alloc::vec::Vec;
 
-use crate::FIRMWARE_VERSION;
 use crate::generated::device_v1 as pb;
 
 const PROTOCOL_VERSION: u32 = 1;
@@ -26,9 +25,8 @@ pub struct MidiCommand {
     placeholder: String,
 }
 
-#[allow(dead_code)] // Remove this later
 #[derive(Debug, Clone)]
-enum Colour {
+pub enum Colour {
     Red = 1,
     Green = 2,
     Blue = 3,
@@ -80,6 +78,7 @@ pub enum Message {
     Hello {
         device_model: String,
         capabilities: Capabilities,
+        firmware_version: (u32, u32, u32),
     },
     Error(String),
     // Client -> Device
@@ -92,6 +91,7 @@ pub enum Message {
 }
 
 impl Message {
+    // Device -> Client
     pub fn to_protobuf(&self) -> pb::Envelope {
         match self {
             Message::Button(btn) => pb::Envelope {
@@ -104,12 +104,14 @@ impl Message {
             Message::Hello {
                 device_model,
                 capabilities,
+                firmware_version:
+                    (firmware_version_major, firmware_version_minor, firmware_version_patch),
             } => pb::Envelope {
                 protocol_version: PROTOCOL_VERSION,
                 payload: Some(pb::envelope::Payload::Hello(pb::Hello {
-                    firmware_version_major: FIRMWARE_VERSION.0,
-                    firmware_version_minor: FIRMWARE_VERSION.1,
-                    firmware_version_patch: FIRMWARE_VERSION.2,
+                    firmware_version_major: *firmware_version_major,
+                    firmware_version_minor: *firmware_version_minor,
+                    firmware_version_patch: *firmware_version_patch,
                     device_model: device_model.clone(),
                     capabilities: Some(pb::Capabilities {
                         button_count: capabilities.button_count,
@@ -161,6 +163,7 @@ impl Message {
         }
     }
 
+    // Client -> Device
     pub fn from_protobuf(envelope: pb::Envelope) -> Option<Self> {
         match envelope.payload {
             Some(pb::envelope::Payload::ClientHello(h)) => Some(Message::ClientHello {

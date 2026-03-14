@@ -2,13 +2,13 @@
 
 extern crate alloc;
 
-pub mod generated {
+mod generated {
     #[path = "device/v1/device.v1.rs"]
     pub mod device_v1;
 }
 
+pub mod application;
 pub mod layout;
 pub mod midi;
 pub mod protocol;
-
-include!(concat!(env!("OUT_DIR"), "/version.rs"));
+pub mod storage;

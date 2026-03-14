@@ -10,7 +10,7 @@ pkl = "0.30"
 # Firmware
 rust = {
   version = "1.93.1",
-  targets = "riscv32imac-unknown-none-elf"
+  targets = "riscv32imac-unknown-none-elf,wasm32-unknown-unknown"
 }
 
 # Proto
@@ -27,3 +27,10 @@ web-dev = { dir = "web", run = "pnpm dev" }
 web-lint = {dir = "web", run = "pnpm lint" }
 web-format = { dir = "web", run = "pnpm prettier" }
 web-typecheck = { dir = "web", run = "pnpm typecheck" }
+
+firmware-build-firmware = { dir = "firmware/firmware", run = "cargo build --target riscv32imac-unknown-none-elf" }
+firmware-build-foundation-riscv = { dir = "firmware/foundation", run = "cargo build --target riscv32imac-unknown-none-elf" }
+firmware-build-foundation-wasm32 = { dir = "firmware/foundation", run = "cargo build --target wasm32-unknown-unknown" }
+firmware-build-simulator = { dir = "firmware/simulator", run = "cargo build" }
+firmware-build = { depends = ["firmware-build-firmware", "firmware-build-foundation-riscv", "firmware-build-foundation-wasm32", "firmware-build-simulator"] }
+firmware-run-simulator = { dir = "firmware/simulator", run = "trunk serve --open" }

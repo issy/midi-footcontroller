@@ -11,7 +11,9 @@ use embedded_graphics::{
 };
 use heapless::String;
 
-type DisplayText = String<16>;
+pub type DisplayText = String<16>;
+
+// TODO: Some displays might have the option to display extra information. There should be a config struct that enables these options for individual layouts
 
 pub struct DisplayLayout<'a, D> {
     display: &'a mut D,

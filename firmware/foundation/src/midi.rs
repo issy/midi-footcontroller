@@ -139,6 +139,7 @@ impl MidiPacket {
     }
 }
 
+#[derive(Default)]
 pub struct MidiParser {
     running_status: Option<u8>,
     data: [u8; 2], // store data bytes
@@ -198,8 +199,20 @@ impl MidiParser {
     }
 }
 
-impl Default for MidiParser {
-    fn default() -> Self {
-        Self::new()
-    }
+pub trait MidiReader {
+    type Error;
+
+    /// Asynchronously read a MIDI packet, returning None if the stream ends
+    fn read_midi_packet(&mut self)
+    -> impl Future<Output = Result<Option<MidiPacket>, Self::Error>>;
+}
+
+pub trait MidiWriter {
+    type Error;
+
+    /// Asynchronously write a MIDI packet
+    fn write_midi_packet(
+        &mut self,
+        packet: &MidiPacket,
+    ) -> impl Future<Output = Result<(), Self::Error>>;
 }

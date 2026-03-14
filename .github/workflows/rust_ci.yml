@@ -19,15 +19,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        project:
-          - name: "firmware"
-            target: riscv32imac-unknown-none-elf
-          - name: "simulator"
-            target: wasm32-unknown-unknown
-          - name: "foundation"
-            target: riscv32imac-unknown-none-elf
-          - name: "foundation"
-            target: wasm32-unknown-unknown
         action:
           - command: build
             args: --release
@@ -37,7 +28,7 @@ jobs:
             args: --all-features --workspace -- -D warnings
     defaults:
       run:
-        working-directory: "firmware/${{ matrix.project.name }}"
+        working-directory: "firmware"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -45,12 +36,33 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@v1
         with:
-          targets: "${{ matrix.project.target }}"
+          targets: riscv32imac-unknown-none-elf,wasm32-unknown-unknown
           toolchain: "1.94.0"
           components: rust-src, rustfmt, clippy
 
       - name: Enable caching
         uses: Swatinem/rust-cache@v2
 
-      - name: Run command
-        run: cargo --target ${{ matrix.project.target }} ${{ matrix.action.command }} ${{ matrix.action.args }}
+      - name: Build foundation (riscv)
+        run: cargo build --target riscv32imac-unknown-none-elf --release
+        working-directory: "firmware/foundation"
+
+      - name: Build foundation (wasm)
+        run: cargo build --target wasm32-unknown-unknown --release
+        working-directory: "firmware/foundation"
+
+      - name: Build firmware
+        run: cargo build --target riscv32imac-unknown-none-elf --release
+        working-directory: "firmware/firmware"
+
+      - name: Build simulator
+        run: cargo build --target wasm32-unknown-unknown --release
+        working-directory: "firmware/simulator"
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+        working-directory: "firmware"
+
+      - name: Run clippy
+        run: cargo clippy --all-features --workspace -- -D warnings
+        working-directory: "firmware"

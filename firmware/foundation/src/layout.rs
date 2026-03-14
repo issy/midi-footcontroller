@@ -13,6 +13,8 @@ use heapless::String;
 
 pub type DisplayText = String<16>;
 
+// TODO: Some displays might have the option to display extra information. There should be a config struct that enables these options for individual layouts
+
 pub struct DisplayLayout<'a, D> {
     display: &'a mut D,
     top_text: DisplayText,

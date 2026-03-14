@@ -19,6 +19,7 @@ use esp_alloc as _;
 use esp_backtrace as _;
 
 use core::cell::RefCell;
+use core::marker::PhantomData;
 use core::ops::Add;
 use core::str::FromStr;
 use embassy_embedded_hal::shared_bus::blocking::spi::SpiDevice;
@@ -112,7 +113,9 @@ impl<'a, 'b> MidiWriter for UartMidiWriter<'a, 'b> {
 }
 
 #[derive(Default)]
-struct FakeStorageManager<'a> {}
+struct FakeStorageManager<'a> {
+    phantom_data: PhantomData<&'a ()>,
+}
 
 impl<'a> StorageManager for FakeStorageManager<'a> {
     fn load_presets(&self) -> Presets {

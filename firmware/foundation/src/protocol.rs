@@ -25,7 +25,6 @@ pub struct MidiCommand {
     placeholder: String,
 }
 
-#[allow(dead_code)] // Remove this later
 #[derive(Debug, Clone)]
 pub enum Colour {
     Red = 1,
@@ -92,6 +91,7 @@ pub enum Message {
 }
 
 impl Message {
+    // Device -> Client
     pub fn to_protobuf(&self) -> pb::Envelope {
         match self {
             Message::Button(btn) => pb::Envelope {
@@ -163,6 +163,7 @@ impl Message {
         }
     }
 
+    // Client -> Device
     pub fn from_protobuf(envelope: pb::Envelope) -> Option<Self> {
         match envelope.payload {
             Some(pb::envelope::Payload::ClientHello(h)) => Some(Message::ClientHello {

@@ -20,4 +20,4 @@ RUN cargo build --target riscv32imac-unknown-none-elf
 
 WORKDIR /app/simulator
 
-RUN cargo build --target riscv32imac-unknown-none-elf
+RUN cargo build --target wasm32-unknown-unknown

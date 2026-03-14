@@ -13,8 +13,8 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  rust-checks:
-    name: Rust Checks
+  build:
+    name: Build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -28,7 +28,7 @@ jobs:
         with:
           targets: riscv32imac-unknown-none-elf,wasm32-unknown-unknown
           toolchain: "1.94.0"
-          components: rust-src, rustfmt, clippy
+          components: rust-src
 
       - name: Enable caching
         uses: Swatinem/rust-cache@v2
@@ -49,11 +49,47 @@ jobs:
         run: cargo build --target wasm32-unknown-unknown --release
         working-directory: "firmware/simulator"
 
+  rustfmt:
+    name: Formatting
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: "firmware"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: "1.94.0"
+          components: rustfmt
+
       - name: Check formatting
         run: cargo fmt --all -- --check
-        working-directory: "firmware"
 
-      # Clippy not working right now due to some issues with the riscv target, will re-enable once those are resolved
-      # - name: Run clippy
-      #   run: cargo clippy --all-features --workspace -- -D warnings
-      #   working-directory: "firmware"
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    # Clippy not working right now due to some issues with the riscv target, will re-enable once those are resolved
+    if: false
+    defaults:
+      run:
+        working-directory: "firmware"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          targets: riscv32imac-unknown-none-elf,wasm32-unknown-unknown
+          toolchain: "1.94.0"
+          components: rust-src, rustfmt, clippy
+
+      - name: Enable caching
+        uses: Swatinem/rust-cache@v2
+
+      - name: Run clippy
+        run: cargo clippy --all-features --workspace -- -D warnings
+        working-directory: "firmware"

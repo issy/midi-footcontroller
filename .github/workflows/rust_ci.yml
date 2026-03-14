@@ -19,16 +19,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        project:
+          - name: "firmware"
+            target: riscv32imac-unknown-none-elf
+          - name: "simulator"
+            target: wasm32-unknown-unknown
+          - name: "foundation"
+            target: riscv32imac-unknown-none-elf
+          - name: "foundation"
+            target: wasm32-unknown-unknown
         action:
-          - command: build
-            args: --release
-          - command: fmt
-            args: --all -- --check
-          - command: clippy
-            args: --all-features --workspace -- -D warnings
+          - command: build --release
+          - command: fmt --all -- --check
+          - command: clippy --all-features --workspace -- -D warnings
     defaults:
       run:
-        working-directory: firmware
+        working-directory: "firmware/${{ matrix.project.name }}"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -36,7 +42,7 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@v1
         with:
-          targets: riscv32imac-unknown-none-elf,wasm32-unknown-unknown
+          targets: "${{ matrix.project.target }}"
           toolchain: stable
           components: rust-src, rustfmt, clippy
 
@@ -44,4 +50,4 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Run command
-        run: cargo ${{ matrix.action.command }} ${{ matrix.action.args }}
+        run: cargo ${{ matrix.action.command }} --target ${{ matrix.project.target }}

@@ -17,7 +17,6 @@ pub struct Application<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter, SM: St
     midi_streams: MidiStreams<'a, MR, MW>,
     channels: InternalChannels<'a>,
     storage_manager: &'a mut SM,
-    presets_state: &'a mut PresetsState,
     // TODO: Add protocol streams
     // TODO: Add buttons
 }
@@ -34,7 +33,6 @@ impl<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter, SM: StorageManager>
         midi_writer: &'a mut MW,
         midi_out_channel: &'a mut MidiOutChannel,
         storage_manager: &'a mut SM,
-        presets_state: &'a mut PresetsState,
     ) -> Self {
         // Maybe a good idea to create the channels here?
         Self {
@@ -52,7 +50,6 @@ impl<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter, SM: StorageManager>
                 midi_out: midi_out_channel,
             },
             storage_manager,
-            presets_state,
         }
     }
 }
@@ -68,7 +65,6 @@ pub struct ApplicationBuilder<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter,
     midi_writer: Option<&'a mut MW>,
     midi_out_channel: Option<&'a mut MidiOutChannel>,
     storage_manager: Option<&'a mut SM>,
-    presets_state: Option<&'a mut PresetsState>,
 }
 
 impl<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter, SM: StorageManager>
@@ -84,7 +80,6 @@ impl<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter, SM: StorageManager>
             midi_writer: None,
             midi_out_channel: None,
             storage_manager: None,
-            presets_state: None,
         }
     }
 
@@ -123,11 +118,6 @@ impl<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter, SM: StorageManager>
         self
     }
 
-    pub fn with_initial_storage_state(mut self, presets: &'a mut PresetsState) -> Self {
-        self.presets_state = Some(presets);
-        self
-    }
-
     pub fn build(self) -> Application<'a, D, MR, MW, SM> {
         Application::new(
             self.display_1.expect("Display 1 is required"),
@@ -138,7 +128,6 @@ impl<'a, D: DrawTarget, MR: MidiReader, MW: MidiWriter, SM: StorageManager>
             self.midi_writer.expect("MIDI writer is required"),
             self.midi_out_channel.expect("MIDI out channel is required"),
             self.storage_manager.expect("Storage manager is required"),
-            self.presets_state.expect("Presets state is required"),
         )
     }
 }

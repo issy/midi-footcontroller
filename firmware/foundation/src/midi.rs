@@ -210,7 +210,7 @@ pub trait MidiReader {
 }
 
 pub trait MidiWriter {
-    type Error;
+    type Error: Debug;
 
     /// Asynchronously write a MIDI packet
     fn write_midi_packet(

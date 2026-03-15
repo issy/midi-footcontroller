@@ -1,7 +1,6 @@
 use crate::layout::DisplayText;
 use crate::midi::MidiPacket;
 use crate::protocol::Colour;
-use embassy_sync::blocking_mutex::CriticalSectionMutex;
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use embassy_sync::channel::Channel;
 

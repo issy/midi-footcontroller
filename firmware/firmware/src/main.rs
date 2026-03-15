@@ -7,6 +7,10 @@
 )]
 #![deny(clippy::large_stack_frames)]
 
+extern crate alloc;
+
+include!(concat!(env!("OUT_DIR"), "/version.rs"));
+
 #[allow(
     unused_imports,
     reason = "esp-alloc is required for heap allocation to work."

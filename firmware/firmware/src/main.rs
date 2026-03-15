@@ -23,6 +23,7 @@ use esp_alloc as _;
 use esp_backtrace as _;
 
 use core::cell::RefCell;
+use core::fmt::Debug;
 use core::marker::PhantomData;
 use core::ops::Add;
 use core::str::FromStr;
@@ -121,13 +122,19 @@ struct FakeStorageManager<'a> {
     phantom_data: PhantomData<&'a ()>,
 }
 
+#[derive(Debug)]
+struct DummyError {}
+
 impl<'a> StorageManager for FakeStorageManager<'a> {
-    fn load_presets(&self) -> Presets {
-        heapless::Vec::new()
+    type Error = DummyError;
+
+    fn load_presets(&self) -> Result<Presets, Self::Error> {
+        Ok(heapless::Vec::new())
     }
 
-    fn save_presets(&mut self, _presets: &Presets) {
+    fn save_presets(&mut self, _presets: &Presets) -> Result<(), Self::Error> {
         // Do nothing
+        Ok(())
     }
 }
 
@@ -258,15 +265,6 @@ async fn main(spawner: Spawner) -> ! {
     .with_tx(peripherals.GPIO8)
     .into_async();
     let (mut rx, mut tx) = uart.split();
-
-    // spawner
-    //     .spawn(midi_thru_task(rx))
-    //     .expect("Unable to spawn MIDI thru task");
-    // info!("MIDI thru task spawned");
-    // spawner
-    //     .spawn(midi_out_task(tx))
-    //     .expect("Unable to spawn MIDI out task");
-    // info!("MIDI out task spawned");
 
     info!("Startup complete.");
 

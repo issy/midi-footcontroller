@@ -2,13 +2,13 @@ use esp_hal::Async;
 use esp_hal::uart::{RxError, TxError, UartRx, UartTx};
 use foundation::midi::{MidiPacket, MidiParser, MidiReader, MidiWriter};
 
-pub(crate) struct UartMidiReader<'a, 'b> {
+pub struct UartMidiReader<'a, 'b> {
     uart: &'a mut UartRx<'b, Async>,
     parser: MidiParser,
 }
 
 impl<'a, 'b> UartMidiReader<'a, 'b> {
-    fn new(uart: &'a mut UartRx<'b, Async>) -> Self {
+    pub fn new(uart: &'a mut UartRx<'b, Async>) -> Self {
         Self {
             uart,
             parser: MidiParser::default(),
@@ -27,12 +27,12 @@ impl<'a, 'b> MidiReader for UartMidiReader<'a, 'b> {
     }
 }
 
-pub(crate) struct UartMidiWriter<'a, 'b> {
+pub struct UartMidiWriter<'a, 'b> {
     uart: &'a mut UartTx<'b, Async>,
 }
 
 impl<'a, 'b> UartMidiWriter<'a, 'b> {
-    fn new(uart: &'a mut UartTx<'b, Async>) -> Self {
+    pub fn new(uart: &'a mut UartTx<'b, Async>) -> Self {
         Self { uart }
     }
 }

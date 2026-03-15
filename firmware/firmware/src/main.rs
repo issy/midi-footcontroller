@@ -29,7 +29,7 @@ use core::marker::PhantomData;
 use core::ops::Add;
 use core::str::FromStr;
 use embassy_embedded_hal::shared_bus::blocking::spi::SpiDevice;
-use embassy_executor::{Spawner, task};
+use embassy_executor::Spawner;
 use embassy_sync::blocking_mutex::{Mutex, raw::NoopRawMutex};
 use embassy_time::Delay;
 use embassy_time::Timer;
@@ -44,7 +44,7 @@ use esp_hal::gpio::{Level, Output, OutputConfig};
 use esp_hal::spi::master::Spi;
 use esp_hal::time::Rate;
 use esp_hal::timer::timg::TimerGroup;
-use esp_hal::uart::{Config as UartConfig, DataBits, Parity, StopBits, TxError, Uart};
+use esp_hal::uart::{Config as UartConfig, DataBits, Parity, StopBits, Uart};
 use esp_println::println;
 use foundation::application::channels;
 use foundation::layout::DisplayLayout;
@@ -83,26 +83,6 @@ impl<'a> StorageManager for FakeStorageManager<'a> {
     fn save_presets(&mut self, _presets: &Presets) -> Result<(), Self::Error> {
         // Do nothing
         Ok(())
-    }
-}
-
-/// Forward MIDI messages IN to the MIDI_OUT_CHANNEL
-#[task]
-async fn midi_thru_task(mut reader: UartMidiReader<'static, 'static>) {
-    loop {
-        if let Some(packet) = reader.read_midi_packet().await.unwrap() {
-            MIDI_OUT_CHANNEL.send(packet).await;
-        }
-    }
-}
-
-/// Read MIDI messages from the MIDI_OUT_CHANNEL and send them out over UART
-#[task]
-async fn midi_out_task(mut writer: UartMidiWriter<'static, 'static>) {
-    loop {
-        let packet = MIDI_OUT_CHANNEL.receive().await;
-        let res: Result<(), TxError> = writer.write_midi_packet(&packet).await;
-        res.unwrap();
     }
 }
 

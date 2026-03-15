@@ -31,6 +31,7 @@
             extensions = [
               "rust-src"
               "rust-analyzer"
+              "rust-fmt"
               "clippy"
             ];
             targets = [
@@ -56,16 +57,11 @@
 
         devShell = craneLib.devShell {
           packages = with pkgs; [
-            difftastic
-            tokei
             cargo-nextest
             cargo-outdated
-            just
 
             probe-rs-tools
           ];
-
-          GIT_EXTERNAL_DIFF = "${pkgs.difftastic}/bin/difft";
         };
       }
     );

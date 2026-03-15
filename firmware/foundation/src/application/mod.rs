@@ -1,4 +1,4 @@
-mod channels;
+pub mod channels;
 pub mod state;
 
 use crate::midi::{MidiReader, MidiWriter};

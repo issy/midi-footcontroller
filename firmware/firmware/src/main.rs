@@ -52,6 +52,7 @@ use esp_hal::uart::{
     Config as UartConfig, DataBits, Parity, RxError, StopBits, TxError, Uart, UartRx, UartTx,
 };
 use esp_println::println;
+use foundation::application::channels;
 use foundation::layout::DisplayLayout;
 use foundation::storage::StorageManager;
 use foundation::storage::state::Presets;
@@ -277,6 +278,12 @@ async fn main(spawner: Spawner) -> ! {
         .with_midi_reader(&mut midi_reader)
         .with_midi_writer(&mut midi_writer)
         .with_storage_manager(&mut storage_manager)
+        .with_channels(
+            &mut channels::MidiOutChannel::new(),
+            &mut channels::DisplayStateUpdateChannel::new(),
+            &mut channels::StorageStateUpdateChannel::new(),
+            &mut channels::ButtonEventChannel::new(),
+        )
         .build();
 
     loop {

@@ -1,11 +1,22 @@
 use crate::application::channels::{
     ButtonEventChannel, DisplayStateUpdateChannel, MidiOutChannel, StorageStateUpdateChannel,
 };
-use crate::application::{Displays, MidiStreams};
 use crate::midi::{MidiReader, MidiWriter};
 use crate::storage::StorageManager;
 use embedded_graphics::draw_target::DrawTarget;
 use embedded_graphics::pixelcolor::Rgb565;
+
+struct Displays<'a, D: DrawTarget<Color = Rgb565>> {
+    display_1: &'a mut D,
+    display_2: &'a mut D,
+    display_3: &'a mut D,
+    display_4: &'a mut D,
+}
+
+struct MidiStreams<'a, MR: MidiReader, MW: MidiWriter> {
+    reader: &'a mut MR,
+    writer: &'a mut MW,
+}
 
 struct InternalChannels<'a> {
     midi_out: &'a mut MidiOutChannel,

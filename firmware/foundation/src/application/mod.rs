@@ -3,6 +3,7 @@ mod channels;
 mod display_task;
 mod midi_task;
 pub mod state;
+mod storage_task;
 
 use crate::midi::{MidiReader, MidiWriter};
 use embedded_graphics::draw_target::DrawTarget;

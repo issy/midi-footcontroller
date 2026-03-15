@@ -6,7 +6,6 @@ rust-version = "1.88"
 
 [[bin]]
 name = "firmware"
-path = "src/bin/main.rs"
 test = false
 
 [dependencies]

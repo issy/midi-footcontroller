@@ -1,6 +1,7 @@
 mod button_task;
 mod channels;
 mod display_task;
+mod midi_task;
 pub mod state;
 
 use crate::midi::{MidiReader, MidiWriter};

@@ -1,3 +1,5 @@
+use core::fmt::Debug;
+
 #[derive(Copy, Clone, Debug)]
 pub enum NoteName {
     C,
@@ -200,7 +202,7 @@ impl MidiParser {
 }
 
 pub trait MidiReader {
-    type Error;
+    type Error: Debug;
 
     /// Asynchronously read a MIDI packet, returning None if the stream ends
     fn read_midi_packet(&mut self)

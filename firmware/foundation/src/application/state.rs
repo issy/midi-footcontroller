@@ -1,4 +1,6 @@
-use crate::application::channels::MidiOutChannel;
+use crate::application::channels::{
+    ButtonEventChannel, DisplayStateUpdateChannel, MidiOutChannel, StorageStateUpdateChannel,
+};
 use crate::application::{Displays, MidiStreams};
 use crate::midi::{MidiReader, MidiWriter};
 use crate::storage::StorageManager;
@@ -7,6 +9,9 @@ use embedded_graphics::pixelcolor::Rgb565;
 
 struct InternalChannels<'a> {
     midi_out: &'a mut MidiOutChannel,
+    display_state_update: &'a mut DisplayStateUpdateChannel,
+    storage_state_update: &'a mut StorageStateUpdateChannel,
+    button_event: &'a mut ButtonEventChannel,
 }
 
 pub struct Application<

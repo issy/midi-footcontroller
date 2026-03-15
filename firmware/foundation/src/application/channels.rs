@@ -53,6 +53,6 @@ pub enum StorageStateEvent {
     SavePreset,
 }
 
-pub type StorageStateEventChannel = Channel<CriticalSectionRawMutex, StorageStateEvent, 16>;
+pub type StorageStateUpdateChannel = Channel<CriticalSectionRawMutex, StorageStateEvent, 16>;
 
 // TODO: Add channel for button events

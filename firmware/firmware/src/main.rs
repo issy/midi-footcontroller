@@ -48,8 +48,8 @@ use esp_hal::uart::{Config as UartConfig, DataBits, Parity, StopBits, Uart};
 use esp_println::println;
 use foundation::application::channels;
 use foundation::layout::DisplayLayout;
-use foundation::storage::StorageManager;
 use foundation::storage::state::Presets;
+use foundation::storage::{StorageManager, StorageManagerLoadError, StorageManagerSaveError};
 use foundation::{
     application::state::ApplicationBuilder,
     midi::{MidiReader, MidiWriter},
@@ -70,17 +70,12 @@ struct FakeStorageManager<'a> {
     phantom_data: PhantomData<&'a ()>,
 }
 
-#[derive(Debug)]
-struct DummyError {}
-
 impl<'a> StorageManager for FakeStorageManager<'a> {
-    type Error = DummyError;
-
-    fn load_presets(&self) -> Result<Presets, Self::Error> {
+    fn load_presets(&self) -> Result<Presets, StorageManagerLoadError> {
         Ok(heapless::Vec::new())
     }
 
-    fn save_presets(&mut self, _presets: &Presets) -> Result<(), Self::Error> {
+    fn save_presets(&mut self, presets: &Presets) -> Result<(), StorageManagerSaveError> {
         // Do nothing
         Ok(())
     }

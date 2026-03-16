@@ -1,7 +1,7 @@
+use crate::generated::device_v1 as pb;
 use alloc::string::String;
 use alloc::vec::Vec;
-
-use crate::generated::device_v1 as pb;
+use serde::{Deserialize, Serialize};
 
 const PROTOCOL_VERSION: u32 = 1;
 
@@ -22,10 +22,11 @@ pub struct Capabilities {
 
 #[derive(Debug)]
 pub struct MidiCommand {
+    // TODO: Fix
     placeholder: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub enum Colour {
     Red = 1,
     Green = 2,

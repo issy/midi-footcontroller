@@ -1,13 +1,14 @@
 use crate::midi::MidiPacket;
 use crate::protocol::Colour;
 use heapless::{String, Vec};
+use serde::{Deserialize, Serialize};
 
 pub const MAX_PRESETS: usize = 128;
 pub const MAX_STRING_LENGTH: usize = 16;
 pub const NUM_OF_BUTTONS: usize = 8;
 pub const MAX_BUTTON_ACTIONS: usize = 8;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
 pub enum MidiCommand {
     ProgramChange {
         channel: u8,
@@ -55,13 +56,13 @@ impl Into<MidiPacket> for MidiCommand {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
 pub enum ButtonType {
     Momentary,
     Toggle,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ButtonConfig {
     pub name: String<MAX_STRING_LENGTH>,
     pub button_type: ButtonType,
@@ -71,7 +72,7 @@ pub struct ButtonConfig {
     pub off_actions: Vec<MidiCommand, MAX_BUTTON_ACTIONS>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct StoredPreset {
     pub name: String<MAX_STRING_LENGTH>,
     pub buttons: Vec<ButtonConfig, NUM_OF_BUTTONS>,

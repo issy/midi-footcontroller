@@ -70,11 +70,18 @@ pub struct Preset {
     buttons: Vec<ButtonConfig>,
 }
 
-impl From<ButtonType> for foundation::storage::state::ButtonType {
-    fn from(value: ButtonType) -> Self {
-        match value {
+impl Convertible<foundation::storage::state::ButtonType> for ButtonType {
+    fn to(self) -> foundation::storage::state::ButtonType {
+        match self {
             ButtonType::Momentary => foundation::storage::state::ButtonType::Momentary,
             ButtonType::Toggle => foundation::storage::state::ButtonType::Toggle,
+        }
+    }
+
+    fn from(value: foundation::storage::state::ButtonType) -> Self {
+        match value {
+            foundation::storage::state::ButtonType::Momentary => ButtonType::Momentary,
+            foundation::storage::state::ButtonType::Toggle => ButtonType::Toggle,
         }
     }
 }
@@ -94,7 +101,16 @@ impl Convertible<foundation::protocol::Colour> for Colour {
     }
 
     fn from(value: foundation::protocol::Colour) -> Self {
-        todo!()
+        match value {
+            foundation::protocol::Colour::Red => Colour::Red,
+            foundation::protocol::Colour::Green => Colour::Green,
+            foundation::protocol::Colour::Blue => Colour::Blue,
+            foundation::protocol::Colour::Yellow => Colour::Yellow,
+            foundation::protocol::Colour::Orange => Colour::Orange,
+            foundation::protocol::Colour::Purple => Colour::Purple,
+            foundation::protocol::Colour::Cyan => Colour::Cyan,
+            foundation::protocol::Colour::White => Colour::White,
+        }
     }
 }
 
@@ -174,8 +190,8 @@ impl From<ButtonConfig> for foundation::storage::state::ButtonConfig {
     fn from(value: ButtonConfig) -> Self {
         foundation::storage::state::ButtonConfig {
             name: heapless::String::from_str(value.name.as_str()).unwrap(),
-            button_type: value.button_type.into(),
-            colour: value.colour.into(),
+            button_type: value.button_type.to(),
+            colour: value.colour.to(),
             on_actions: heapless::Vec::from_iter(
                 value.on_actions.iter().map(|m| m.to()).collect::<Vec<_>>(),
             ),

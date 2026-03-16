@@ -1,18 +1,10 @@
-use foundation::storage::state::Presets;
+use foundation::Convertible;
+use foundation::storage::state::{Presets, StoredPreset};
 use foundation::storage::{StorageManager, StorageManagerLoadError, StorageManagerSaveError};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use std::vec::Vec;
 use web_sys::Storage;
-
-/// A trait for types that can be converted to and from another type `T`
-pub trait Convertible<T>: Sized {
-    /// Convert `Self` into `T`
-    fn to(self) -> T;
-
-    /// Convert `T` into `Self`
-    fn from(value: T) -> Self;
-}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
 enum MidiCommand {
@@ -220,49 +212,26 @@ impl Convertible<foundation::storage::state::ButtonConfig> for ButtonConfig {
     }
 }
 
-impl From<Preset> for foundation::storage::state::StoredPreset {
-    fn from(value: Preset) -> Self {
+impl Convertible<foundation::storage::state::StoredPreset> for Preset {
+    fn to(self) -> StoredPreset {
         foundation::storage::state::StoredPreset {
-            name: heapless::String::from_str(value.name.as_str()).unwrap(),
+            name: heapless::String::from_str(self.name.as_str()).unwrap(),
             buttons: heapless::Vec::from_iter(
-                value
-                    .buttons
+                self.buttons
                     .iter()
                     .map(|b| b.clone().to())
                     .collect::<Vec<_>>(),
             ),
         }
     }
-}
 
-impl From<foundation::storage::state::ButtonConfig> for ButtonConfig {
-    fn from(value: foundation::storage::state::ButtonConfig) -> Self {
-        ButtonConfig {
-            name: value.name.to_string(),
-            button_type: value.button_type.into(),
-            colour: value.colour.into(),
-            on_actions: value
-                .on_actions
-                .into_iter()
-                .map(|m| m.clone().into())
-                .collect(),
-            off_actions: value
-                .off_actions
-                .into_iter()
-                .map(|m| m.clone().into())
-                .collect(),
-        }
-    }
-}
-
-impl From<foundation::storage::state::StoredPreset> for Preset {
-    fn from(value: foundation::storage::state::StoredPreset) -> Self {
+    fn from(value: StoredPreset) -> Self {
         Preset {
             name: value.name.to_string(),
             buttons: value
                 .buttons
                 .into_iter()
-                .map(|b| b.clone().into())
+                .map(|b| Convertible::from(b))
                 .collect(),
         }
     }
@@ -285,12 +254,15 @@ impl StorageManager for LocalStorageManager<'_> {
 
         let deserialized: Vec<Preset> = serde_json::from_slice(value.as_bytes())
             .map_err(|_| StorageManagerLoadError::ErrorDeserializingData)?;
-        let mapped = deserialized.into_iter().map(|p| p.into()).collect();
+        let mapped = deserialized.into_iter().map(|p| p.to()).collect();
         Ok(mapped)
     }
 
     fn save_presets(&mut self, presets: &Presets) -> Result<(), StorageManagerSaveError> {
-        let mapped: Vec<Preset> = presets.into_iter().map(|p| p.clone().into()).collect();
+        let mapped: Vec<Preset> = presets
+            .into_iter()
+            .map(|p| Convertible::from(p.clone()))
+            .collect();
         let serialized = serde_json::to_string(&mapped)
             .map_err(|_| StorageManagerSaveError::ErrorDeserializingData)?;
 

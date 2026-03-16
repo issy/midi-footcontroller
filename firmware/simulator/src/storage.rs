@@ -2,6 +2,7 @@ use foundation::storage::state::Presets;
 use foundation::storage::{StorageManager, StorageManagerLoadError, StorageManagerSaveError};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
+use std::vec::Vec;
 use web_sys::Storage;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
@@ -145,6 +146,21 @@ impl From<ButtonConfig> for foundation::storage::state::ButtonConfig {
     }
 }
 
+impl From<Preset> for foundation::storage::state::StoredPreset {
+    fn from(value: Preset) -> Self {
+        foundation::storage::state::StoredPreset {
+            name: heapless::String::from_str(value.name.as_str()).unwrap(),
+            buttons: heapless::Vec::from_iter(
+                value
+                    .buttons
+                    .iter()
+                    .map(|b| b.clone().into())
+                    .collect::<Vec<_>>(),
+            ),
+        }
+    }
+}
+
 pub struct LocalStorageManager<'a> {
     local_storage: &'a mut Storage,
 }
@@ -160,9 +176,9 @@ impl StorageManager for LocalStorageManager<'_> {
             .map_err(|_| StorageManagerLoadError::ErrorReadingFromStorage)?
             .ok_or(StorageManagerLoadError::NoValueStored)?;
 
-        let f: Presets = serde_json::from_slice(value.as_bytes())
+        let presets: Vec<Preset> = serde_json::from_slice(value.as_bytes())
             .map_err(|_| StorageManagerLoadError::ErrorDeserializingData)?;
-        let val = f.into_iter().map(|p| p.into()).collect();
+        let val = presets.into_iter().map(|p| p.into()).collect();
         Ok(val)
     }
 

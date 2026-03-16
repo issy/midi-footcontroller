@@ -5,6 +5,14 @@ use std::str::FromStr;
 use std::vec::Vec;
 use web_sys::Storage;
 
+pub trait BiMap<T>: Sized {
+    /// Convert `Self` into `T`
+    fn to(self) -> T;
+
+    /// Convert `T` into `Self`
+    fn from(t: T) -> Self;
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
 enum MidiCommand {
     ProgramChange {
@@ -157,6 +165,76 @@ impl From<Preset> for foundation::storage::state::StoredPreset {
                     .map(|b| b.clone().into())
                     .collect::<Vec<_>>(),
             ),
+        }
+    }
+}
+
+impl From<foundation::storage::state::MidiCommand> for MidiCommand {
+    fn from(value: foundation::storage::state::MidiCommand) -> Self {
+        match value {
+            foundation::storage::state::MidiCommand::ProgramChange { channel, program } => {
+                MidiCommand::ProgramChange { channel, program }
+            }
+            foundation::storage::state::MidiCommand::ControllerChange {
+                channel,
+                controller,
+                value,
+            } => MidiCommand::ControllerChange {
+                channel,
+                controller,
+                value,
+            },
+            foundation::storage::state::MidiCommand::NoteOn {
+                channel,
+                note,
+                velocity,
+            } => MidiCommand::NoteOn {
+                channel,
+                note,
+                velocity,
+            },
+            foundation::storage::state::MidiCommand::NoteOff {
+                channel,
+                note,
+                velocity,
+            } => MidiCommand::NoteOff {
+                channel,
+                note,
+                velocity,
+            },
+        }
+    }
+}
+
+impl From<foundation::storage::state::ButtonConfig> for ButtonConfig {
+    fn from(value: foundation::storage::state::ButtonConfig) -> Self {
+        ButtonConfig {
+            name: value.name.to_string(),
+            button_type: value.button_type.into(),
+            colour: value.colour.into(),
+            on_actions: value
+                .on_actions
+                .into_iter()
+                .map(|m| m.clone().into())
+                .collect(),
+            off_actions: value
+                .off_actions
+                .into_iter()
+                .map(|m| m.clone().into())
+                .collect(),
+        }
+    }
+}
+
+impl From<foundation::storage::state::StoredPreset> for Preset {
+    fn from(value: foundation::storage::state::StoredPreset) -> Self {
+        Preset {
+            name: value.name.to_string(),
+            buttons: value
+                .buttons
+                .into_iter()
+                .map(|b| b.clone().into())
+                .collect(),
         }
     }
 }

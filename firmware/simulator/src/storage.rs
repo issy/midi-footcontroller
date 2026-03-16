@@ -186,18 +186,36 @@ impl Convertible<foundation::storage::state::MidiCommand> for MidiCommand {
     }
 }
 
-impl From<ButtonConfig> for foundation::storage::state::ButtonConfig {
-    fn from(value: ButtonConfig) -> Self {
+impl Convertible<foundation::storage::state::ButtonConfig> for ButtonConfig {
+    fn to(self) -> foundation::storage::state::ButtonConfig {
         foundation::storage::state::ButtonConfig {
-            name: heapless::String::from_str(value.name.as_str()).unwrap(),
-            button_type: value.button_type.to(),
-            colour: value.colour.to(),
+            name: heapless::String::from_str(self.name.as_str()).unwrap(),
+            button_type: self.button_type.to(),
+            colour: self.colour.to(),
             on_actions: heapless::Vec::from_iter(
-                value.on_actions.iter().map(|m| m.to()).collect::<Vec<_>>(),
+                self.on_actions.iter().map(|m| m.to()).collect::<Vec<_>>(),
             ),
             off_actions: heapless::Vec::from_iter(
-                value.off_actions.iter().map(|m| m.to()).collect::<Vec<_>>(),
+                self.off_actions.iter().map(|m| m.to()).collect::<Vec<_>>(),
             ),
+        }
+    }
+
+    fn from(value: foundation::storage::state::ButtonConfig) -> Self {
+        ButtonConfig {
+            name: value.name.to_string(),
+            button_type: Convertible::from(value.button_type),
+            colour: Convertible::from(value.colour),
+            on_actions: value
+                .on_actions
+                .into_iter()
+                .map(|m| Convertible::from(m))
+                .collect(),
+            off_actions: value
+                .off_actions
+                .into_iter()
+                .map(|m| Convertible::from(m))
+                .collect(),
         }
     }
 }
@@ -210,7 +228,7 @@ impl From<Preset> for foundation::storage::state::StoredPreset {
                 value
                     .buttons
                     .iter()
-                    .map(|b| b.clone().into())
+                    .map(|b| b.clone().to())
                     .collect::<Vec<_>>(),
             ),
         }

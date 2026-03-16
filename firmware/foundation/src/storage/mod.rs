@@ -3,9 +3,15 @@ use core::fmt::Debug;
 
 pub mod state;
 
-pub trait StorageManager {
-    type Error: Debug;
+pub enum StorageManagerLoadError {
+    ErrorReadingFromStorage,
+    NoValueStored,
+    ErrorDeserializingData,
+}
 
-    fn load_presets(&self) -> Result<Presets, Self::Error>;
-    fn save_presets(&mut self, presets: &Presets) -> Result<(), Self::Error>;
+pub enum StorageManagerSaveError {}
+
+pub trait StorageManager {
+    fn load_presets(&self) -> Result<Presets, StorageManagerLoadError>;
+    fn save_presets(&mut self, presets: &Presets) -> Result<(), StorageManagerSaveError>;
 }

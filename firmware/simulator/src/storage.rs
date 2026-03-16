@@ -1,5 +1,8 @@
+use foundation::storage::state::Presets;
+use foundation::storage::{StorageManager, StorageManagerLoadError, StorageManagerSaveError};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
+use web_sys::Storage;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
 pub enum MidiCommand {
@@ -139,5 +142,31 @@ impl From<ButtonConfig> for foundation::storage::state::ButtonConfig {
                     .collect::<Vec<_>>(),
             ),
         }
+    }
+}
+
+pub struct LocalStorageManager<'a> {
+    local_storage: &'a mut Storage,
+}
+
+const STORAGE_KEY_PRESETS: &str = "presets";
+const STORAGE_KEY_PRESET_ID: &str = "preset_id";
+
+impl StorageManager for LocalStorageManager<'_> {
+    fn load_presets(&self) -> Result<Presets, StorageManagerLoadError> {
+        let value = self
+            .local_storage
+            .get_item(STORAGE_KEY_PRESETS)
+            .map_err(|_| StorageManagerLoadError::ErrorReadingFromStorage)?
+            .ok_or(StorageManagerLoadError::NoValueStored)?;
+
+        let f: Presets = serde_json::from_slice(value.as_bytes())
+            .map_err(|_| StorageManagerLoadError::ErrorDeserializingData)?;
+        let val = f.into_iter().map(|p| p.into()).collect();
+        Ok(val)
+    }
+
+    fn save_presets(&mut self, presets: &Presets) -> Result<(), StorageManagerSaveError> {
+        todo!()
     }
 }

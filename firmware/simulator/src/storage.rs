@@ -6,7 +6,7 @@ use std::vec::Vec;
 use web_sys::Storage;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
-pub enum MidiCommand {
+enum MidiCommand {
     ProgramChange {
         channel: u8,
         program: u8,

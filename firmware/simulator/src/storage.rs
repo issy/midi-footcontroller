@@ -5,12 +5,13 @@ use std::str::FromStr;
 use std::vec::Vec;
 use web_sys::Storage;
 
-pub trait BiMap<T>: Sized {
+/// A trait for types that can be converted to and from another type `T`
+pub trait Convertible<T>: Sized {
     /// Convert `Self` into `T`
     fn to(self) -> T;
 
     /// Convert `T` into `Self`
-    fn from(t: T) -> Self;
+    fn from(value: T) -> Self;
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize, Serialize)]
@@ -78,9 +79,9 @@ impl From<ButtonType> for foundation::storage::state::ButtonType {
     }
 }
 
-impl From<Colour> for foundation::protocol::Colour {
-    fn from(value: Colour) -> Self {
-        match value {
+impl Convertible<foundation::protocol::Colour> for Colour {
+    fn to(self) -> foundation::protocol::Colour {
+        match self {
             Colour::Red => foundation::protocol::Colour::Red,
             Colour::Green => foundation::protocol::Colour::Green,
             Colour::Blue => foundation::protocol::Colour::Blue,
@@ -91,11 +92,15 @@ impl From<Colour> for foundation::protocol::Colour {
             Colour::White => foundation::protocol::Colour::White,
         }
     }
+
+    fn from(value: foundation::protocol::Colour) -> Self {
+        todo!()
+    }
 }
 
-impl From<MidiCommand> for foundation::storage::state::MidiCommand {
-    fn from(value: MidiCommand) -> Self {
-        match value {
+impl Convertible<foundation::storage::state::MidiCommand> for MidiCommand {
+    fn to(self) -> foundation::storage::state::MidiCommand {
+        match self {
             MidiCommand::ProgramChange { channel, program } => {
                 foundation::storage::state::MidiCommand::ProgramChange { channel, program }
             }
@@ -128,48 +133,7 @@ impl From<MidiCommand> for foundation::storage::state::MidiCommand {
             },
         }
     }
-}
 
-impl From<ButtonConfig> for foundation::storage::state::ButtonConfig {
-    fn from(value: ButtonConfig) -> Self {
-        foundation::storage::state::ButtonConfig {
-            name: heapless::String::from_str(value.name.as_str()).unwrap(),
-            button_type: value.button_type.into(),
-            colour: value.colour.into(),
-            on_actions: heapless::Vec::from_iter(
-                value
-                    .on_actions
-                    .iter()
-                    .map(|m| m.clone().into())
-                    .collect::<Vec<_>>(),
-            ),
-            off_actions: heapless::Vec::from_iter(
-                value
-                    .off_actions
-                    .iter()
-                    .map(|m| m.clone().into())
-                    .collect::<Vec<_>>(),
-            ),
-        }
-    }
-}
-
-impl From<Preset> for foundation::storage::state::StoredPreset {
-    fn from(value: Preset) -> Self {
-        foundation::storage::state::StoredPreset {
-            name: heapless::String::from_str(value.name.as_str()).unwrap(),
-            buttons: heapless::Vec::from_iter(
-                value
-                    .buttons
-                    .iter()
-                    .map(|b| b.clone().into())
-                    .collect::<Vec<_>>(),
-            ),
-        }
-    }
-}
-
-impl From<foundation::storage::state::MidiCommand> for MidiCommand {
     fn from(value: foundation::storage::state::MidiCommand) -> Self {
         match value {
             foundation::storage::state::MidiCommand::ProgramChange { channel, program } => {
@@ -202,6 +166,37 @@ impl From<foundation::storage::state::MidiCommand> for MidiCommand {
                 note,
                 velocity,
             },
+        }
+    }
+}
+
+impl From<ButtonConfig> for foundation::storage::state::ButtonConfig {
+    fn from(value: ButtonConfig) -> Self {
+        foundation::storage::state::ButtonConfig {
+            name: heapless::String::from_str(value.name.as_str()).unwrap(),
+            button_type: value.button_type.into(),
+            colour: value.colour.into(),
+            on_actions: heapless::Vec::from_iter(
+                value.on_actions.iter().map(|m| m.to()).collect::<Vec<_>>(),
+            ),
+            off_actions: heapless::Vec::from_iter(
+                value.off_actions.iter().map(|m| m.to()).collect::<Vec<_>>(),
+            ),
+        }
+    }
+}
+
+impl From<Preset> for foundation::storage::state::StoredPreset {
+    fn from(value: Preset) -> Self {
+        foundation::storage::state::StoredPreset {
+            name: heapless::String::from_str(value.name.as_str()).unwrap(),
+            buttons: heapless::Vec::from_iter(
+                value
+                    .buttons
+                    .iter()
+                    .map(|b| b.clone().into())
+                    .collect::<Vec<_>>(),
+            ),
         }
     }
 }

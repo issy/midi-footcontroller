@@ -9,7 +9,10 @@ pub enum StorageManagerLoadError {
     ErrorDeserializingData,
 }
 
-pub enum StorageManagerSaveError {}
+pub enum StorageManagerSaveError {
+    ErrorDeserializingData,
+    ErrorWritingToStorage,
+}
 
 pub trait StorageManager {
     fn load_presets(&self) -> Result<Presets, StorageManagerLoadError>;

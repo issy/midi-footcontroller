@@ -176,13 +176,19 @@ impl StorageManager for LocalStorageManager<'_> {
             .map_err(|_| StorageManagerLoadError::ErrorReadingFromStorage)?
             .ok_or(StorageManagerLoadError::NoValueStored)?;
 
-        let presets: Vec<Preset> = serde_json::from_slice(value.as_bytes())
+        let deserialized: Vec<Preset> = serde_json::from_slice(value.as_bytes())
             .map_err(|_| StorageManagerLoadError::ErrorDeserializingData)?;
-        let val = presets.into_iter().map(|p| p.into()).collect();
-        Ok(val)
+        let mapped = deserialized.into_iter().map(|p| p.into()).collect();
+        Ok(mapped)
     }
 
     fn save_presets(&mut self, presets: &Presets) -> Result<(), StorageManagerSaveError> {
-        todo!()
+        let mapped: Vec<Preset> = presets.into_iter().map(|p| p.clone().into()).collect();
+        let serialized = serde_json::to_string(&mapped)
+            .map_err(|_| StorageManagerSaveError::ErrorDeserializingData)?;
+
+        self.local_storage
+            .set_item(STORAGE_KEY_PRESETS, serialized.as_str())
+            .map_err(|_| StorageManagerSaveError::ErrorWritingToStorage)
     }
 }

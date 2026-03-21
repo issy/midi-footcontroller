@@ -21,7 +21,10 @@
             name = "source";
           };
           strictDeps = true;
-          buildInputs = [ ];
+          buildInputs = with pkgs; [
+            nodejs_24
+            pnpm
+          ];
           nativeBuildInputs = with pkgs; [
             nodejs_24
             pnpm

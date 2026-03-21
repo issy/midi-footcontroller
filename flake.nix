@@ -19,8 +19,14 @@
       pkgs = nixpkgs.legacyPackages.${system};
     in
     {
+      packages = {
+        app-firmware = app-firmware.packages.${system}.default;
+        app-web = app-web.packages.${system}.default;
+      };
+
       devShell = pkgs.mkShell {
         buildInputs = with pkgs; [
+
         ];
       };
     }

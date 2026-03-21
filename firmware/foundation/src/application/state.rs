@@ -6,19 +6,19 @@ use crate::storage::StorageManager;
 use embedded_graphics::draw_target::DrawTarget;
 use embedded_graphics::pixelcolor::Rgb565;
 
-struct Displays<'a, D: DrawTarget<Color = Rgb565>> {
+pub(crate) struct Displays<'a, D: DrawTarget<Color = Rgb565>> {
     pub(crate) display_1: &'a mut D,
     pub(crate) display_2: &'a mut D,
     pub(crate) display_3: &'a mut D,
     pub(crate) display_4: &'a mut D,
 }
 
-struct MidiStreams<'a, MR: MidiReader, MW: MidiWriter> {
+pub(crate) struct MidiStreams<'a, MR: MidiReader, MW: MidiWriter> {
     reader: &'a mut MR,
     writer: &'a mut MW,
 }
 
-struct InternalChannels<'a> {
+pub(crate) struct InternalChannels<'a> {
     midi_out: &'a mut MidiOutChannel,
     display_state_update: &'a mut DisplayStateUpdateChannel,
     storage_state_update: &'a mut StorageStateUpdateChannel,
@@ -32,7 +32,6 @@ pub struct Application<
     MW: MidiWriter,
     SM: StorageManager,
 > {
-    // TODO: Make these no longer public eventually?
     pub(crate) displays: Displays<'a, D>,
     pub(crate) midi_streams: MidiStreams<'a, MR, MW>,
     pub(crate) channels: InternalChannels<'a>,

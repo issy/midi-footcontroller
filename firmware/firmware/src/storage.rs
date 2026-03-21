@@ -1,13 +1,10 @@
-use core::marker::PhantomData;
 use foundation::storage::state::Presets;
 use foundation::storage::{StorageManager, StorageManagerLoadError, StorageManagerSaveError};
 
 #[derive(Default)]
-pub struct FakeStorageManager<'a> {
-    phantom_data: PhantomData<&'a ()>,
-}
+pub struct FakeStorageManager;
 
-impl<'a> StorageManager for FakeStorageManager<'a> {
+impl StorageManager for FakeStorageManager {
     fn load_presets(&self) -> Result<Presets, StorageManagerLoadError> {
         Ok(heapless::Vec::new())
     }

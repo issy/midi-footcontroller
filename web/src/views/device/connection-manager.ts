@@ -3,11 +3,11 @@ import { createContext, use, useCallback, useEffect, useState } from 'react';
 type ConnectionManager =
   | {
       isConnected: false;
-      connect(): Promise<void>;
+      connect: () => Promise<void>;
     }
   | {
       isConnected: true;
-      disconnect(): Promise<void>;
+      disconnect: () => Promise<void>;
     };
 
 const ConnectionManagerContext = createContext<ConnectionManager | undefined>(undefined);

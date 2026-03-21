@@ -1,9 +1,9 @@
-use crate::application::channels::{StorageStateEvent, StorageStateEventChannel};
+use crate::application::channels::{StorageStateEvent, StorageStateUpdateChannel};
 use crate::storage::StorageManager;
 
 async fn storage_read_task<SM: StorageManager>(
     storage_manager: SM,
-    storage_state_event_channel: StorageStateEventChannel,
+    storage_state_event_channel: StorageStateUpdateChannel,
 ) -> ! {
     let _presets = storage_manager
         .load_presets()

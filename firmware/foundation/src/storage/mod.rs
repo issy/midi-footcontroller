@@ -3,12 +3,14 @@ use core::fmt::Debug;
 
 pub mod state;
 
+#[derive(Debug)]
 pub enum StorageManagerLoadError {
     ErrorReadingFromStorage,
     NoValueStored,
     ErrorDeserializingData,
 }
 
+#[derive(Debug)]
 pub enum StorageManagerSaveError {
     ErrorDeserializingData,
     ErrorWritingToStorage,

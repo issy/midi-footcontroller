@@ -9,6 +9,7 @@
 
 extern crate alloc;
 mod midi;
+mod storage;
 
 include!(concat!(env!("OUT_DIR"), "/version.rs"));
 
@@ -23,16 +24,15 @@ use esp_alloc as _;
 )]
 use esp_backtrace as _;
 
+use crate::storage::FakeStorageManager;
+
 use core::cell::RefCell;
-use core::fmt::Debug;
-use core::marker::PhantomData;
 use core::ops::Add;
 use core::str::FromStr;
 use embassy_embedded_hal::shared_bus::blocking::spi::SpiDevice;
 use embassy_executor::Spawner;
 use embassy_sync::blocking_mutex::{Mutex, raw::NoopRawMutex};
 use embassy_time::Delay;
-use embassy_time::Timer;
 use embedded_graphics::draw_target::DrawTarget;
 use embedded_graphics::mono_font::{MonoTextStyleBuilder, ascii::FONT_10X20};
 use embedded_graphics::prelude::*;
@@ -45,15 +45,9 @@ use esp_hal::spi::master::Spi;
 use esp_hal::time::Rate;
 use esp_hal::timer::timg::TimerGroup;
 use esp_hal::uart::{Config as UartConfig, DataBits, Parity, StopBits, Uart};
-use esp_println::println;
 use foundation::application::channels;
+use foundation::application::state::ApplicationBuilder;
 use foundation::layout::DisplayLayout;
-use foundation::storage::state::Presets;
-use foundation::storage::{StorageManager, StorageManagerLoadError, StorageManagerSaveError};
-use foundation::{
-    application::state::ApplicationBuilder,
-    midi::{MidiReader, MidiWriter},
-};
 use heapless::String;
 use log::info;
 use midi::{UartMidiReader, UartMidiWriter};
@@ -64,22 +58,6 @@ use mipidsi::options::{ColorInversion, Orientation};
 // This creates a default app-descriptor required by the esp-idf bootloader.
 // For more information see: <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/app_image_format.html#application-description>
 esp_bootloader_esp_idf::esp_app_desc!();
-
-#[derive(Default)]
-struct FakeStorageManager<'a> {
-    phantom_data: PhantomData<&'a ()>,
-}
-
-impl<'a> StorageManager for FakeStorageManager<'a> {
-    fn load_presets(&self) -> Result<Presets, StorageManagerLoadError> {
-        Ok(heapless::Vec::new())
-    }
-
-    fn save_presets(&mut self, presets: &Presets) -> Result<(), StorageManagerSaveError> {
-        // Do nothing
-        Ok(())
-    }
-}
 
 #[allow(
     clippy::large_stack_frames,
@@ -208,8 +186,7 @@ async fn main(spawner: Spawner) -> ! {
         )
         .build();
 
-    loop {
-        Timer::after_secs(5).await;
-        println!("Heartbeat");
-    }
+    // Start app tasks here
+
+    core::future::pending().await
 }

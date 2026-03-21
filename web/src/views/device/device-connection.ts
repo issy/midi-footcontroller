@@ -2,7 +2,7 @@ import { createContext, use, useCallback, useEffect, useState } from 'react';
 
 const connectToPort = async () => {
   const port = await navigator.serial.requestPort();
-  await port.open({ baudRate: 115_200 }); // TODO: Is this the right baud rate? TBD
+  await port.open({ baudRate: 31_250 });
   return port;
 };
 

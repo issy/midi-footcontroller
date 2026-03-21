@@ -1,6 +1,6 @@
 import { createContext, use, useCallback, useEffect, useState } from 'react';
 
-type ConnectionManager =
+export type ConnectionManager =
   | {
       isConnected: false;
       connect: () => Promise<void>;

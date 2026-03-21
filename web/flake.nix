@@ -21,10 +21,6 @@
             name = "source";
           };
           strictDeps = true;
-          buildInputs = with pkgs; [
-            nodejs_24
-            pnpm
-          ];
           nativeBuildInputs = with pkgs; [
             nodejs_24
             pnpm
@@ -32,10 +28,6 @@
           buildPhase = ''
             pnpm install --frozen-lockfile
             pnpm build
-          '';
-          installPhase = ''
-            mkdir -p $out
-            cp -r dist/* $out/
           '';
           version = "0.1.0";
           pname = "app-web";

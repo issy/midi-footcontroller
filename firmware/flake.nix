@@ -52,7 +52,7 @@
         };
       in
       rec {
-        defaultPackage = craneLib.buildPackage commonArgs;
+        packages.default = craneLib.buildPackage commonArgs;
 
         devShell = craneLib.devShell {
           packages = with pkgs; [

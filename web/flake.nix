@@ -22,14 +22,26 @@
           };
           strictDeps = true;
           buildInputs = [ ];
+          nativeBuildInputs = with pkgs; [
+            nodejs_24
+            pnpm
+          ];
+          buildPhase = ''
+            pnpm install --frozen-lockfile
+            pnpm build
+          '';
+          installPhase = ''
+            mkdir -p $out
+            cp -r dist/* $out/
+          '';
           version = "0.1.0";
-          pname = "app";
+          pname = "app-web";
         };
       in
       rec {
-        defaultPackage = commonArgs;
+        packages.default = pkgs.stdenv.mkDerivation commonArgs;
 
-        devShell = pkgs.mkShell {
+        devShells.default = pkgs.mkShell {
           packages = with pkgs; [
             nodejs_24
             pnpm

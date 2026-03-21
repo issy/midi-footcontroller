@@ -14,21 +14,30 @@
       inputs.flake-utils.follows = "flake-utils";
     };
   };
-  outputs = { self, nixpkgs, flake-utils, app-firmware, app-web }: flake-utils.lib.eachDefaultSystem (system:
-    let
-      pkgs = nixpkgs.legacyPackages.${system};
-    in
+  outputs =
     {
-      packages = {
-        app-firmware = app-firmware.packages.${system}.default;
-        app-web = app-web.packages.${system}.default;
-      };
+      self,
+      nixpkgs,
+      flake-utils,
+      app-firmware,
+      app-web
+    }:
+    flake-utils.lib.eachDefaultSystem (
+      system:
+      let
+        pkgs = nixpkgs.legacyPackages.${system};
+      in
+      {
+        packages = {
+          app-firmware = app-firmware.packages.${system}.default;
+          app-web = app-web.packages.${system}.default;
+        };
 
-      devShell = pkgs.mkShell {
-        buildInputs = with pkgs; [
+        devShell = pkgs.mkShell {
+          buildInputs = with pkgs; [
 
-        ];
-      };
-    }
-  );
+          ];
+        };
+      }
+    );
 }

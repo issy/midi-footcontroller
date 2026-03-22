@@ -1,4 +1,4 @@
-import { MdOutlineUsbOff } from 'react-icons/md';
+import { MdOutlineUsbOff, MdOutlineUsb } from 'react-icons/md';
 import { type ConnectionManager, useConnectionManagerContext } from '@/views/device/connection-manager';
 import { Button } from '@mantine/core';
 import { Fragment } from 'react';
@@ -22,6 +22,7 @@ const DisconnectedView = ({ connect }: Pick<Extract<ConnectionManager, { isConne
           mutate();
         }}
       >
+        <MdOutlineUsb />
         Connect
       </Button>
     </Fragment>

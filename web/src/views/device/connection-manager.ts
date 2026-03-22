@@ -23,11 +23,13 @@ export const useConnectionManagerContext = () => {
 };
 
 export const useConnectionManager = (): ConnectionManager => {
+  const [_port, _setPort] = useState<SerialPort>();
   const [isConnected, setIsConnected] = useState(false);
 
   const connect = useCallback(async () => {
     const port = await navigator.serial.requestPort();
     await port.open({ baudRate: 31_250 });
+    _setPort(port);
   }, []);
 
   const disconnect = useCallback(async () => {
@@ -38,26 +40,32 @@ export const useConnectionManager = (): ConnectionManager => {
   }, []);
 
   useEffect(() => {
+    if (_port === undefined) return;
+
     function onConnectListener() {
       setIsConnected(true);
+      console.log('Connected');
     }
 
-    navigator.serial.addEventListener('connect', onConnectListener);
+    _port.addEventListener('connect', onConnectListener);
     return () => {
-      navigator.serial.removeEventListener('connect', onConnectListener);
+      _port.removeEventListener('connect', onConnectListener);
     };
-  }, []);
+  }, [_port]);
 
   useEffect(() => {
+    if (_port === undefined) return;
+
     function onDisconnectListener() {
       setIsConnected(false);
+      console.log('Disconnected');
     }
 
-    navigator.serial.addEventListener('disconnect', onDisconnectListener);
+    _port.addEventListener('disconnect', onDisconnectListener);
     return () => {
-      navigator.serial.removeEventListener('disconnect', onDisconnectListener);
+      _port.removeEventListener('disconnect', onDisconnectListener);
     };
-  }, []);
+  }, [_port]);
 
   return isConnected ? { isConnected: true, disconnect } : { isConnected: false, connect };
 };

@@ -1,8 +1,14 @@
 import { Outlet } from 'react-router';
+import { AppShell } from '@mantine/core';
 
 function AppLayout() {
-  // TODO: Use AppShell
-  return <Outlet />;
+  return (
+    <AppShell padding="md">
+      <AppShell.Main>
+        <Outlet />
+      </AppShell.Main>
+    </AppShell>
+  );
 }
 
 export default AppLayout;

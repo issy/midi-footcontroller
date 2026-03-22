@@ -1,4 +1,4 @@
-import { MdOutlineUsbOff, MdOutlineUsb } from 'react-icons/md';
+import { MdOutlineUsb, MdOutlineUsbOff } from 'react-icons/md';
 import { type ConnectionManager, useConnectionManagerContext } from '@/views/device/connection-manager';
 import { Button } from '@mantine/core';
 import { Fragment } from 'react';
@@ -12,7 +12,8 @@ const DisconnectedView = ({ connect }: Pick<Extract<ConnectionManager, { isConne
 
   return (
     <Fragment>
-      <h3 className="flex">
+      <h3>
+        {/* Use flex or something to wrap this */}
         <MdOutlineUsbOff />
         Disconnected
       </h3>
@@ -32,13 +33,7 @@ const DisconnectedView = ({ connect }: Pick<Extract<ConnectionManager, { isConne
 function DeviceConnectView() {
   const conn = useConnectionManagerContext();
 
-  return (
-    <div className="h-screen w-screen flex items-center justify-center m-auto">
-      <div className="flex flex-col items-center gap-4 text-4xl">
-        {conn.isConnected ? <Fragment></Fragment> : <DisconnectedView connect={conn.connect} />}
-      </div>
-    </div>
-  );
+  return <div>{conn.isConnected ? <Fragment></Fragment> : <DisconnectedView connect={conn.connect} />}</div>;
 }
 
 export default DeviceConnectView;

@@ -17,12 +17,12 @@ const DisconnectedView = ({ connect }: Pick<Extract<ConnectionManager, { isConne
         <Text>Disconnected</Text>
       </h3>
       <Button
+        leftSection={<MdOutlineUsb />}
         loading={isPending}
         onClick={() => {
           mutate();
         }}
       >
-        <MdOutlineUsb />
         <Text>Connect</Text>
       </Button>
     </Fragment>

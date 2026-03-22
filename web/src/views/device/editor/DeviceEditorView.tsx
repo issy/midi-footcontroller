@@ -1,9 +1,21 @@
+import { AppShell, Flex } from '@mantine/core';
+
 function DeviceEditorView() {
   return (
-    <div>
-      <h2>Editor</h2>
-      <p>This hasn't been implemented yet. One day you'll be able to edit your device's config here.</p>
-    </div>
+    <Flex>
+      <AppShell.Navbar pos="static">
+        {/* Preset list */}
+        <p>Foo</p>
+        <p>Bar</p>
+        <p>Baz</p>
+        <p>Hello</p>
+        <p>World</p>
+      </AppShell.Navbar>
+      <AppShell.Main p="md">
+        {/* Preset editor */}
+        <p>Main content goes here I suppose, but is this underneath the navbar?</p>
+      </AppShell.Main>
+    </Flex>
   );
 }
 

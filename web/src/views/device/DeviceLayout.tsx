@@ -47,6 +47,26 @@ function ConnectButton({ connect }: Pick<Extract<ConnectionManager, { isConnecte
   );
 }
 
+function DisconnectButton({ disconnect }: Pick<Extract<ConnectionManager, { isConnected: true }>, 'disconnect'>) {
+  const { isPending, mutate } = useMutation({
+    mutationFn: disconnect,
+    mutationKey: ['connect'],
+  });
+
+  return (
+    <Button
+      color="red"
+      leftSection={<MdOutlineUsbOff />}
+      loading={isPending}
+      onClick={() => {
+        mutate();
+      }}
+    >
+      <Text>Disconnect</Text>
+    </Button>
+  );
+}
+
 function BrowserNotSupported() {
   return (
     <aside role="alert">
@@ -63,13 +83,7 @@ function BrowserNotSupported() {
 const ConnectionStatus = () => {
   const conn = useConnectionManagerContext();
 
-  return conn.isConnected ? (
-    <Button color="red" leftSection={<MdOutlineUsbOff />}>
-      <Text>Disconnect</Text>
-    </Button>
-  ) : (
-    <ConnectButton connect={conn.connect} />
-  );
+  return conn.isConnected ? <DisconnectButton disconnect={conn.disconnect} /> : <ConnectButton connect={conn.connect} />;
 };
 
 function DeviceLayout() {
@@ -84,7 +98,6 @@ function DeviceLayout() {
           Header
           <Group>
             {/* TODO: Update button */}
-            {/* TODO: Connection menu button */}
             <ConnectionStatus />
             <ColourSchemeButton />
           </Group>

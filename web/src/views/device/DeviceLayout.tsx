@@ -1,6 +1,6 @@
 import { Outlet } from 'react-router';
 import ConnectionManagerProvider from '@/views/device/connection-manager/ConnectionManagerProvider';
-import { AppShell, Button, Group } from '@mantine/core';
+import { AppShell, Button, Group, Text } from '@mantine/core';
 import ColourSchemeButton from '@/components/ColourSchemeButton';
 import { useConnectionManagerContext } from '@/views/device/connection-manager/context';
 import { MdOutlineUsb, MdOutlineUsbOff } from 'react-icons/md';
@@ -19,10 +19,12 @@ const ConnectionStatus = () => {
 
   return conn.isConnected ? (
     <Button color="red" leftSection={<MdOutlineUsbOff />}>
-      Disconnect
+      <Text>Disconnect</Text>
     </Button>
   ) : (
-    <Button leftSection={<MdOutlineUsb />}>Connect</Button>
+    <Button leftSection={<MdOutlineUsb />}>
+      <Text>Connect</Text>
+    </Button>
   );
 };
 

@@ -4,8 +4,8 @@ import { ActionIcon, AppShell, Button, Group, Menu, Stack, Text } from '@mantine
 import ColourSchemeButton from '@/components/ColourSchemeButton';
 import { type ConnectionManager, useConnectionManagerContext } from '@/views/device/connection-manager/context';
 import { MdOutlineUsb, MdOutlineUsbOff, MdArrowDropDown, MdCode } from 'react-icons/md';
-import classes from './DeviceLayout.module.scss';
 import { useMutation } from '@tanstack/react-query';
+import classes from './DeviceLayout.module.css';
 
 function ConnectButton({ connect }: Pick<Extract<ConnectionManager, { isConnected: false }>, 'connect'>) {
   const { isPending, mutate } = useMutation({

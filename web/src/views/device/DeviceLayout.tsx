@@ -2,19 +2,32 @@ import { Outlet } from 'react-router';
 import ConnectionManagerProvider from '@/views/device/connection-manager/ConnectionManagerProvider';
 import { ActionIcon, AppShell, Button, Group, Menu, Stack, Text } from '@mantine/core';
 import ColourSchemeButton from '@/components/ColourSchemeButton';
-import { useConnectionManagerContext } from '@/views/device/connection-manager/context';
+import { type ConnectionManager, useConnectionManagerContext } from '@/views/device/connection-manager/context';
 import { MdOutlineUsb, MdOutlineUsbOff, MdArrowDropDown, MdCode } from 'react-icons/md';
 import classes from './DeviceLayout.module.scss';
+import { useMutation } from '@tanstack/react-query';
 
-function DropdownButton() {
+function ConnectButton({ connect }: Pick<Extract<ConnectionManager, { isConnected: false }>, 'connect'>) {
+  const { isPending, mutate } = useMutation({
+    mutationFn: connect,
+    mutationKey: ['connect'],
+  });
+
   return (
     <Group wrap="nowrap" gap={0}>
-      <Button leftSection={<MdOutlineUsb />} className={classes.connectDropdownButton}>
+      <Button
+        leftSection={<MdOutlineUsb />}
+        className={classes.button}
+        loading={isPending}
+        onClick={() => {
+          mutate();
+        }}
+      >
         <Text>Connect</Text>
       </Button>
       <Menu transitionProps={{ transition: 'pop' }} position="bottom-end" withinPortal>
         <Menu.Target>
-          <ActionIcon variant="filled" size={36} className={classes.connectDropdownIcon}>
+          <ActionIcon variant="filled" size={36} className={classes.menuControl}>
             <MdArrowDropDown />
           </ActionIcon>
         </Menu.Target>
@@ -55,9 +68,7 @@ const ConnectionStatus = () => {
       <Text>Disconnect</Text>
     </Button>
   ) : (
-    <Button leftSection={<MdOutlineUsb />}>
-      <Text>Connect</Text>
-    </Button>
+    <ConnectButton connect={conn.connect} />
   );
 };
 
@@ -74,7 +85,6 @@ function DeviceLayout() {
           <Group>
             {/* TODO: Update button */}
             {/* TODO: Connection menu button */}
-            <DropdownButton />
             <ConnectionStatus />
             <ColourSchemeButton />
           </Group>

@@ -1,5 +1,7 @@
 import { Outlet } from 'react-router';
 import { ConnectionManagerProvider, useConnectionManager } from '@/views/device/connection-manager';
+import { AppShell, Group } from '@mantine/core';
+import ColourSchemeButton from '@/components/ColourSchemeButton';
 
 function BrowserNotSupported() {
   return (
@@ -20,6 +22,12 @@ function DeviceLayout() {
 
   return (
     <ConnectionManagerProvider value={connectionManager}>
+      <AppShell.Header>
+        <Group h="100%" px="md" display="flex" justify="space-between">
+          Header
+          <ColourSchemeButton />
+        </Group>
+      </AppShell.Header>
       <Outlet />
     </ConnectionManagerProvider>
   );

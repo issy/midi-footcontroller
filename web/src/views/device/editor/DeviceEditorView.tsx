@@ -1,21 +1,14 @@
-import { AppShell, Flex } from '@mantine/core';
+import { AppShell, Text } from '@mantine/core';
+import { Fragment } from 'react';
 
 function DeviceEditorView() {
   return (
-    <Flex>
-      <AppShell.Navbar pos="static">
-        {/* Preset list */}
-        <p>Foo</p>
-        <p>Bar</p>
-        <p>Baz</p>
-        <p>Hello</p>
-        <p>World</p>
-      </AppShell.Navbar>
-      <AppShell.Main p="md">
-        {/* Preset editor */}
-        <p>Main content goes here I suppose, but is this underneath the navbar?</p>
+    <Fragment>
+      <AppShell.Navbar p="md">Navbar</AppShell.Navbar>
+      <AppShell.Main>
+        <Text>This is the main section, where the device editor will go</Text>
       </AppShell.Main>
-    </Flex>
+    </Fragment>
   );
 }
 

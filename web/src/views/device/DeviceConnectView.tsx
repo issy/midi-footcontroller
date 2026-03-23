@@ -1,5 +1,5 @@
 import { MdOutlineUsb, MdOutlineUsbOff } from 'react-icons/md';
-import { type ConnectionManager, useConnectionManagerContext } from '@/views/device/connection-manager';
+import { type ConnectionManager, useConnectionManagerContext } from '@/views/device/connection-manager/context';
 import { Button, Text } from '@mantine/core';
 import { Fragment } from 'react';
 import { useMutation } from '@tanstack/react-query';
@@ -29,6 +29,7 @@ const DisconnectedView = ({ connect }: Pick<Extract<ConnectionManager, { isConne
   );
 };
 
+// TODO: This should just show a big error state that the device is not connected
 function DeviceConnectView() {
   const conn = useConnectionManagerContext();
 

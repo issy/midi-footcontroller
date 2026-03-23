@@ -1,7 +1,9 @@
 import { Outlet } from 'react-router';
-import { ConnectionManagerProvider, useConnectionManager } from '@/views/device/connection-manager';
-import { AppShell, Group } from '@mantine/core';
+import ConnectionManagerProvider from '@/views/device/connection-manager/ConnectionManagerProvider';
+import { AppShell, Button, Group } from '@mantine/core';
 import ColourSchemeButton from '@/components/ColourSchemeButton';
+import { useConnectionManagerContext } from '@/views/device/connection-manager/context';
+import { MdOutlineUsb, MdOutlineUsbOff } from 'react-icons/md';
 
 function BrowserNotSupported() {
   return (
@@ -12,22 +14,32 @@ function BrowserNotSupported() {
   );
 }
 
-function DeviceLayout() {
-  // TODO: Wrap the connection manager in a device wrapper
-  const connectionManager = useConnectionManager();
+const ConnectionStatus = () => {
+  const conn = useConnectionManagerContext();
 
+  return conn.isConnected ? (
+    <Button color="red" leftSection={<MdOutlineUsbOff />}>
+      Disconnect
+    </Button>
+  ) : (
+    <Button leftSection={<MdOutlineUsb />}>Connect</Button>
+  );
+};
+
+function DeviceLayout() {
   if (!('serial' in navigator)) {
     return <BrowserNotSupported />;
   }
 
   return (
-    <ConnectionManagerProvider value={connectionManager}>
+    <ConnectionManagerProvider>
       <AppShell.Header>
         <Group h="100%" px="md" justify="space-between">
           Header
           <Group>
             {/* TODO: Update button */}
             {/* TODO: Connection menu button */}
+            <ConnectionStatus />
             <ColourSchemeButton />
           </Group>
         </Group>

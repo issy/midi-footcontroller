@@ -1,28 +1,7 @@
-import { createContext, use, useCallback, useEffect, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useState } from 'react';
+import { type ConnectionManager, ConnectionManagerContext } from './context';
 
-export type ConnectionManager =
-  | {
-      isConnected: false;
-      connect: () => Promise<void>;
-    }
-  | {
-      isConnected: true;
-      disconnect: () => Promise<void>;
-    };
-
-const ConnectionManagerContext = createContext<ConnectionManager | undefined>(undefined);
-ConnectionManagerContext.displayName = 'ConnectionManagerContext';
-export const ConnectionManagerProvider = ConnectionManagerContext.Provider;
-
-export const useConnectionManagerContext = () => {
-  const context = use(ConnectionManagerContext);
-  if (context === undefined) {
-    throw new Error('useConnectionManagerContext must be used within a ConnectionManagerProvider');
-  }
-  return context;
-};
-
-export const useConnectionManager = (): ConnectionManager => {
+const useConnectionManager = (): ConnectionManager => {
   const [_port, _setPort] = useState<SerialPort>();
   const [isConnected, setIsConnected] = useState(false);
 
@@ -69,3 +48,12 @@ export const useConnectionManager = (): ConnectionManager => {
 
   return isConnected ? { isConnected: true, disconnect } : { isConnected: false, connect };
 };
+
+const ConnectionManagerProvider = ({ children }: { children: ReactNode }) => {
+  // TODO: Wrap the connection manager in a device wrapper
+  const connectionManager = useConnectionManager();
+
+  return <ConnectionManagerContext value={connectionManager}>{children}</ConnectionManagerContext>;
+};
+
+export default ConnectionManagerProvider;

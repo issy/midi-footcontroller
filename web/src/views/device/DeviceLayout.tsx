@@ -23,9 +23,13 @@ function DeviceLayout() {
   return (
     <ConnectionManagerProvider value={connectionManager}>
       <AppShell.Header>
-        <Group h="100%" px="md" display="flex" justify="space-between">
+        <Group h="100%" px="md" justify="space-between">
           Header
-          <ColourSchemeButton />
+          <Group>
+            {/* TODO: Update button */}
+            {/* TODO: Connection menu button */}
+            <ColourSchemeButton />
+          </Group>
         </Group>
       </AppShell.Header>
       <Outlet />

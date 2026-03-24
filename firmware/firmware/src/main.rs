@@ -259,15 +259,6 @@ async fn main(spawner: Spawner) -> ! {
     .into_async();
     let (mut rx, mut tx) = uart.split();
 
-    // spawner
-    //     .spawn(midi_thru_task(rx))
-    //     .expect("Unable to spawn MIDI thru task");
-    // info!("MIDI thru task spawned");
-    // spawner
-    //     .spawn(midi_out_task(tx))
-    //     .expect("Unable to spawn MIDI out task");
-    // info!("MIDI out task spawned");
-
     info!("Startup complete.");
 
     let mut midi_reader = UartMidiReader::new(&mut rx);

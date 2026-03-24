@@ -3,9 +3,9 @@ import ConnectionManagerProvider from '@/views/device/connection-manager/Connect
 import { ActionIcon, AppShell, Button, Group, Menu, Stack, Text } from '@mantine/core';
 import ColourSchemeButton from '@/components/ColourSchemeButton';
 import { type ConnectionManager, useConnectionManagerContext } from '@/views/device/connection-manager/context';
-import { MdOutlineUsb, MdOutlineUsbOff, MdArrowDropDown, MdCode } from 'react-icons/md';
+import { MdArrowDropDown, MdCode, MdOutlineUsb, MdOutlineUsbOff, MdDownload } from 'react-icons/md';
 import { useMutation } from '@tanstack/react-query';
-import classes from './DeviceLayout.module.css';
+import classes from './DeviceLayout.module.scss';
 
 function ConnectButton({ connect }: Pick<Extract<ConnectionManager, { isConnected: false }>, 'connect'>) {
   const { isPending, mutate } = useMutation({
@@ -25,7 +25,7 @@ function ConnectButton({ connect }: Pick<Extract<ConnectionManager, { isConnecte
       >
         <Text>Connect</Text>
       </Button>
-      <Menu transitionProps={{ transition: 'pop' }} position="bottom-end" withinPortal>
+      <Menu transitionProps={{ transition: 'pop-top-right' }} position="bottom-end" withinPortal>
         <Menu.Target>
           <ActionIcon variant="filled" size={36} className={classes.menuControl}>
             <MdArrowDropDown />
@@ -86,6 +86,22 @@ const ConnectionStatus = () => {
   return conn.isConnected ? <DisconnectButton disconnect={conn.disconnect} /> : <ConnectButton connect={conn.connect} />;
 };
 
+const UpdateStatus = () => {
+  const conn = useConnectionManagerContext();
+
+  if (!conn.isConnected) return null;
+
+  // TODO: Check for update somehow
+  // Get firmware version from connection
+  // Check GitHub release API for latest version
+  // Show button if they don't match?
+  return (
+    <Button color="green" leftSection={<MdDownload />}>
+      <Text>Update</Text>
+    </Button>
+  );
+};
+
 function DeviceLayout() {
   if (!('serial' in navigator)) {
     return <BrowserNotSupported />;
@@ -97,7 +113,7 @@ function DeviceLayout() {
         <Group h="100%" px="md" justify="space-between">
           Header
           <Group>
-            {/* TODO: Update button */}
+            <UpdateStatus />
             <ConnectionStatus />
             <ColourSchemeButton />
           </Group>

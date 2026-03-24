@@ -1,4 +1,16 @@
-import { AppShell, AspectRatio, Box, Button, Grid, type MantineColor, SimpleGrid, Stack, Text, Title } from '@mantine/core';
+import {
+  AppShell,
+  AspectRatio,
+  Box,
+  Button,
+  Grid,
+  type MantineColor,
+  SimpleGrid,
+  Stack,
+  Text,
+  Title,
+  Card,
+} from '@mantine/core';
 import { useParams } from 'react-router';
 import { useState } from 'react';
 
@@ -95,12 +107,12 @@ function DevicePresetView() {
         <Grid columns={2}>
           <Grid.Col span={1}>
             <Stack>
-              <Box bg="gray">
-                <Text>Button editor panel</Text>
-              </Box>
-              <Box bg="gray">
+              <Card>
+                <Text>Button editor</Text>
+              </Card>
+              <Card>
                 <Text>Action editor</Text>
-              </Box>
+              </Card>
             </Stack>
           </Grid.Col>
           <Grid.Col span={1}>

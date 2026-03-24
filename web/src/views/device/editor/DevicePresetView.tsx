@@ -1,4 +1,4 @@
-import { AppShell, AspectRatio, Button, type MantineColor, SimpleGrid, Title } from '@mantine/core';
+import { AppShell, AspectRatio, Button, type MantineColor, SimpleGrid, Stack, Title } from '@mantine/core';
 import { useParams } from 'react-router';
 
 function DeviceButton({ color, text }: { color: MantineColor; text: string }) {
@@ -16,17 +16,19 @@ function DevicePresetView() {
 
   return (
     <AppShell.Main>
-      <SimpleGrid cols={4} spacing="md">
-        <DeviceButton color="red" text="Hello" />
-        <DeviceButton color="blue" text="Hello" />
-        <DeviceButton color="green" text="Hello" />
-        <DeviceButton color="yellow" text="Hello" />
-        <DeviceButton color="grape" text="Hello" />
-        <DeviceButton color="green" text="Hello" />
-        <DeviceButton color="blue" text="Hello" />
-        <DeviceButton color="teal" text="Hello" />
-      </SimpleGrid>
-      {presetId}
+      <Stack gap="xs">
+        <Title>{presetId}</Title>
+        <SimpleGrid cols={4} spacing="md">
+          <DeviceButton color="red" text="Hello" />
+          <DeviceButton color="blue" text="Hello" />
+          <DeviceButton color="green" text="Hello" />
+          <DeviceButton color="yellow" text="Hello" />
+          <DeviceButton color="grape" text="Hello" />
+          <DeviceButton color="green" text="Hello" />
+          <DeviceButton color="blue" text="Hello" />
+          <DeviceButton color="teal" text="Hello" />
+        </SimpleGrid>
+      </Stack>
     </AppShell.Main>
   );
 }

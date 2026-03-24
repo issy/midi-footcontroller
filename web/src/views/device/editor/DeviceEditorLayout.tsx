@@ -24,13 +24,15 @@ function NavListItem({ path, label }: { path: string; label: string }) {
 function DeviceEditorLayout() {
   return (
     <Fragment>
-      <AppShell.Navbar p="md">
-        <Title order={4}>Presets</Title>
-        {/* Presets */}
-        <Stack gap={0}>
-          <NavListItem path="foo" label="Foo" />
-          <NavListItem path="bar" label="Bar" />
-          <NavListItem path="baz" label="Baz" />
+      <AppShell.Navbar p="sm">
+        <Stack>
+          <Title order={4}>Presets</Title>
+          {/* Presets */}
+          <Stack gap={0}>
+            <NavListItem path="foo" label="Foo" />
+            <NavListItem path="bar" label="Bar" />
+            <NavListItem path="baz" label="Baz" />
+          </Stack>
         </Stack>
       </AppShell.Navbar>
       <Outlet />

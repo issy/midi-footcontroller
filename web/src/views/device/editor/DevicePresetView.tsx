@@ -1,4 +1,4 @@
-import { AppShell, AspectRatio, Button, type MantineColor, SimpleGrid, Stack, Title } from '@mantine/core';
+import { AppShell, AspectRatio, Box, Button, Grid, type MantineColor, SimpleGrid, Stack, Text, Title } from '@mantine/core';
 import { useParams } from 'react-router';
 import { useState } from 'react';
 
@@ -92,6 +92,31 @@ function DevicePresetView() {
             />
           ))}
         </SimpleGrid>
+        <Grid columns={2}>
+          <Grid.Col span={1}>
+            <Stack>
+              <Box bg="gray">
+                <Text>Button editor panel</Text>
+              </Box>
+              <Box bg="gray">
+                <Text>Action editor</Text>
+              </Box>
+            </Stack>
+          </Grid.Col>
+          <Grid.Col span={1}>
+            <Stack>
+              <Box bg="gray">
+                <Text>Action list</Text>
+              </Box>
+              <Box bg="gray">
+                <Text>Action list</Text>
+              </Box>
+              <Box bg="gray">
+                <Text>Action list</Text>
+              </Box>
+            </Stack>
+          </Grid.Col>
+        </Grid>
       </Stack>
     </AppShell.Main>
   );

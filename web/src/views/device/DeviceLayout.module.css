@@ -1,9 +1,9 @@
-.button {
+:global(.mantine-Button-root).button {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
 
-.menuControl {
+:global(.mantine-ActionIcon-root).menuControl {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
   border: 0;

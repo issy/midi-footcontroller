@@ -1,16 +1,4 @@
-import {
-  AppShell,
-  AspectRatio,
-  Box,
-  Button,
-  Grid,
-  type MantineColor,
-  SimpleGrid,
-  Stack,
-  Text,
-  Title,
-  Card,
-} from '@mantine/core';
+import { AppShell, AspectRatio, Button, Card, Grid, type MantineColor, SimpleGrid, Stack, Text, Title } from '@mantine/core';
 import { useParams } from 'react-router';
 import { useState } from 'react';
 
@@ -83,6 +71,18 @@ const mockPresetData: Array<PresetData> = [
   },
 ];
 
+interface ButtonActionData {
+  type: string;
+  channel: number;
+}
+
+const mockButtonActions: Array<ButtonActionData> = [
+  {
+    type: 'Program Change',
+    channel: 1,
+  },
+];
+
 function DevicePresetView() {
   const { presetId } = useParams<{ presetId: string }>();
   const [active, setActive] = useState<string | undefined>(undefined);
@@ -117,15 +117,29 @@ function DevicePresetView() {
           </Grid.Col>
           <Grid.Col span={1}>
             <Stack>
-              <Box bg="gray">
-                <Text>Action list</Text>
-              </Box>
-              <Box bg="gray">
-                <Text>Action list</Text>
-              </Box>
-              <Box bg="gray">
-                <Text>Action list</Text>
-              </Box>
+              <Card>
+                <SimpleGrid cols={4} spacing="sm" component="dl" m={0}>
+                  <div style={{ display: 'block' }}>
+                    <Text fw={700}>Foo</Text>
+                    <Text>Bar</Text>
+                  </div>
+                  <div style={{ display: 'block' }}>
+                    <Text fw={700}>Foo</Text>
+                    <Text>Bar</Text>
+                  </div>
+                  <div style={{ display: 'block' }}>
+                    <Text fw={700}>Foo</Text>
+                    <Text>Bar</Text>
+                  </div>
+                  <div style={{ display: 'block' }}>
+                    <Text fw={700}>Foo</Text>
+                    <Text>Bar</Text>
+                  </div>
+                </SimpleGrid>
+              </Card>
+              <Card>
+                <Text>Button 2</Text>
+              </Card>
             </Stack>
           </Grid.Col>
         </Grid>

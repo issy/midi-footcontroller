@@ -1,6 +1,7 @@
 import { AppShell, AspectRatio, Button, Card, Grid, type MantineColor, SimpleGrid, Stack, Text, Title } from '@mantine/core';
 import { useParams } from 'react-router';
 import { Fragment, useState } from 'react';
+import { MdAdd } from 'react-icons/md';
 
 function DeviceButton({
   color,
@@ -28,7 +29,7 @@ interface PresetData {
   id: string;
 }
 
-const mockPresetData: Array<PresetData> = [
+const mockPresetButtonsData: Array<PresetData> = [
   {
     id: 'one',
     color: 'red',
@@ -122,21 +123,21 @@ const mockButtonActions: Array<ButtonActionData> = [
 
 function DevicePresetView() {
   const { presetId } = useParams<{ presetId: string }>();
-  const [active, setActive] = useState<string | undefined>(undefined);
+  const [activeButton, setActiveButton] = useState<string | undefined>(undefined);
 
   return (
     <AppShell.Main>
       <Stack gap="xs">
         <Title>{presetId}</Title>
         <SimpleGrid cols={4} spacing="md">
-          {mockPresetData.map((preset) => (
+          {mockPresetButtonsData.map((button) => (
             <DeviceButton
-              key={`button_${preset.id}`}
-              color={preset.color}
-              text={preset.text}
-              active={active === preset.id}
+              key={`button_${button.id}`}
+              color={button.color}
+              text={button.text}
+              active={activeButton === button.id}
               onClick={() => {
-                setActive(preset.id);
+                setActiveButton(button.id);
               }}
             />
           ))}
@@ -204,9 +205,18 @@ function DevicePresetView() {
                   </SimpleGrid>
                 </Card>
               ))}
-              <Card>
-                <Text>Button 2</Text>
-              </Card>
+              <Button
+                onClick={() => {
+                  /* empty */
+                }}
+                style={{ width: '100%' }}
+                variant="light"
+                color="gray"
+                size="lg"
+                leftSection={<MdAdd />}
+              >
+                <Text>Add</Text>
+              </Button>
             </Stack>
           </Grid.Col>
         </Grid>

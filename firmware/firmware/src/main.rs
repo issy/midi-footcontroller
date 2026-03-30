@@ -8,6 +8,8 @@
 #![deny(clippy::large_stack_frames)]
 
 extern crate alloc;
+mod midi;
+mod storage;
 
 include!(concat!(env!("OUT_DIR"), "/version.rs"));
 
@@ -22,44 +24,33 @@ use esp_alloc as _;
 )]
 use esp_backtrace as _;
 
+use crate::storage::FakeStorageManager;
+
 use core::cell::RefCell;
-use core::marker::PhantomData;
 use core::ops::Add;
 use core::str::FromStr;
 use embassy_embedded_hal::shared_bus::blocking::spi::SpiDevice;
-use embassy_executor::{Spawner, task};
-use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
-use embassy_sync::{
-    blocking_mutex::{Mutex, raw::NoopRawMutex},
-    channel::Channel,
-};
+use embassy_executor::Spawner;
+use embassy_sync::blocking_mutex::{Mutex, raw::NoopRawMutex};
 use embassy_time::Delay;
-use embassy_time::Timer;
 use embedded_graphics::draw_target::DrawTarget;
 use embedded_graphics::mono_font::{MonoTextStyleBuilder, ascii::FONT_10X20};
 use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::PrimitiveStyleBuilder;
 use embedded_graphics::text::{Alignment, Baseline, TextStyleBuilder};
 use embedded_graphics::{pixelcolor::Rgb565, text::Text};
-use esp_hal::Async;
 use esp_hal::clock::CpuClock;
 use esp_hal::gpio::{Level, Output, OutputConfig};
 use esp_hal::spi::master::Spi;
 use esp_hal::time::Rate;
 use esp_hal::timer::timg::TimerGroup;
-use esp_hal::uart::{
-    Config as UartConfig, DataBits, Parity, RxError, StopBits, TxError, Uart, UartRx, UartTx,
-};
-use esp_println::println;
+use esp_hal::uart::{Config as UartConfig, DataBits, Parity, StopBits, Uart};
+use foundation::application::channels;
+use foundation::application::state::ApplicationBuilder;
 use foundation::layout::DisplayLayout;
-use foundation::storage::StorageManager;
-use foundation::storage::state::Presets;
-use foundation::{
-    application::state::ApplicationBuilder,
-    midi::{MidiPacket, MidiParser, MidiReader, MidiWriter},
-};
 use heapless::String;
 use log::info;
+use midi::{UartMidiReader, UartMidiWriter};
 use mipidsi::models::ST7789;
 use mipidsi::options::Rotation::Deg270;
 use mipidsi::options::{ColorInversion, Orientation};
@@ -67,89 +58,6 @@ use mipidsi::options::{ColorInversion, Orientation};
 // This creates a default app-descriptor required by the esp-idf bootloader.
 // For more information see: <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/app_image_format.html#application-description>
 esp_bootloader_esp_idf::esp_app_desc!();
-
-static MIDI_OUT_CHANNEL: Channel<CriticalSectionRawMutex, MidiPacket, 128> = Channel::new();
-
-struct UartMidiReader<'a, 'b> {
-    uart: &'a mut UartRx<'b, Async>,
-    parser: MidiParser,
-}
-
-impl<'a, 'b> UartMidiReader<'a, 'b> {
-    fn new(uart: &'a mut UartRx<'b, Async>) -> Self {
-        Self {
-            uart,
-            parser: MidiParser::default(),
-        }
-    }
-}
-
-impl<'a, 'b> MidiReader for UartMidiReader<'a, 'b> {
-    type Error = RxError;
-
-    async fn read_midi_packet(&mut self) -> Result<Option<MidiPacket>, Self::Error> {
-        let mut buf = [0u8; 1];
-        self.uart.read_async(&mut buf).await?;
-
-        Ok(self.parser.feed(buf[0]))
-    }
-}
-
-struct UartMidiWriter<'a, 'b> {
-    uart: &'a mut UartTx<'b, Async>,
-}
-
-impl<'a, 'b> UartMidiWriter<'a, 'b> {
-    fn new(uart: &'a mut UartTx<'b, Async>) -> Self {
-        Self { uart }
-    }
-}
-
-impl<'a, 'b> MidiWriter for UartMidiWriter<'a, 'b> {
-    type Error = TxError;
-
-    async fn write_midi_packet(&mut self, packet: &MidiPacket) -> Result<(), Self::Error> {
-        self.uart
-            .write_async(&packet.data[..packet.len as usize])
-            .await?;
-        Ok(())
-    }
-}
-
-#[derive(Default)]
-struct FakeStorageManager<'a> {
-    phantom_data: PhantomData<&'a ()>,
-}
-
-impl<'a> StorageManager for FakeStorageManager<'a> {
-    fn load_presets(&self) -> Presets {
-        heapless::Vec::new()
-    }
-
-    fn save_presets(&mut self, _presets: &Presets) {
-        // Do nothing
-    }
-}
-
-/// Forward MIDI messages IN to the MIDI_OUT_CHANNEL
-#[task]
-async fn midi_thru_task(mut reader: UartMidiReader<'static, 'static>) {
-    loop {
-        if let Some(packet) = reader.read_midi_packet().await.unwrap() {
-            MIDI_OUT_CHANNEL.send(packet).await;
-        }
-    }
-}
-
-/// Read MIDI messages from the MIDI_OUT_CHANNEL and send them out over UART
-#[task]
-async fn midi_out_task(mut writer: UartMidiWriter<'static, 'static>) {
-    loop {
-        let packet = MIDI_OUT_CHANNEL.receive().await;
-        let res: Result<(), TxError> = writer.write_midi_packet(&packet).await;
-        res.unwrap();
-    }
-}
 
 #[allow(
     clippy::large_stack_frames,
@@ -259,15 +167,6 @@ async fn main(spawner: Spawner) -> ! {
     .into_async();
     let (mut rx, mut tx) = uart.split();
 
-    // spawner
-    //     .spawn(midi_thru_task(rx))
-    //     .expect("Unable to spawn MIDI thru task");
-    // info!("MIDI thru task spawned");
-    // spawner
-    //     .spawn(midi_out_task(tx))
-    //     .expect("Unable to spawn MIDI out task");
-    // info!("MIDI out task spawned");
-
     info!("Startup complete.");
 
     let mut midi_reader = UartMidiReader::new(&mut rx);
@@ -279,10 +178,15 @@ async fn main(spawner: Spawner) -> ! {
         .with_midi_reader(&mut midi_reader)
         .with_midi_writer(&mut midi_writer)
         .with_storage_manager(&mut storage_manager)
+        .with_channels(
+            &mut channels::MidiOutChannel::new(),
+            &mut channels::DisplayStateUpdateChannel::new(),
+            &mut channels::StorageStateUpdateChannel::new(),
+            &mut channels::ButtonEventChannel::new(),
+        )
         .build();
 
-    loop {
-        Timer::after_secs(5).await;
-        println!("Heartbeat");
-    }
+    // Start app tasks here
+
+    core::future::pending().await
 }

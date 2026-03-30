@@ -25,4 +25,34 @@ pub enum ButtonEvent {
 pub type ButtonEventChannel = Channel<CriticalSectionRawMutex, ButtonEvent, 16>;
 
 // TODO: Add channel for state updates
+pub enum StorageStateEvent {
+    PresetUpdate {
+        preset_name: DisplayText,
+        // Display 1
+        display_1_top_row_text: Option<DisplayText>,
+        display_1_top_row_color: Option<Colour>,
+        display_1_bottom_row_text: Option<DisplayText>,
+        display_1_bottom_row_color: Option<Colour>,
+        // Display 2
+        display_2_top_row_text: Option<DisplayText>,
+        display_2_top_row_color: Option<Colour>,
+        display_2_bottom_row_text: Option<DisplayText>,
+        display_2_bottom_row_color: Option<Colour>,
+        // Display 3
+        display_3_top_row_text: Option<DisplayText>,
+        display_3_top_row_color: Option<Colour>,
+        display_3_bottom_row_text: Option<DisplayText>,
+        display_3_bottom_row_color: Option<Colour>,
+        // Display 4
+        display_4_top_row_text: Option<DisplayText>,
+        display_4_top_row_color: Option<Colour>,
+        display_4_bottom_row_text: Option<DisplayText>,
+        display_4_bottom_row_color: Option<Colour>,
+        // TODO: Button actions
+    },
+    SavePreset,
+}
+
+pub type StorageStateUpdateChannel = Channel<CriticalSectionRawMutex, StorageStateEvent, 16>;
+
 // TODO: Add channel for button events

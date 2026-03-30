@@ -31,5 +31,6 @@ pub async fn display_task<
             3 => &mut display_4_layout,
             _ => continue, // Invalid display index, ignore the message
         };
+        // TODO: Update layout for display
     }
 }

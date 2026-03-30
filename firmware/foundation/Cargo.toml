@@ -2,7 +2,7 @@
 name = "foundation"
 version = "0.1.0"
 edition = "2024"
-rust-version = "1.88"
+rust-version = "1.94.0"
 
 [lib]
 name = "foundation"
@@ -11,5 +11,6 @@ path = "src/lib.rs"
 [dependencies]
 embedded-graphics = { version = "0.8.2" }
 prost = { version = "0.14.3", default-features = false, features = ["derive"] }
-heapless = { version = "0.9.2" }
+heapless = { version = "0.9.2", features = ["serde"] }
 embassy-sync = { version = "0.7.2", features = [] }
+serde = { version = "1.0.228", default-features = false, features = ["derive"] }

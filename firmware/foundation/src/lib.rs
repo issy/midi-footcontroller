@@ -12,3 +12,12 @@ pub mod layout;
 pub mod midi;
 pub mod protocol;
 pub mod storage;
+
+/// A trait for types that can be converted to and from another type `T`
+pub trait Convertible<T>: Sized {
+    /// Convert `Self` into `T`
+    fn to(self) -> T;
+
+    /// Convert `T` into `Self`
+    fn from(value: T) -> Self;
+}

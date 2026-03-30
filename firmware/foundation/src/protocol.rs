@@ -1,7 +1,10 @@
+use crate::generated::device_v1 as pb;
+use crate::generated::device_v1::Envelope;
+use crate::midi::MidiPacket;
 use alloc::string::String;
 use alloc::vec::Vec;
-
-use crate::generated::device_v1 as pb;
+use core::fmt::Debug;
+use serde::{Deserialize, Serialize};
 
 const PROTOCOL_VERSION: u32 = 1;
 
@@ -22,10 +25,11 @@ pub struct Capabilities {
 
 #[derive(Debug)]
 pub struct MidiCommand {
+    // TODO: Fix
     placeholder: String,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub enum Colour {
     Red = 1,
     Green = 2,
@@ -175,5 +179,145 @@ impl Message {
             Some(pb::envelope::Payload::Ack(ack)) => Some(Message::Ack(ack.id)),
             _ => None,
         }
+    }
+}
+
+enum RxState {
+    ReadingLength,
+    ReadingPayload { len: usize, buf: Vec<u8> },
+}
+
+enum ReadError {
+    ErrorReadingLength,
+    ErrorReadingPayload,
+}
+
+trait ProtocolReader {
+    /// Asynchronously read a payload, returning None if the stream ends
+    fn read_payload(&mut self) -> impl Future<Output = Result<Option<pb::Envelope>, ReadError>>;
+}
+
+enum ParseState {
+    Idle,
+    ReadingLength,
+    ReadingPayload,
+}
+
+struct ProtocolParser {
+    state: Option<ParseState>,
+    data: Vec<u8>,
+    index: usize,
+}
+
+struct DefaultProtocolReader {
+    parser: ProtocolParser,
+}
+
+impl ProtocolReader for DefaultProtocolReader {
+    async fn read_payload(&mut self) -> Result<Option<Envelope>, ReadError> {
+        Ok(None)
+    }
+}
+
+/// Slop
+
+/// CRC8 using a simple polynomial
+fn crc8(data: &[u8]) -> u8 {
+    let mut crc = 0u8;
+    for &b in data {
+        crc ^= b;
+        for _ in 0..8 {
+            crc = if (crc & 0x80) != 0 {
+                crc << 1 ^ 0x07
+            } else {
+                crc << 1
+            };
+        }
+    }
+    crc
+}
+
+pub struct FrameDecoder<const N: usize> {
+    state: State,
+    len_buf: [u8; 2],
+    len_pos: usize,
+    payload: [u8; N],
+    payload_pos: usize,
+    expected_len: usize,
+}
+
+#[derive(Debug)]
+enum State {
+    Sync1,
+    Sync2,
+    Len,
+    Payload,
+    Crc,
+}
+
+impl<const N: usize> FrameDecoder<N> {
+    pub const fn new() -> Self {
+        Self {
+            state: State::Sync1,
+            len_buf: [0; 2],
+            len_pos: 0,
+            payload: [0; N],
+            payload_pos: 0,
+            expected_len: 0,
+        }
+    }
+
+    /// Push a single byte
+    /// Returns Some(&payload) when a full valid frame is received
+    pub fn push(&mut self, byte: u8) -> Option<&[u8]> {
+        match self.state {
+            State::Sync1 => {
+                if byte == 0xAA {
+                    self.state = State::Sync2;
+                }
+            }
+            State::Sync2 => {
+                if byte == 0x55 {
+                    self.state = State::Len;
+                    self.len_pos = 0;
+                } else {
+                    // Stay in sync1 if second header byte fails
+                    self.state = State::Sync1;
+                }
+            }
+            State::Len => {
+                self.len_buf[self.len_pos] = byte;
+                self.len_pos += 1;
+                if self.len_pos == 2 {
+                    self.expected_len = u16::from_le_bytes(self.len_buf) as usize;
+                    if self.expected_len == 0 || self.expected_len > N {
+                        // Invalid length - resync
+                        self.state = State::Sync1;
+                    } else {
+                        self.payload_pos = 0;
+                        self.state = State::Payload;
+                    }
+                }
+            }
+            State::Payload => {
+                self.payload[self.payload_pos] = byte;
+                self.payload_pos += 1;
+                if self.payload_pos == self.expected_len {
+                    self.state = State::Crc;
+                }
+            }
+            State::Crc => {
+                let calc_crc = crc8(&self.payload[..self.expected_len]);
+                if calc_crc == byte {
+                    // Success
+                    self.state = State::Sync1;
+                    return Some(&self.payload[..self.expected_len]);
+                } else {
+                    // CRC failed - discard frame
+                    self.state = State::Sync1;
+                }
+            }
+        }
+        None
     }
 }

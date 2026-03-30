@@ -17,6 +17,7 @@ local web = new Group {
           "**/*.js",
           "**/*.ts",
           "**/*.tsx",
+          "wrangler.jsonc",
         )
       batch = true
       depends = List("eslint")

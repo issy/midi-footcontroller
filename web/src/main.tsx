@@ -16,7 +16,7 @@ if (!rootElement) throw new Error('root element not found');
 createRoot(rootElement).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter basename="midi-footcontroller">
+      <BrowserRouter>
         <MantineProvider theme={theme} defaultColorScheme="auto">
           <App />
         </MantineProvider>

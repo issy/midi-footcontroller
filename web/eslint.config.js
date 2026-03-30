@@ -21,6 +21,11 @@ export default defineConfig([
       tseslint.configs.recommendedTypeChecked,
       tseslint.configs.strictTypeChecked,
       tseslint.configs.stylisticTypeChecked,
+      {
+        rules: {
+          '@typescript-eslint/array-type': ['error', { default: 'generic' }],
+        },
+      },
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
       reactX.configs['recommended-typescript'],

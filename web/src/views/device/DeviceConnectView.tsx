@@ -1,16 +1,24 @@
-import { Button } from '@headlessui/react';
+import { useConnectionManagerContext } from '@/views/device/connection-manager/context';
+import { AppShell, Text } from '@mantine/core';
 
+// TODO: This should just show a big error state that the device is not connected
 function DeviceConnectView() {
+  const conn = useConnectionManagerContext();
+
   return (
-    <div>
-      <Button
-        onClick={() => {
-          console.log('connect me');
-        }}
-      >
-        Connect
-      </Button>
-    </div>
+    <AppShell.Main>
+      <div>
+        {conn.isConnected ? (
+          <div>
+            <Text>Connected</Text>
+          </div>
+        ) : (
+          <div>
+            <Text>Disconnected</Text>
+          </div>
+        )}
+      </div>
+    </AppShell.Main>
   );
 }
 

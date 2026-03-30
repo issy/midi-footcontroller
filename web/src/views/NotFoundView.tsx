@@ -1,5 +1,6 @@
 import { Link } from 'react-router';
 
+// TODO: Replace this with one of the mantine UI views
 function NotFoundView() {
   return (
     <div className="min-h-screen flex items-center justify-center px-6">

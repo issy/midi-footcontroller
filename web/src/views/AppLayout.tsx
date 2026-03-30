@@ -1,10 +1,11 @@
+import { AppShell } from '@mantine/core';
 import { Outlet } from 'react-router';
 
 function AppLayout() {
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <AppShell header={{ height: 60 }} navbar={{ width: '300', breakpoint: 'sm', collapsed: { desktop: false } }} padding="md">
       <Outlet />
-    </div>
+    </AppShell>
   );
 }
 

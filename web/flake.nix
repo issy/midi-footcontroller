@@ -42,8 +42,10 @@
             pnpm
           ];
           shellHook = ''
-          echo "📦 Installing dependencies..."
+          echo "  📦 Installing dependencies..."
           pnpm install --frozen-lockfile --quiet
+          echo "  ✅ Dependencies installed."
+          echo ""
           '';
         };
       }

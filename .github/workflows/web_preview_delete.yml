@@ -2,11 +2,10 @@ name: Web / Tidy Up Preview Deployments
 
 on:
   delete:
-  push:
 
 jobs:
   delete-preview-deployments:
-    # if: ${{ github.event.ref_type == 'branch' }}
+    if: ${{ github.event.ref_type == 'branch' }}
     runs-on: ubuntu-latest
     steps:
       - name: Delete Preview Deployments
@@ -23,8 +22,6 @@ jobs:
           gh_branch_name=${{ github.event.ref }}
 
           echo "Deleting deployments on branch: $gh_branch_name"
-          echo "$response"
-          exit 0
 
           while [ $page -gt 1 ]; do
             echo "Processing page: $page"

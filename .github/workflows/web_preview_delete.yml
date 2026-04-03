@@ -23,7 +23,7 @@ jobs:
 
           echo "Deleting deployments on branch: $gh_branch_name"
 
-          while [ $page -gt 1 ]; do
+          while [ $page -gt 0 ]; do
             echo "Processing page: $page"
             response=$(curl -s -H "Authorization: Bearer $API_TOKEN" "$API_URL?page=$page&per_page=25")
             echo "$response" | jq -c '.result[] | {id: .id, branch: .branch}' | while read -r dep; do

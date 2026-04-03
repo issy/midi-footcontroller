@@ -29,7 +29,8 @@ jobs:
             echo "$response" | jq -c '.result[] | {id: .id, branch: .branch}' | while read -r dep; do
               dep_id=$(echo "$dep" | jq -r '.id')
               dep_branch=$(echo "$dep" | jq -r '.branch')
-              if [[ "$dep_branch" == "$gh_branch_name" ]]; then
+              dep_environment=$(echo "$dep" | jq -r '.environment')
+              if [[ "$dep_branch" == "$gh_branch_name" && "$dep_environment" == "preview" ]]; then
                 echo "Deleting deployment $dep_id on $dep_branch"
                 curl -s -X DELETE -H "Authorization: Bearer $API_TOKEN" "$API_URL/$dep_id"
               fi

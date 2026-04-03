@@ -1,0 +1,23 @@
+name: Web
+on:
+  delete:
+
+jobs:
+  delete-preview-deployments:
+    if: ${{ github.event.ref_type == 'branch' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Delete Preview Deployments
+        uses: cloudflare/wrangler-action@v3
+        with:
+          workingDirectory: web
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          apiToken: ${{ secrets.CLOUDFLARE_PAGES_API_KEY }}
+          command: pages deployment list --project-name=midi-footcontroller --environment=preview --json | jq -r '.[] | select(.Branch == "${{ github.event }}") | .Id' | xargs npx wrangler pages deployment delete

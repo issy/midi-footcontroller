@@ -1,11 +1,11 @@
-name: Web
+name: Web / Tidy Up Preview Deployments
+
 on:
   delete:
 
 jobs:
   delete-preview-deployments:
     if: ${{ github.event.ref_type == 'branch' }}
-    name: Delete Preview Deployments
     runs-on: ubuntu-latest
     steps:
       - name: Delete Preview Deployments

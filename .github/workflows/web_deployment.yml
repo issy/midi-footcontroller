@@ -1,4 +1,4 @@
-name: Web
+name: Web / Deploy
 
 on:
   push:
@@ -6,8 +6,7 @@ on:
       - main
 
 jobs:
-  production-deploy:
-    name: Deploy
+  deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: read

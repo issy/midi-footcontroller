@@ -1,5 +1,5 @@
 import classes from './HomePage.module.scss';
-import { Container, Flex, Title } from '@mantine/core';
+import { Container, Flex, Text } from '@mantine/core';
 
 export function HomePage() {
   return (
@@ -7,7 +7,10 @@ export function HomePage() {
       <Container size="xl">
         <Flex justify="space-between" gap="lg">
           <div className={classes.heroSection}>
-            <Title className={classes.title}>MIDI-X</Title>
+            <h1 className={classes.title}>MIDI-X</h1>
+            <Text c="dimmed" size="xl">
+              A completely configurable MIDI controller built for the stage
+            </Text>
           </div>
         </Flex>
       </Container>

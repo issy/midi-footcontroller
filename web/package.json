@@ -10,9 +10,7 @@
     "lint": "eslint .",
     "prettier": "prettier --write .",
     "prettier:ci": "prettier --check .",
-    "typecheck": "tsc",
-    "preview": "pnpm run build && wrangler pages dev",
-    "deploy": "pnpm run build && wrangler pages deploy"
+    "typecheck": "tsc"
   },
   "dependencies": {
     "@bufbuild/protobuf": "^2.11.0",

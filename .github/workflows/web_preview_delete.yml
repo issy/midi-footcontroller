@@ -21,6 +21,9 @@ jobs:
           page=$total_pages
           gh_branch_name=${{ github.event.ref }}
 
+          echo "Deleting deployments on branch: $gh_branch_name"
+          exit 0
+
           while [ $page -gt 1 ]; do
             echo "Processing page: $page"
             response=$(curl -s -H "Authorization: Bearer $API_TOKEN" "$API_URL?page=$page&per_page=25")

@@ -15,11 +15,14 @@ export function HomePage() {
             </Text>
             <Flex gap="md">
               <Button size="lg" variant="gradient" gradient={{ from: 'indigo', to: 'blueviolet', deg: 20 }}>
-                Learn more
+                Open Editor
+              </Button>
+              <Button size="lg" variant="light" color="gray">
+                Learn More
               </Button>
               <Button
                 size="lg"
-                variant="light"
+                variant="outline"
                 color="gray"
                 leftSection={<FaGithub size={28} />}
                 rightSection={<MdOpenInNew />}

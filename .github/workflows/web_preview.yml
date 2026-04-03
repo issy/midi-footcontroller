@@ -1,13 +1,15 @@
 name: Web
 
 on:
-  push:
-    branches:
-      - main
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
 
 jobs:
-  production-deploy:
-    name: Deploy
+  preview-deploy:
+    name: Preview
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -37,11 +39,11 @@ jobs:
       - name: Build project
         run: pnpm build
 
-      - name: Deploy
+      - name: Deploy Preview
         uses: cloudflare/wrangler-action@v3
         with:
           workingDirectory: web
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           apiToken: ${{ secrets.CLOUDFLARE_PAGES_API_KEY }}
-          command: pages deploy dist --project-name=midi-footcontroller
+          command: pages deploy dist --project-name=midi-footcontroller --branch=${{ github.head_ref }}
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,18 @@
+.container {
+  height: 100vh;
+  padding: 5rem;
+}
+
+.heroSection {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border: solid 1px red;
+}
+
+.title {
+  font-size: 72px;
+  background: -webkit-linear-gradient(var(--mantine-color-indigo-3), var(--mantine-color-blue-5), var(--mantine-color-teal-3));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

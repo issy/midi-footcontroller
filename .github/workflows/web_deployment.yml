@@ -49,7 +49,7 @@ jobs:
           gitHubToken: ${{ secrets.GITHUB_TOKEN }}
 
   preview-deploy:
-    name: Deploy (Preview)
+    name: Preview
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' && github.ref != 'refs/heads/main'
     permissions:
@@ -80,7 +80,7 @@ jobs:
       - name: Build project
         run: pnpm build
 
-      - name: Deploy
+      - name: Deploy Preview
         uses: cloudflare/wrangler-action@v3
         with:
           workingDirectory: web

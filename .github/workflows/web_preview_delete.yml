@@ -5,19 +5,37 @@ on:
 jobs:
   delete-preview-deployments:
     if: ${{ github.event.ref_type == 'branch' }}
+    name: Delete Preview Deployments
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    defaults:
-      run:
-        working-directory: web
     steps:
-      - uses: actions/checkout@v6
-
       - name: Delete Preview Deployments
-        uses: cloudflare/wrangler-action@v3
-        with:
-          workingDirectory: web
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          apiToken: ${{ secrets.CLOUDFLARE_PAGES_API_KEY }}
-          command: pages deployment list --project-name=midi-footcontroller --environment=preview --json | jq -r '.[] | select(.Branch == "${{ github.event }}") | .Id' | xargs npx wrangler pages deployment delete
+        env:
+          ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          PROJECT_NAME: ${{ secrets.CLOUDFLARE_PROJECT_NAME }}
+          API_TOKEN: ${{ secrets.CLOUDFLARE_PAGES_API_KEY }}
+        run: |
+          API_URL="https://api.cloudflare.com/client/v4/accounts/$ACCOUNT_ID/pages/projects/$PROJECT_NAME/deployments"
+          response=$(curl -s -H "Authorization: Bearer $API_TOKEN" "$API_URL?page=1&per_page=25")
+          total_pages=$(echo "$response" | jq '.result_info.total_pages')
+          echo "Total pages: $total_pages"
+          page=$total_pages
+          gh_branch_name=${{ github.event.ref }}
+
+          echo "Deleting deployments on branch: $gh_branch_name"
+          exit 0
+
+          while [ $page -gt 1 ]; do
+            echo "Processing page: $page"
+            response=$(curl -s -H "Authorization: Bearer $API_TOKEN" "$API_URL?page=$page&per_page=25")
+            echo "$response" | jq -c '.result[] | {id: .id, branch: .branch}' | while read -r dep; do
+              dep_id=$(echo "$dep" | jq -r '.id')
+              dep_branch=$(echo "$dep" | jq -r '.branch')
+              if [[ "$dep_branch" == "$gh_branch_name" ]]; then
+                echo "Deleting deployment $dep_id on $dep_branch"
+                curl -s -X DELETE -H "Authorization: Bearer $API_TOKEN" "$API_URL/$dep_id"
+              fi
+            done
+            page=$((page-1))
+          done
+
+          echo "Done!"

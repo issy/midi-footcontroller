@@ -15,6 +15,7 @@ function DeviceConnectView() {
         ) : (
           <div>
             <Text>Disconnected</Text>
+            <Text>Testing!!!</Text>
           </div>
         )}
       </div>

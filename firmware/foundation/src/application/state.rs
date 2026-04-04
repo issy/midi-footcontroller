@@ -77,6 +77,13 @@ impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: Stor
             storage_manager,
         }
     }
+
+    pub async fn midi_thru_task(&mut self) {
+        if let Some(packet) = self.midi_streams.reader.read_midi_packet().await.unwrap() {
+            // TODO: If we decide to support MIDI command input in future, this would be a good place to process those
+            self.channels.midi_out.send(packet).await;
+        }
+    }
 }
 
 #[derive(Default)]

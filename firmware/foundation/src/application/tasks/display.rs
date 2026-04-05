@@ -15,12 +15,13 @@ pub async fn display_task<
     SM: StorageManager,
 >(
     channel: DisplayStateUpdateChannel,
-    application: Application<'a, D, MR, MW, SM>,
+    mut application: Application<'a, D, MR, MW, SM>,
 ) -> ! {
-    let mut display_1_layout = DisplayLayout::new(application.displays.display_1);
-    let mut display_2_layout = DisplayLayout::new(application.displays.display_2);
-    let mut display_3_layout = DisplayLayout::new(application.displays.display_3);
-    let mut display_4_layout = DisplayLayout::new(application.displays.display_4);
+    let displays = application.displays.get_mut();
+    let mut display_1_layout = DisplayLayout::new(displays.display_1);
+    let mut display_2_layout = DisplayLayout::new(displays.display_2);
+    let mut display_3_layout = DisplayLayout::new(displays.display_3);
+    let mut display_4_layout = DisplayLayout::new(displays.display_4);
 
     loop {
         let update_message = channel.receive().await;

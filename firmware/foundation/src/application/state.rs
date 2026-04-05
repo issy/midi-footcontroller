@@ -3,6 +3,8 @@ use crate::application::channels::{
 };
 use crate::midi::{MidiReader, MidiWriter};
 use crate::storage::StorageManager;
+use embassy_sync::blocking_mutex::raw::NoopRawMutex;
+use embassy_sync::mutex::Mutex;
 use embedded_graphics::draw_target::DrawTarget;
 use embedded_graphics::pixelcolor::Rgb565;
 
@@ -14,8 +16,8 @@ pub(crate) struct Displays<'a, D: DrawTarget<Color = Rgb565>> {
 }
 
 pub(crate) struct MidiStreams<'a, MR: MidiReader, MW: MidiWriter> {
-    reader: &'a mut MR,
-    writer: &'a mut MW,
+    reader: Mutex<NoopRawMutex, &'a mut MR>,
+    writer: Mutex<NoopRawMutex, &'a mut MW>,
 }
 
 pub(crate) struct InternalChannels<'a> {
@@ -32,7 +34,7 @@ pub struct Application<
     MW: MidiWriter,
     SM: StorageManager,
 > {
-    pub(crate) displays: Displays<'a, D>,
+    pub(crate) displays: Mutex<NoopRawMutex, Displays<'a, D>>,
     pub(crate) midi_streams: MidiStreams<'a, MR, MW>,
     pub(crate) channels: InternalChannels<'a>,
     pub(crate) storage_manager: &'a mut SM,
@@ -58,15 +60,15 @@ impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: Stor
     ) -> Self {
         // Maybe a good idea to create the channels here?
         Self {
-            displays: Displays {
+            displays: Mutex::new(Displays {
                 display_1,
                 display_2,
                 display_3,
                 display_4,
-            },
+            }),
             midi_streams: MidiStreams {
-                reader: midi_reader,
-                writer: midi_writer,
+                reader: Mutex::new(midi_reader),
+                writer: Mutex::new(midi_writer),
             },
             channels: InternalChannels {
                 midi_out: midi_out_channel,
@@ -79,7 +81,15 @@ impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: Stor
     }
 
     pub async fn midi_thru_task(&mut self) {
-        if let Some(packet) = self.midi_streams.reader.read_midi_packet().await.unwrap() {
+        if let Some(packet) = self
+            .midi_streams
+            .reader
+            .lock()
+            .await
+            .read_midi_packet()
+            .await
+            .unwrap()
+        {
             // TODO: If we decide to support MIDI command input in future, this would be a good place to process those
             self.channels.midi_out.send(packet).await;
         }
@@ -89,6 +99,8 @@ impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: Stor
         let packet = self.channels.midi_out.receive().await;
         self.midi_streams
             .writer
+            .lock()
+            .await
             .write_midi_packet(&packet)
             .await
             .unwrap();

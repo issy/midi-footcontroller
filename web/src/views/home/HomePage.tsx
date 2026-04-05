@@ -4,7 +4,7 @@ import { FaGithub } from 'react-icons/fa6';
 import { MdOpenInNew } from 'react-icons/md';
 import { Fragment } from 'react';
 import ColourSchemeButton from '@/components/ColourSchemeButton';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 
 export function HomePage() {
   const { defaultGradient } = useSafeMantineTheme();
@@ -13,7 +13,11 @@ export function HomePage() {
   return (
     <Fragment>
       <AppShell.Header>
-        <Group h="100%" px="md" justify="end">
+        <Group h="100%" px="md" justify="space-between">
+          <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <Text size="xl">Header</Text>
+          </Link>
+
           <Group>
             <Button
               onClick={() => {

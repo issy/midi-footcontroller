@@ -84,6 +84,15 @@ impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: Stor
             self.channels.midi_out.send(packet).await;
         }
     }
+
+    pub async fn midi_out_task(&mut self) {
+        let packet = self.channels.midi_out.receive().await;
+        self.midi_streams
+            .writer
+            .write_midi_packet(&packet)
+            .await
+            .unwrap();
+    }
 }
 
 #[derive(Default)]

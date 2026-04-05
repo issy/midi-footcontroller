@@ -20,11 +20,11 @@ pub(crate) struct MidiStreams<'a, MR: MidiReader, MW: MidiWriter> {
     writer: Mutex<NoopRawMutex, &'a mut MW>,
 }
 
-pub(crate) struct InternalChannels<'a> {
-    midi_out: &'a mut MidiOutChannel,
-    display_state_update: &'a mut DisplayStateUpdateChannel,
-    storage_state_update: &'a mut StorageStateUpdateChannel,
-    button_event: &'a mut ButtonEventChannel,
+pub(crate) struct InternalChannels {
+    midi_out: MidiOutChannel,
+    display_state_update: DisplayStateUpdateChannel,
+    storage_state_update: StorageStateUpdateChannel,
+    button_event: ButtonEventChannel,
 }
 
 pub struct Application<
@@ -36,7 +36,7 @@ pub struct Application<
 > {
     pub(crate) displays: Mutex<NoopRawMutex, Displays<'a, D>>,
     pub(crate) midi_streams: MidiStreams<'a, MR, MW>,
-    pub(crate) channels: InternalChannels<'a>,
+    pub(crate) channels: InternalChannels,
     pub(crate) storage_manager: &'a mut SM,
     // TODO: Add protocol streams
     // TODO: Add buttons
@@ -53,12 +53,7 @@ impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: Stor
         midi_reader: &'a mut MR,
         midi_writer: &'a mut MW,
         storage_manager: &'a mut SM,
-        midi_out_channel: &'a mut MidiOutChannel,
-        display_state_update_channel: &'a mut DisplayStateUpdateChannel,
-        storage_state_update_channel: &'a mut StorageStateUpdateChannel,
-        button_event_channel: &'a mut ButtonEventChannel,
     ) -> Self {
-        // Maybe a good idea to create the channels here?
         Self {
             displays: Mutex::new(Displays {
                 display_1,
@@ -71,10 +66,10 @@ impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: Stor
                 writer: Mutex::new(midi_writer),
             },
             channels: InternalChannels {
-                midi_out: midi_out_channel,
-                display_state_update: display_state_update_channel,
-                storage_state_update: storage_state_update_channel,
-                button_event: button_event_channel,
+                midi_out: MidiOutChannel::new(),
+                display_state_update: DisplayStateUpdateChannel::new(),
+                storage_state_update: StorageStateUpdateChannel::new(),
+                button_event: ButtonEventChannel::new(),
             },
             storage_manager,
         }
@@ -122,10 +117,6 @@ pub struct ApplicationBuilder<
     midi_reader: Option<&'a mut MR>,
     midi_writer: Option<&'a mut MW>,
     storage_manager: Option<&'a mut SM>,
-    midi_out_channel: Option<&'a mut MidiOutChannel>,
-    display_state_update_channel: Option<&'a mut DisplayStateUpdateChannel>,
-    storage_state_update_channel: Option<&'a mut StorageStateUpdateChannel>,
-    button_event_channel: Option<&'a mut ButtonEventChannel>,
 }
 
 impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: StorageManager>
@@ -139,11 +130,7 @@ impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: Stor
             display_4: None,
             midi_reader: None,
             midi_writer: None,
-            midi_out_channel: None,
-            display_state_update_channel: None,
-            storage_state_update_channel: None,
             storage_manager: None,
-            button_event_channel: None,
         }
     }
 
@@ -172,20 +159,6 @@ impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: Stor
         self
     }
 
-    pub fn with_channels(
-        mut self,
-        midi_out_channel: &'a mut MidiOutChannel,
-        display_state_update_channel: &'a mut DisplayStateUpdateChannel,
-        storage_state_update_channel: &'a mut StorageStateUpdateChannel,
-        button_event_channel: &'a mut ButtonEventChannel,
-    ) -> Self {
-        self.midi_out_channel = Some(midi_out_channel);
-        self.display_state_update_channel = Some(display_state_update_channel);
-        self.storage_state_update_channel = Some(storage_state_update_channel);
-        self.button_event_channel = Some(button_event_channel);
-        self
-    }
-
     pub fn with_storage_manager(mut self, manager: &'a mut SM) -> Self {
         self.storage_manager = Some(manager);
         self
@@ -200,13 +173,6 @@ impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: Stor
             self.midi_reader.expect("MIDI reader is required"),
             self.midi_writer.expect("MIDI writer is required"),
             self.storage_manager.expect("Storage manager is required"),
-            self.midi_out_channel.expect("MIDI out channel required"),
-            self.display_state_update_channel
-                .expect("Display state update channel required"),
-            self.storage_state_update_channel
-                .expect("Storage state update channel required"),
-            self.button_event_channel
-                .expect("Button event channel required"),
         )
     }
 }

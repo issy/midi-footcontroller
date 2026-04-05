@@ -47,7 +47,6 @@ use esp_hal::spi::master::Spi;
 use esp_hal::time::Rate;
 use esp_hal::timer::timg::TimerGroup;
 use esp_hal::uart::{Config as UartConfig, DataBits, Parity, StopBits, Uart};
-use foundation::application::channels;
 use foundation::application::state::{Application, ApplicationBuilder};
 use foundation::layout::DisplayLayout;
 use heapless::String;
@@ -201,23 +200,12 @@ async fn main(spawner: Spawner) -> ! {
     let mut midi_writer = UartMidiWriter::new(&mut tx);
     let mut storage_manager = FakeStorageManager::default();
 
-    let mut midi_out_channel = channels::MidiOutChannel::new();
-    let mut display_state_update_channel = channels::DisplayStateUpdateChannel::new();
-    let mut storage_state_update_channel = channels::StorageStateUpdateChannel::new();
-    let mut button_event_channel = channels::ButtonEventChannel::new();
-
     let app = APP.init(
         ApplicationBuilder::new()
             .with_display(&mut display)
             .with_midi_reader(&mut midi_reader)
             .with_midi_writer(&mut midi_writer)
             .with_storage_manager(&mut storage_manager)
-            .with_channels(
-                &mut midi_out_channel,
-                &mut display_state_update_channel,
-                &mut storage_state_update_channel,
-                &mut button_event_channel,
-            )
             .build(),
     );
 

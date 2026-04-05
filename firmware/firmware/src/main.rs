@@ -29,7 +29,6 @@ use crate::storage::FakeStorageManager;
 use core::cell::RefCell;
 use core::ops::Add;
 use core::str::FromStr;
-use display_interface_spi::SPIInterface;
 use embassy_embedded_hal::shared_bus::blocking::spi::SpiDevice;
 use embassy_executor::Spawner;
 use embassy_sync::blocking_mutex::{Mutex, raw::NoopRawMutex};
@@ -40,14 +39,14 @@ use embedded_graphics::prelude::*;
 use embedded_graphics::primitives::PrimitiveStyleBuilder;
 use embedded_graphics::text::{Alignment, Baseline, TextStyleBuilder};
 use embedded_graphics::{pixelcolor::Rgb565, text::Text};
-use esp_hal::Blocking;
 use esp_hal::clock::CpuClock;
 use esp_hal::gpio::{Level, Output, OutputConfig};
 use esp_hal::spi::master::Spi;
 use esp_hal::time::Rate;
 use esp_hal::timer::timg::TimerGroup;
 use esp_hal::uart::{Config as UartConfig, DataBits, Parity, StopBits, Uart};
-use foundation::application::state::{Application, ApplicationBuilder};
+use foundation::application::channels;
+use foundation::application::state::ApplicationBuilder;
 use foundation::layout::DisplayLayout;
 use heapless::String;
 use log::info;
@@ -55,32 +54,6 @@ use midi::{UartMidiReader, UartMidiWriter};
 use mipidsi::models::ST7789;
 use mipidsi::options::Rotation::Deg270;
 use mipidsi::options::{ColorInversion, Orientation};
-use mipidsi::{Display, NoResetPin};
-use static_cell::StaticCell;
-
-type FirmwareApplication = Application<
-    'static,
-    Display<
-        SPIInterface<
-            SpiDevice<'static, NoopRawMutex, Spi<'static, Blocking>, Output<'static>>,
-            Output<'static>,
-        >,
-        ST7789,
-        NoResetPin,
-    >,
-    UartMidiReader<'static, 'static>,
-    UartMidiWriter<'static, 'static>,
-    FakeStorageManager,
->;
-
-static APP: StaticCell<FirmwareApplication> = StaticCell::new();
-
-#[embassy_executor::task]
-async fn midi_thru_task(app: &'static mut FirmwareApplication) -> ! {
-    loop {
-        app.midi_thru_task().await;
-    }
-}
 
 // This creates a default app-descriptor required by the esp-idf bootloader.
 // For more information see: <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/app_image_format.html#application-description>
@@ -200,17 +173,20 @@ async fn main(spawner: Spawner) -> ! {
     let mut midi_writer = UartMidiWriter::new(&mut tx);
     let mut storage_manager = FakeStorageManager::default();
 
-    let app = APP.init(
-        ApplicationBuilder::new()
-            .with_display(&mut display)
-            .with_midi_reader(&mut midi_reader)
-            .with_midi_writer(&mut midi_writer)
-            .with_storage_manager(&mut storage_manager)
-            .build(),
-    );
+    let app = ApplicationBuilder::new()
+        .with_display(&mut display)
+        .with_midi_reader(&mut midi_reader)
+        .with_midi_writer(&mut midi_writer)
+        .with_storage_manager(&mut storage_manager)
+        .with_channels(
+            &mut channels::MidiOutChannel::new(),
+            &mut channels::DisplayStateUpdateChannel::new(),
+            &mut channels::StorageStateUpdateChannel::new(),
+            &mut channels::ButtonEventChannel::new(),
+        )
+        .build();
 
     // Start app tasks here
-    spawner.spawn(midi_thru_task(app)).unwrap();
 
     core::future::pending().await
 }

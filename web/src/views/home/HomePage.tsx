@@ -39,7 +39,14 @@ export function HomePage() {
                 A completely configurable MIDI controller built for the stage
               </Text>
               <Flex gap="md">
-                <Button size="lg" variant="gradient" gradient={defaultGradient}>
+                <Button
+                  size="lg"
+                  variant="gradient"
+                  gradient={defaultGradient}
+                  onClick={() => {
+                    void navigate('/device');
+                  }}
+                >
                   Open Editor
                 </Button>
                 <Button size="lg" variant="light">

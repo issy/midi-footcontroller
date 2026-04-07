@@ -8,7 +8,7 @@ function DeviceEditorPresetRedirect() {
     return null;
   }
 
-  return <Navigate to={presets[0].id} />;
+  return <Navigate to={presets[0].id} replace />;
 }
 
 export default DeviceEditorPresetRedirect;

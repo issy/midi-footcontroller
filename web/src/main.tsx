@@ -8,7 +8,9 @@ import '@mantine/core/styles.css';
 
 const queryClient = new QueryClient();
 
-const theme = createTheme({});
+const theme = createTheme({
+  primaryColor: 'indigo',
+});
 
 const rootElement = document.getElementById('root');
 if (!rootElement) throw new Error('root element not found');

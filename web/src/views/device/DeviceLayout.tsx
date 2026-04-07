@@ -1,9 +1,9 @@
-import { Outlet } from 'react-router';
+import { Link, Outlet } from 'react-router';
 import ConnectionManagerProvider from '@/views/device/connection-manager/ConnectionManagerProvider';
 import { ActionIcon, AppShell, Button, Group, Menu, Stack, Text } from '@mantine/core';
 import ColourSchemeButton from '@/components/ColourSchemeButton';
 import { type ConnectionManager, useConnectionManagerContext } from '@/views/device/connection-manager/context';
-import { MdArrowDropDown, MdCode, MdOutlineUsb, MdOutlineUsbOff, MdDownload } from 'react-icons/md';
+import { MdArrowDropDown, MdCode, MdDownload, MdOutlineUsb, MdOutlineUsbOff } from 'react-icons/md';
 import { useMutation } from '@tanstack/react-query';
 import classes from './DeviceLayout.module.scss';
 
@@ -111,7 +111,11 @@ function DeviceLayout() {
     <ConnectionManagerProvider>
       <AppShell.Header>
         <Group h="100%" px="md" justify="space-between">
-          Header
+          <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <Text size="xl" fw={900} variant="gradient" gradient={{ from: 'indigo', to: 'violet' }}>
+              MIDI-X
+            </Text>
+          </Link>
           <Group>
             <UpdateStatus />
             <ConnectionStatus />

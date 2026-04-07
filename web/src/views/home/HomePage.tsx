@@ -42,8 +42,7 @@ export function HomePage() {
               <Flex gap="md">
                 <Button
                   size="lg"
-                  variant="gradient"
-                  gradient={{ from: 'violet', to: 'indigo', deg: 45 }}
+                  variant="filled"
                   onClick={() => {
                     void navigate('/device');
                   }}

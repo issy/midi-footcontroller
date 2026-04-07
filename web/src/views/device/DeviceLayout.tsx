@@ -112,7 +112,9 @@ function DeviceLayout() {
       <AppShell.Header>
         <Group h="100%" px="md" justify="space-between">
           <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <Text size="xl">Header</Text>
+            <Text size="xl" fw={900} variant="gradient" gradient={{ from: 'indigo', to: 'violet' }}>
+              MIDI-X
+            </Text>
           </Link>
           <Group>
             <UpdateStatus />

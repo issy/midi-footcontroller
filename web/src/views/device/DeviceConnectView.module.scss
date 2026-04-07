@@ -1,0 +1,17 @@
+.container {
+  height: 100vh;
+  align-content: center;
+}
+
+.containerInner {
+  margin: 0 auto;
+}
+
+.disconnectedIcon {
+  width: 100%;
+  color: var(--mantine-color-red-text);
+}
+
+.disconnectedText {
+  color: var(--mantine-color-red-text);
+}

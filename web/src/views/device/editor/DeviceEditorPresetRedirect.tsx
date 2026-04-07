@@ -1,7 +1,14 @@
 import { Navigate } from 'react-router';
+import usePresets from '@/views/device/editor/use-presets';
 
 function DeviceEditorPresetRedirect() {
-  return <Navigate to="foo" />;
+  const { data: presets } = usePresets();
+
+  if (presets === undefined || presets.length === 0) {
+    return null;
+  }
+
+  return <Navigate to={presets[0].id} />;
 }
 
 export default DeviceEditorPresetRedirect;

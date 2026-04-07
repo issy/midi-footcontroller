@@ -2,6 +2,7 @@ import { AppShell, NavLink, Stack, Title } from '@mantine/core';
 import { Fragment, useMemo } from 'react';
 import { Outlet, useLocation, useNavigate, useResolvedPath } from 'react-router';
 import classes from './DeviceEditorLayout.module.scss';
+import usePresets from '@/views/device/editor/use-presets';
 
 function NavListItem({ path, label }: { path: string; label: string }) {
   const navigate = useNavigate();
@@ -22,17 +23,21 @@ function NavListItem({ path, label }: { path: string; label: string }) {
 }
 
 function DeviceEditorLayout() {
+  const { data: presets } = usePresets();
+
   return (
     <Fragment>
       <AppShell.Navbar p="sm">
         <Stack>
           <Title order={4}>Presets</Title>
           {/* Presets */}
-          <Stack gap={0}>
-            <NavListItem path="foo" label="Foo" />
-            <NavListItem path="bar" label="Bar" />
-            <NavListItem path="baz" label="Baz" />
-          </Stack>
+          {presets !== undefined && (
+            <Stack gap={0}>
+              {presets.map(({ id, name }) => (
+                <NavListItem key={id} path={id} label={name} />
+              ))}
+            </Stack>
+          )}
         </Stack>
       </AppShell.Navbar>
       <Outlet />

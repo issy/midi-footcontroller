@@ -134,6 +134,10 @@ const mockButtonActions: Array<ButtonActionData> = [
   },
 ];
 
+function ActionEditForm() {
+  return <div>Form will go here</div>;
+}
+
 function DevicePresetView() {
   const { presetId } = useParams<{ presetId: string }>();
   const [activeButton, setActiveButton] = useState<string | undefined>(undefined);
@@ -166,10 +170,17 @@ function DevicePresetView() {
                 <Card>
                   <Flex justify="space-between">
                     <Title size="h3">Action editor</Title>
-                    <ActionIcon variant="subtle" color="neutral">
+                    <ActionIcon
+                      variant="subtle"
+                      color="neutral"
+                      onClick={() => {
+                        setIsEditing(false);
+                      }}
+                    >
                       <MdClose />
                     </ActionIcon>
                   </Flex>
+                  <ActionEditForm />
                 </Card>
               )}
             </Stack>

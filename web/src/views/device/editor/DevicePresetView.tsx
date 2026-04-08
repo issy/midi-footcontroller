@@ -15,6 +15,7 @@ import {
 import { useParams } from 'react-router';
 import { Fragment, useState } from 'react';
 import { MdAdd, MdClose, MdDelete, MdEdit } from 'react-icons/md';
+import ButtonActionEditForm from '@/views/device/editor/ButtonActionEditForm';
 
 function DeviceButton({
   color,
@@ -134,10 +135,6 @@ const mockButtonActions: Array<ButtonActionData> = [
   },
 ];
 
-function ActionEditForm() {
-  return <div>Form will go here</div>;
-}
-
 function DevicePresetView() {
   const { presetId } = useParams<{ presetId: string }>();
   const [activeButton, setActiveButton] = useState<string | undefined>(undefined);
@@ -180,7 +177,7 @@ function DevicePresetView() {
                       <MdClose />
                     </ActionIcon>
                   </Flex>
-                  <ActionEditForm />
+                  <ButtonActionEditForm />
                 </Card>
               )}
             </Stack>

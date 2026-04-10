@@ -92,6 +92,7 @@ function FormField<TFieldValues extends FieldValues, TFieldName extends FieldPat
                 onChange={field.onChange}
                 clearable={clearable}
                 autoComplete="off"
+                labelProps={{ mb: 'xs' }}
               />
             );
           }
@@ -110,6 +111,7 @@ function FormField<TFieldValues extends FieldValues, TFieldName extends FieldPat
                 onValueChange={(e) => {
                   field.onChange(e.floatValue);
                 }}
+                labelProps={{ mb: 'xs' }}
               />
             );
           }
@@ -125,6 +127,7 @@ function FormField<TFieldValues extends FieldValues, TFieldName extends FieldPat
                   field.onChange(e.currentTarget.value);
                 }}
                 autoComplete="off"
+                labelProps={{ mb: 'xs' }}
               />
             );
           }

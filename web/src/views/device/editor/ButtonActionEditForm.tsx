@@ -1,8 +1,8 @@
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import FormField from '@/components/FormField';
-import { Button } from '@mantine/core';
+import { Button, Stack } from '@mantine/core';
 
 // TODO: Should these be zero-indexed?
 const midiChannelNumberSchema = z.int().min(1).max(16);
@@ -47,6 +47,7 @@ function ButtonActionEditForm() {
       type: 'CONTROL_CHANGE',
     },
   });
+  const actionType = useWatch({ control, name: 'type' });
 
   const submitHandler = (data: FormValues) => {
     console.log('submitHandler', data);
@@ -58,41 +59,49 @@ function ButtonActionEditForm() {
         void handleSubmit(submitHandler)(e);
       }}
     >
-      <FormField
-        control={control}
-        projection={{
-          fieldName: 'type',
-          type: 'select',
-          label: 'Type',
-          options: [{ value: 'CONTROL_CHANGE', label: 'CC Message' }],
-        }}
-      />
-      <FormField
-        control={control}
-        projection={{
-          fieldName: 'channel',
-          type: 'number',
-          label: 'Channel',
-          placeholder: 'Select a MIDI channel',
-        }}
-      />
-      <FormField
-        control={control}
-        projection={{
-          fieldName: 'control',
-          type: 'number',
-          label: 'Control',
-        }}
-      />
-      <FormField
-        control={control}
-        projection={{
-          fieldName: 'value',
-          type: 'number',
-          label: 'Value',
-        }}
-      />
-      <Button type="submit">Submit</Button>
+      <Stack gap="md" p="xs">
+        <FormField
+          control={control}
+          projection={{
+            fieldName: 'channel',
+            type: 'number',
+            label: 'Channel',
+            placeholder: 'Select a MIDI channel',
+          }}
+        />
+        <FormField
+          control={control}
+          projection={{
+            fieldName: 'type',
+            type: 'select',
+            label: 'Type',
+            options: [
+              { value: 'CONTROL_CHANGE', label: 'CC Message' },
+              { value: 'PROGRAM_CHANGE', label: 'Program Change Message' },
+              { value: 'NOTE_ON', label: 'Note On' },
+              { value: 'NOTE_OFF', label: 'Note Off' },
+            ],
+          }}
+        />
+        {actionType === 'PROGRAM_CHANGE' && <p>This is a program change</p>}
+        <FormField
+          control={control}
+          projection={{
+            fieldName: 'control',
+            type: 'number',
+            label: 'Control',
+          }}
+        />
+        <FormField
+          control={control}
+          projection={{
+            fieldName: 'value',
+            type: 'number',
+            label: 'Value',
+          }}
+        />
+        <Button type="submit">Submit</Button>
+      </Stack>
     </form>
   );
 }

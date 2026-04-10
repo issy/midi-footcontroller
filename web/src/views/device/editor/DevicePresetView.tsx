@@ -177,7 +177,15 @@ function DevicePresetView() {
                       <MdClose />
                     </ActionIcon>
                   </Flex>
-                  <ButtonActionEditForm />
+                  <ButtonActionEditForm
+                    onSubmit={(values) =>
+                      new Promise<void>((resolve) => {
+                        console.log(values);
+                        setIsEditing(false);
+                        resolve();
+                      })
+                    }
+                  />
                 </Card>
               )}
             </Stack>

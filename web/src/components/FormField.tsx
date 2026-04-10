@@ -93,6 +93,7 @@ function FormField<TFieldValues extends FieldValues, TFieldName extends FieldPat
                 clearable={clearable}
                 autoComplete="off"
                 labelProps={{ mb: 'xs' }}
+                withAlignedLabels
               />
             );
           }

@@ -253,7 +253,7 @@ function DevicePresetView() {
               ))}
               <Button
                 onClick={() => {
-                  /* empty */
+                  setIsEditing(true);
                 }}
                 style={{ width: '100%' }}
                 variant="default"

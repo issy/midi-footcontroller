@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import FormField from '@/components/FormField';
 import { Button, Stack } from '@mantine/core';
+import { Fragment } from 'react';
 
 // TODO: Should these be zero-indexed?
 const midiChannelNumberSchema = z.int().min(1).max(16);
@@ -40,23 +41,28 @@ const schema = buttonActionSchema();
 
 type FormValues = z.infer<ReturnType<typeof buttonActionSchema>>;
 
-function ButtonActionEditForm() {
+const defaultValues: Partial<FormValues> = {
+  channel: 1,
+  type: 'PROGRAM_CHANGE',
+};
+
+function ButtonActionEditForm({
+  initialValues,
+  onSubmit,
+}: {
+  initialValues?: FormValues;
+  onSubmit: (values: FormValues) => Promise<void>;
+}) {
   const { handleSubmit, control } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      type: 'CONTROL_CHANGE',
-    },
+    defaultValues: initialValues ?? defaultValues,
   });
   const actionType = useWatch({ control, name: 'type' });
-
-  const submitHandler = (data: FormValues) => {
-    console.log('submitHandler', data);
-  };
 
   return (
     <form
       onSubmit={(e) => {
-        void handleSubmit(submitHandler)(e);
+        void handleSubmit(onSubmit)(e);
       }}
     >
       <Stack gap="md" p="xs">
@@ -66,7 +72,7 @@ function ButtonActionEditForm() {
             fieldName: 'channel',
             type: 'number',
             label: 'Channel',
-            placeholder: 'Select a MIDI channel',
+            placeholder: 'Select a MIDI channel (1-16)',
           }}
         />
         <FormField
@@ -76,31 +82,60 @@ function ButtonActionEditForm() {
             type: 'select',
             label: 'Type',
             options: [
-              { value: 'CONTROL_CHANGE', label: 'CC Message' },
               { value: 'PROGRAM_CHANGE', label: 'Program Change Message' },
+              { value: 'CONTROL_CHANGE', label: 'CC Message' },
               { value: 'NOTE_ON', label: 'Note On' },
               { value: 'NOTE_OFF', label: 'Note Off' },
             ],
           }}
         />
-        {actionType === 'PROGRAM_CHANGE' && <p>This is a program change</p>}
-        <FormField
-          control={control}
-          projection={{
-            fieldName: 'control',
-            type: 'number',
-            label: 'Control',
-          }}
-        />
-        <FormField
-          control={control}
-          projection={{
-            fieldName: 'value',
-            type: 'number',
-            label: 'Value',
-          }}
-        />
-        <Button type="submit">Submit</Button>
+        {actionType === 'PROGRAM_CHANGE' && (
+          <Fragment>
+            <FormField
+              control={control}
+              projection={{
+                fieldName: 'program',
+                type: 'number',
+                label: 'Program',
+              }}
+            />
+          </Fragment>
+        )}
+        {actionType === 'CONTROL_CHANGE' && (
+          <Fragment>
+            <FormField
+              control={control}
+              projection={{
+                fieldName: 'control',
+                type: 'number',
+                label: 'Control',
+              }}
+            />
+            <FormField
+              control={control}
+              projection={{
+                fieldName: 'value',
+                type: 'number',
+                label: 'Value',
+              }}
+            />
+          </Fragment>
+        )}
+        {actionType === 'NOTE_ON' ||
+          (actionType === 'NOTE_OFF' && (
+            <FormField control={control} projection={{ fieldName: 'note', type: 'number', label: 'Note' }} />
+          ))}
+        {actionType === 'NOTE_ON' && (
+          <FormField
+            control={control}
+            projection={{
+              fieldName: 'velocity',
+              type: 'number',
+              label: 'Velocity',
+            }}
+          />
+        )}
+        <Button type="submit">{initialValues === undefined ? 'Create' : 'Update'}</Button>
       </Stack>
     </form>
   );

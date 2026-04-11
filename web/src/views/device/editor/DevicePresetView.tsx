@@ -1,7 +1,21 @@
-import { AppShell, AspectRatio, Button, Card, Grid, type MantineColor, SimpleGrid, Stack, Text, Title } from '@mantine/core';
+import {
+  ActionIcon,
+  AppShell,
+  AspectRatio,
+  Button,
+  Card,
+  Flex,
+  Grid,
+  type MantineColor,
+  SimpleGrid,
+  Stack,
+  Text,
+  Title,
+} from '@mantine/core';
 import { useParams } from 'react-router';
 import { Fragment, useState } from 'react';
-import { MdAdd } from 'react-icons/md';
+import { MdAdd, MdClose, MdDelete, MdEdit } from 'react-icons/md';
+import ButtonActionEditForm from '@/views/device/editor/ButtonActionEditForm';
 
 function DeviceButton({
   color,
@@ -124,6 +138,7 @@ const mockButtonActions: Array<ButtonActionData> = [
 function DevicePresetView() {
   const { presetId } = useParams<{ presetId: string }>();
   const [activeButton, setActiveButton] = useState<string | undefined>(undefined);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
 
   return (
     <AppShell.Main>
@@ -148,70 +163,108 @@ function DevicePresetView() {
               <Card>
                 <Title size="h3">Button editor</Title>
               </Card>
-              <Card>
-                <Text>Action editor</Text>
-              </Card>
+              {isEditing && (
+                <Card>
+                  <Flex justify="space-between">
+                    <Title size="h3">Action editor</Title>
+                    <ActionIcon
+                      variant="subtle"
+                      color="neutral"
+                      onClick={() => {
+                        setIsEditing(false);
+                      }}
+                    >
+                      <MdClose />
+                    </ActionIcon>
+                  </Flex>
+                  <ButtonActionEditForm
+                    onSubmit={(values) =>
+                      new Promise<void>((resolve) => {
+                        console.log(values);
+                        setIsEditing(false);
+                        resolve();
+                      })
+                    }
+                  />
+                </Card>
+              )}
             </Stack>
           </Grid.Col>
           <Grid.Col span={1}>
             <Stack>
               {mockButtonActions.map((action, index) => (
                 <Card key={`action_${index.toString()}`}>
-                  <SimpleGrid cols={4} spacing="sm" component="dl" m={0}>
-                    <div style={{ display: 'block' }}>
-                      <Text fw={700}>Type</Text>
-                      <Text>{formatButtonActionDataType(action.type)}</Text>
-                    </div>
-                    <div style={{ display: 'block' }}>
-                      <Text fw={700}>Channel</Text>
-                      <Text>{action.channel}</Text>
-                    </div>
-                    {action.type === 'PROGRAM_CHANGE' && (
+                  <Flex justify="space-between">
+                    <SimpleGrid cols={4} spacing="sm" component="dl" m={0} w="100%">
                       <div style={{ display: 'block' }}>
-                        <Text fw={700}>Program</Text>
-                        <Text>{action.program}</Text>
+                        <Text fw={700}>Type</Text>
+                        <Text>{formatButtonActionDataType(action.type)}</Text>
                       </div>
-                    )}
-                    {action.type === 'CONTROL_CHANGE' && (
-                      <Fragment>
+                      <div style={{ display: 'block' }}>
+                        <Text fw={700}>Channel</Text>
+                        <Text>{action.channel}</Text>
+                      </div>
+                      {action.type === 'PROGRAM_CHANGE' && (
                         <div style={{ display: 'block' }}>
-                          <Text fw={700}>Control</Text>
-                          <Text>{action.control}</Text>
+                          <Text fw={700}>Program</Text>
+                          <Text>{action.program}</Text>
                         </div>
-                        <div style={{ display: 'block' }}>
-                          <Text fw={700}>Value</Text>
-                          <Text>{action.value}</Text>
-                        </div>
-                      </Fragment>
-                    )}
-                    {action.type === 'NOTE_ON' && (
-                      <Fragment>
+                      )}
+                      {action.type === 'CONTROL_CHANGE' && (
+                        <Fragment>
+                          <div style={{ display: 'block' }}>
+                            <Text fw={700}>Control</Text>
+                            <Text>{action.control}</Text>
+                          </div>
+                          <div style={{ display: 'block' }}>
+                            <Text fw={700}>Value</Text>
+                            <Text>{action.value}</Text>
+                          </div>
+                        </Fragment>
+                      )}
+                      {action.type === 'NOTE_ON' && (
+                        <Fragment>
+                          <div style={{ display: 'block' }}>
+                            <Text fw={700}>Note</Text>
+                            <Text>{action.note}</Text>
+                          </div>
+                          <div style={{ display: 'block' }}>
+                            <Text fw={700}>Velocity</Text>
+                            <Text>{action.velocity}</Text>
+                          </div>
+                        </Fragment>
+                      )}
+                      {action.type === 'NOTE_OFF' && (
                         <div style={{ display: 'block' }}>
                           <Text fw={700}>Note</Text>
                           <Text>{action.note}</Text>
                         </div>
-                        <div style={{ display: 'block' }}>
-                          <Text fw={700}>Velocity</Text>
-                          <Text>{action.velocity}</Text>
-                        </div>
-                      </Fragment>
-                    )}
-                    {action.type === 'NOTE_OFF' && (
-                      <div style={{ display: 'block' }}>
-                        <Text fw={700}>Note</Text>
-                        <Text>{action.note}</Text>
-                      </div>
-                    )}
-                  </SimpleGrid>
+                      )}
+                    </SimpleGrid>
+                    <Flex gap="xs" align="center">
+                      <ActionIcon
+                        variant="default"
+                        size="lg"
+                        aria-label="Edit"
+                        onClick={() => {
+                          setIsEditing(true);
+                        }}
+                      >
+                        <MdEdit />
+                      </ActionIcon>
+                      <ActionIcon variant="filled" size="lg" color="red" aria-label="Delete">
+                        <MdDelete />
+                      </ActionIcon>
+                    </Flex>
+                  </Flex>
                 </Card>
               ))}
               <Button
                 onClick={() => {
-                  /* empty */
+                  setIsEditing(true);
                 }}
                 style={{ width: '100%' }}
-                variant="light"
-                color="gray"
+                variant="default"
                 size="lg"
                 leftSection={<MdAdd />}
               >

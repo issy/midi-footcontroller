@@ -53,7 +53,11 @@ function ButtonActionEditForm({
   initialValues?: FormValues;
   onSubmit: (values: FormValues) => Promise<void>;
 }) {
-  const { handleSubmit, control } = useForm<FormValues>({
+  const {
+    handleSubmit,
+    control,
+    formState: { isDirty, isSubmitting },
+  } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: initialValues ?? defaultValues,
   });
@@ -135,7 +139,9 @@ function ButtonActionEditForm({
             }}
           />
         )}
-        <Button type="submit">{initialValues === undefined ? 'Create' : 'Update'}</Button>
+        <Button type="submit" disabled={!isDirty} loading={isSubmitting}>
+          {initialValues === undefined ? 'Create' : 'Update'}
+        </Button>
       </Stack>
     </form>
   );

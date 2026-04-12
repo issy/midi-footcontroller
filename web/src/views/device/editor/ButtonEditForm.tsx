@@ -1,9 +1,10 @@
 import { z } from 'zod';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button, ColorInput, Stack } from '@mantine/core';
+import { Button, ColorPicker, Stack } from '@mantine/core';
 import FormField from '@/components/FormField';
 
+// TODO: Pick different hex values
 const hexToColour = {
   '#fa5252': 'RED',
   '#34d399': 'GREEN',
@@ -63,19 +64,18 @@ function ButtonEditForm({ initialValues, onSubmit }: ButtonEditFormProps) {
         <Controller
           name="colour"
           control={control}
-          render={({ field, fieldState }) => {
-            const error = fieldState.error?.message;
+          render={({ field }) => {
             const valueAsHex = colourToHex[field.value];
             return (
-              <ColorInput
+              <ColorPicker
+                fullWidth
                 value={valueAsHex}
                 onChange={(hex) => {
                   field.onChange(hexToColour[hex as keyof typeof hexToColour]);
                 }}
+                swatchesPerRow={8}
                 swatches={Object.keys(hexToColour)}
-                error={error}
                 format="hex"
-                withEyeDropper={false}
                 withPicker={false}
               />
             );

@@ -164,7 +164,7 @@ function DevicePresetView() {
               <Card>
                 <Title size="h3">Button editor</Title>
                 <ButtonEditForm
-                  initialValues={{ name: 'Hello' }}
+                  initialValues={{ name: 'Hello', colour: 'RED' }}
                   onSubmit={(values) =>
                     new Promise<void>((resolve) => {
                       console.log(values);

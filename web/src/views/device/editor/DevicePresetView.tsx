@@ -209,7 +209,12 @@ function DevicePresetView() {
           <Grid.Col span={1}>
             <Stack>
               {mockButtonActions.map((action, index) => (
-                <Card key={`action_${index.toString()}`} withBorder>
+                <Card
+                  key={`action_${index.toString()}`}
+                  bd={isEditing ? 'solid 1px var(--mantine-primary-color-filled)' : undefined}
+                  bg={isEditing ? 'var(--mantine-primary-color-active)' : undefined}
+                  withBorder
+                >
                   <Flex justify="space-between">
                     <SimpleGrid cols={4} spacing="sm" component="dl" m={0} w="100%">
                       <div style={{ display: 'block' }}>

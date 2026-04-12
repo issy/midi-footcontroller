@@ -16,6 +16,7 @@ import { useParams } from 'react-router';
 import { Fragment, useState } from 'react';
 import { MdAdd, MdClose, MdDelete, MdEdit } from 'react-icons/md';
 import ButtonActionEditForm from '@/views/device/editor/ButtonActionEditForm';
+import ButtonEditForm from './ButtonEditForm';
 
 function DeviceButton({
   color,
@@ -162,6 +163,15 @@ function DevicePresetView() {
             <Stack>
               <Card>
                 <Title size="h3">Button editor</Title>
+                <ButtonEditForm
+                  initialValues={{ name: 'Hello' }}
+                  onSubmit={(values) =>
+                    new Promise<void>((resolve) => {
+                      console.log(values);
+                      resolve();
+                    })
+                  }
+                />
               </Card>
               {isEditing && (
                 <Card>

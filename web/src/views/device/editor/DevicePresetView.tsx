@@ -1,7 +1,7 @@
 import { ActionIcon, AppShell, AspectRatio, Button, Card, Flex, Grid, SimpleGrid, Stack, Text, Title } from '@mantine/core';
 import { useParams } from 'react-router';
 import { Fragment, useState } from 'react';
-import { MdAdd, MdClose, MdDelete, MdEdit } from 'react-icons/md';
+import { MdAdd, MdClose, MdDelete, MdEdit, MdOutlineVisibility, MdOutlineVisibilityOff } from 'react-icons/md';
 import ButtonActionEditForm from '@/views/device/editor/ButtonActionEditForm';
 import ButtonEditForm from './ButtonEditForm';
 import { type Colour, colourToMantineColour } from '@/utils/colourMapping';
@@ -129,6 +129,7 @@ function DevicePresetView() {
   const [activeButton, setActiveButton] = useState<string>(mockPresetButtonsData[0].id);
   const activeButtonData = mockPresetButtonsData.find((button) => button.id === activeButton);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [buttonEditorExpanded, setButtonEditorExpanded] = useState<boolean>(true);
 
   return (
     <AppShell.Main>
@@ -152,17 +153,30 @@ function DevicePresetView() {
             <Stack>
               {activeButtonData !== undefined && (
                 <Card>
-                  <Title size="h3">Button editor</Title>
-                  <ButtonEditForm
-                    key={activeButton}
-                    initialValues={activeButtonData}
-                    onSubmit={(values) =>
-                      new Promise<void>((resolve) => {
-                        console.log(values);
-                        resolve();
-                      })
-                    }
-                  />
+                  <Flex justify="space-between">
+                    <Title size="h3">Button editor</Title>
+                    <ActionIcon
+                      variant="subtle"
+                      color="neutral"
+                      onClick={() => {
+                        setButtonEditorExpanded((value) => !value);
+                      }}
+                    >
+                      {buttonEditorExpanded ? <MdOutlineVisibilityOff /> : <MdOutlineVisibility />}
+                    </ActionIcon>
+                  </Flex>
+                  {buttonEditorExpanded && (
+                    <ButtonEditForm
+                      key={activeButton}
+                      initialValues={activeButtonData}
+                      onSubmit={(values) =>
+                        new Promise<void>((resolve) => {
+                          console.log(values);
+                          resolve();
+                        })
+                      }
+                    />
+                  )}
                 </Card>
               )}
               {isEditing && (

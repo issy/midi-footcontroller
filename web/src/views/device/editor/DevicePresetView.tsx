@@ -212,7 +212,7 @@ function DevicePresetView() {
                 <Card
                   key={`action_${index.toString()}`}
                   bd={isEditing ? 'solid 1px var(--mantine-primary-color-filled)' : undefined}
-                  bg={isEditing ? 'var(--mantine-primary-color-active)' : undefined}
+                  bg={isEditing ? 'var(--mantine-primary-color-light)' : undefined}
                   withBorder
                 >
                   <Flex justify="space-between">

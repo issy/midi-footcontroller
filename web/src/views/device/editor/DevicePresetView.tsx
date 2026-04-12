@@ -39,7 +39,7 @@ function DeviceButton({
 }
 
 interface PresetData {
-  color: MantineColor;
+  colour: MantineColor;
   text: string;
   id: string;
 }
@@ -47,42 +47,42 @@ interface PresetData {
 const mockPresetButtonsData: Array<PresetData> = [
   {
     id: 'one',
-    color: 'red',
+    colour: 'red',
     text: 'Hello',
   },
   {
     id: 'two',
-    color: 'green',
+    colour: 'green',
     text: 'Hello',
   },
   {
     id: 'three',
-    color: 'blue',
+    colour: 'blue',
     text: 'Hello',
   },
   {
     id: 'four',
-    color: 'yellow',
+    colour: 'yellow',
     text: 'Hello',
   },
   {
     id: 'five',
-    color: 'green',
+    colour: 'green',
     text: 'Hello',
   },
   {
     id: 'six',
-    color: 'grape',
+    colour: 'grape',
     text: 'Hello',
   },
   {
     id: 'seven',
-    color: 'teal',
+    colour: 'teal',
     text: 'Hello',
   },
   {
     id: 'eight',
-    color: 'blue',
+    colour: 'blue',
     text: 'Hello',
   },
 ];
@@ -139,6 +139,7 @@ const mockButtonActions: Array<ButtonActionData> = [
 function DevicePresetView() {
   const { presetId } = useParams<{ presetId: string }>();
   const [activeButton, setActiveButton] = useState<string | undefined>(undefined);
+  const activeButtonData = mockPresetButtonsData.find((button) => button.id === activeButton);
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
   return (
@@ -149,7 +150,7 @@ function DevicePresetView() {
           {mockPresetButtonsData.map((button) => (
             <DeviceButton
               key={`button_${button.id}`}
-              color={button.color}
+              color={button.colour}
               text={button.text}
               active={activeButton === button.id}
               onClick={() => {
@@ -161,18 +162,20 @@ function DevicePresetView() {
         <Grid columns={2}>
           <Grid.Col span={1}>
             <Stack>
-              <Card>
-                <Title size="h3">Button editor</Title>
-                <ButtonEditForm
-                  initialValues={{ name: 'Hello', colour: 'RED' }}
-                  onSubmit={(values) =>
-                    new Promise<void>((resolve) => {
-                      console.log(values);
-                      resolve();
-                    })
-                  }
-                />
-              </Card>
+              {activeButtonData !== undefined && (
+                <Card>
+                  <Title size="h3">Button editor</Title>
+                  <ButtonEditForm
+                    initialValues={activeButtonData}
+                    onSubmit={(values) =>
+                      new Promise<void>((resolve) => {
+                        console.log(values);
+                        resolve();
+                      })
+                    }
+                  />
+                </Card>
+              )}
               {isEditing && (
                 <Card>
                   <Flex justify="space-between">

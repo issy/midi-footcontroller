@@ -152,7 +152,7 @@ function DevicePresetView() {
           <Grid.Col span={1}>
             <Stack>
               {activeButtonData !== undefined && (
-                <Card>
+                <Card withBorder>
                   <Flex justify="space-between">
                     <Title size="h3">Button editor</Title>
                     <ActionIcon
@@ -180,7 +180,7 @@ function DevicePresetView() {
                 </Card>
               )}
               {isEditing && (
-                <Card>
+                <Card withBorder>
                   <Flex justify="space-between">
                     <Title size="h3">Action editor</Title>
                     <ActionIcon
@@ -209,7 +209,7 @@ function DevicePresetView() {
           <Grid.Col span={1}>
             <Stack>
               {mockButtonActions.map((action, index) => (
-                <Card key={`action_${index.toString()}`}>
+                <Card key={`action_${index.toString()}`} withBorder>
                   <Flex justify="space-between">
                     <SimpleGrid cols={4} spacing="sm" component="dl" m={0} w="100%">
                       <div style={{ display: 'block' }}>

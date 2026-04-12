@@ -1,36 +1,25 @@
-import {
-  ActionIcon,
-  AppShell,
-  AspectRatio,
-  Button,
-  Card,
-  Flex,
-  Grid,
-  type MantineColor,
-  SimpleGrid,
-  Stack,
-  Text,
-  Title,
-} from '@mantine/core';
+import { ActionIcon, AppShell, AspectRatio, Button, Card, Flex, Grid, SimpleGrid, Stack, Text, Title } from '@mantine/core';
 import { useParams } from 'react-router';
 import { Fragment, useState } from 'react';
 import { MdAdd, MdClose, MdDelete, MdEdit } from 'react-icons/md';
 import ButtonActionEditForm from '@/views/device/editor/ButtonActionEditForm';
+import ButtonEditForm from './ButtonEditForm';
+import { type Colour, colourToMantineColour } from '@/utils/colourMapping';
 
 function DeviceButton({
-  color,
+  colour,
   text,
   active,
   onClick,
 }: {
-  color: MantineColor;
+  colour: Colour;
   text: string;
   active: boolean;
   onClick: () => void;
 }) {
   return (
     <AspectRatio ratio={3}>
-      <Button variant={active ? 'filled' : 'light'} color={color} fullWidth h="100%" onClick={onClick}>
+      <Button variant={active ? 'filled' : 'light'} color={colourToMantineColour[colour]} fullWidth h="100%" onClick={onClick}>
         <Title>{text}</Title>
       </Button>
     </AspectRatio>
@@ -38,7 +27,7 @@ function DeviceButton({
 }
 
 interface PresetData {
-  color: MantineColor;
+  colour: Colour;
   text: string;
   id: string;
 }
@@ -46,42 +35,42 @@ interface PresetData {
 const mockPresetButtonsData: Array<PresetData> = [
   {
     id: 'one',
-    color: 'red',
+    colour: 'RED',
     text: 'Hello',
   },
   {
     id: 'two',
-    color: 'green',
+    colour: 'GREEN',
     text: 'Hello',
   },
   {
     id: 'three',
-    color: 'blue',
+    colour: 'BLUE',
     text: 'Hello',
   },
   {
     id: 'four',
-    color: 'yellow',
+    colour: 'YELLOW',
     text: 'Hello',
   },
   {
     id: 'five',
-    color: 'green',
+    colour: 'GREEN',
     text: 'Hello',
   },
   {
     id: 'six',
-    color: 'grape',
+    colour: 'PURPLE',
     text: 'Hello',
   },
   {
     id: 'seven',
-    color: 'teal',
+    colour: 'CYAN',
     text: 'Hello',
   },
   {
     id: 'eight',
-    color: 'blue',
+    colour: 'BLUE',
     text: 'Hello',
   },
 ];
@@ -137,7 +126,8 @@ const mockButtonActions: Array<ButtonActionData> = [
 
 function DevicePresetView() {
   const { presetId } = useParams<{ presetId: string }>();
-  const [activeButton, setActiveButton] = useState<string | undefined>(undefined);
+  const [activeButton, setActiveButton] = useState<string>(mockPresetButtonsData[0].id);
+  const activeButtonData = mockPresetButtonsData.find((button) => button.id === activeButton);
   const [isEditing, setIsEditing] = useState<boolean>(false);
 
   return (
@@ -148,7 +138,7 @@ function DevicePresetView() {
           {mockPresetButtonsData.map((button) => (
             <DeviceButton
               key={`button_${button.id}`}
-              color={button.color}
+              colour={button.colour}
               text={button.text}
               active={activeButton === button.id}
               onClick={() => {
@@ -160,9 +150,21 @@ function DevicePresetView() {
         <Grid columns={2}>
           <Grid.Col span={1}>
             <Stack>
-              <Card>
-                <Title size="h3">Button editor</Title>
-              </Card>
+              {activeButtonData !== undefined && (
+                <Card>
+                  <Title size="h3">Button editor</Title>
+                  <ButtonEditForm
+                    key={activeButton}
+                    initialValues={activeButtonData}
+                    onSubmit={(values) =>
+                      new Promise<void>((resolve) => {
+                        console.log(values);
+                        resolve();
+                      })
+                    }
+                  />
+                </Card>
+              )}
               {isEditing && (
                 <Card>
                   <Flex justify="space-between">

@@ -24,6 +24,7 @@ export default defineConfig([
       {
         rules: {
           '@typescript-eslint/array-type': ['error', { default: 'generic' }],
+          '@typescript-eslint/consistent-indexed-object-style': 'off',
         },
       },
       reactHooks.configs.flat.recommended,

@@ -3,29 +3,13 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, ColorPicker, Stack } from '@mantine/core';
 import FormField from '@/components/FormField';
-
-// TODO: Pick different hex values
-const hexToColour = {
-  '#fa5252': 'RED',
-  '#34d399': 'GREEN',
-  '#2563eb': 'BLUE',
-  '#fbbf24': 'YELLOW',
-  '#f97316': 'ORANGE',
-  '#8b5cf6': 'PURPLE',
-  '#06b6d4': 'CYAN',
-  '#ffffff': 'WHITE',
-} as const;
-
-const colourToHex = Object.fromEntries(Object.entries(hexToColour).map(([key, value]) => [value, key])) as Record<
-  (typeof hexToColour)[keyof typeof hexToColour],
-  keyof typeof hexToColour
->;
+import { colourSchema, colourToHex, hexToColour } from '@/utils/colourMapping';
 
 const buttonSchema = z.object({
   // TODO: Is this the same length defined in the firmware crate?
   // TODO: Refine this to alphanumeric characters only?
-  name: z.string().max(16),
-  colour: z.enum(['RED', 'GREEN', 'BLUE', 'YELLOW', 'ORANGE', 'PURPLE', 'CYAN', 'WHITE']),
+  text: z.string().max(16),
+  colour: colourSchema,
 });
 
 type FormValues = z.infer<typeof buttonSchema>;
@@ -56,7 +40,7 @@ function ButtonEditForm({ initialValues, onSubmit }: ButtonEditFormProps) {
         <FormField
           control={control}
           projection={{
-            fieldName: 'name',
+            fieldName: 'text',
             type: 'text',
             label: 'Name',
           }}

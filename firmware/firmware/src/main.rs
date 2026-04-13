@@ -139,24 +139,67 @@ async fn main(spawner: Spawner) -> ! {
     .with_mosi(peripherals.GPIO19)
     .with_cs(peripherals.GPIO20);
 
-    let cs = Output::new(peripherals.GPIO5, Level::High, OutputConfig::default());
     let spi_bus = SPI_BUS.init(Mutex::new(RefCell::new(spi)));
-    let spi_device = SpiDevice::new(spi_bus, cs);
 
-    let dc = Output::new(peripherals.GPIO21, Level::Low, OutputConfig::default());
-    let di = SPIInterface::new(spi_device, dc);
-    let display = DISPLAY_1.init(
-        mipidsi::Builder::new(ST7789, di)
+    let cs_1 = Output::new(peripherals.GPIO5, Level::High, OutputConfig::default());
+    let spi_device_1 = SpiDevice::new(spi_bus, cs_1);
+    let dc_1 = Output::new(peripherals.GPIO21, Level::Low, OutputConfig::default());
+    let display_1 = DISPLAY_1.init(
+        mipidsi::Builder::new(ST7789, SPIInterface::new(spi_device_1, dc_1))
             .display_size(240, 280)
             .orientation(Orientation::default().rotate(Deg270))
             .display_offset(0, 20)
             .invert_colors(ColorInversion::Inverted)
             // TODO: Add reset pin
             .init(&mut Delay)
-            .expect("Failed to initialise ST7789 display"),
+            .expect("Failed to initialise display 1"),
     );
 
-    display.clear(Rgb565::BLACK).unwrap();
+    // FIXME: Dummy pins used for displays 2-4. Figure out which pins are appropriate
+
+    let cs_2 = Output::new(peripherals.GPIO6, Level::High, OutputConfig::default());
+    let spi_device_2 = SpiDevice::new(spi_bus, cs_2);
+    let dc_2 = Output::new(peripherals.GPIO22, Level::Low, OutputConfig::default());
+    let display_2 = DISPLAY_2.init(
+        mipidsi::Builder::new(ST7789, SPIInterface::new(spi_device_2, dc_2))
+            .display_size(240, 280)
+            .orientation(Orientation::default().rotate(Deg270))
+            .display_offset(0, 20)
+            .invert_colors(ColorInversion::Inverted)
+            .init(&mut Delay)
+            .expect("Failed to initialise display 2"),
+    );
+
+    let cs_3 = Output::new(peripherals.GPIO10, Level::High, OutputConfig::default());
+    let spi_device_3 = SpiDevice::new(spi_bus, cs_3);
+    let dc_3 = Output::new(peripherals.GPIO23, Level::Low, OutputConfig::default());
+    let display_3 = DISPLAY_3.init(
+        mipidsi::Builder::new(ST7789, SPIInterface::new(spi_device_3, dc_3))
+            .display_size(240, 280)
+            .orientation(Orientation::default().rotate(Deg270))
+            .display_offset(0, 20)
+            .invert_colors(ColorInversion::Inverted)
+            .init(&mut Delay)
+            .expect("Failed to initialise display 3"),
+    );
+
+    let cs_4 = Output::new(peripherals.GPIO9, Level::High, OutputConfig::default());
+    let spi_device_4 = SpiDevice::new(spi_bus, cs_4);
+    let dc_4 = Output::new(peripherals.GPIO17, Level::Low, OutputConfig::default());
+    let display_4 = DISPLAY_4.init(
+        mipidsi::Builder::new(ST7789, SPIInterface::new(spi_device_4, dc_4))
+            .display_size(240, 280)
+            .orientation(Orientation::default().rotate(Deg270))
+            .display_offset(0, 20)
+            .invert_colors(ColorInversion::Inverted)
+            .init(&mut Delay)
+            .expect("Failed to initialise display 4"),
+    );
+
+    display_1.clear(Rgb565::BLACK).unwrap();
+    display_2.clear(Rgb565::BLACK).unwrap();
+    display_3.clear(Rgb565::BLACK).unwrap();
+    display_4.clear(Rgb565::BLACK).unwrap();
 
     let uart = Uart::new(
         peripherals.UART1,
@@ -182,7 +225,10 @@ async fn main(spawner: Spawner) -> ! {
 
     let app = APP.init(
         ApplicationBuilder::new()
-            .with_display(display)
+            .with_display(display_1)
+            .with_display(display_2)
+            .with_display(display_3)
+            .with_display(display_4)
             .with_midi_reader(midi_reader)
             .with_midi_writer(midi_writer)
             .with_storage_manager(storage_manager)

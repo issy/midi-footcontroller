@@ -116,8 +116,4 @@ fn main() {
     );
 
     console::log_1(&"Hello world from main".into());
-    wasm_bindgen_futures::spawn_local(async {
-        console::log_1(&"Hello world".into());
-        app.storage_read_task().await;
-    });
 }

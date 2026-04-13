@@ -21,7 +21,8 @@ use foundation::application::state::{Application, ApplicationBuilder};
 use foundation::storage::StorageManager;
 use static_cell::StaticCell;
 use wasm_bindgen::prelude::wasm_bindgen;
-use web_sys::{Storage, window};
+use web_sys::js_sys::Array;
+use web_sys::{Storage, console, window};
 
 const STORAGE_KEY_PRESETS: &str = "presets";
 const STORAGE_KEY_PRESET_ID: &str = "preset_id";
@@ -37,7 +38,7 @@ static APP: StaticCell<Application<FakeMidiReader, FakeMidiWriter, LocalStorageM
 async fn main() {
     console_error_panic_hook::set_once();
 
-    let mut local_storage = LOCAL_STORAGE.init(
+    let local_storage = LOCAL_STORAGE.init(
         window()
             .unwrap()
             .local_storage()
@@ -116,6 +117,12 @@ async fn main() {
             .with_storage_manager(storage_manager)
             .build(),
     );
+
+    console::log_1(&"Hello world from main".into());
+    wasm_bindgen_futures::spawn_local(async {
+        console::log_1(&"Hello world".into());
+        app.storage_read_task().await;
+    });
 
     core::future::pending().await
 }

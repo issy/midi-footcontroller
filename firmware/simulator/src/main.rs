@@ -1,6 +1,6 @@
 mod storage;
 
-use crate::storage::Preset;
+use crate::storage::{LocalStorageManager, Preset};
 use embedded_graphics::geometry::Dimensions;
 use embedded_graphics::prelude::Primitive;
 use embedded_graphics::prelude::RgbColor;
@@ -15,6 +15,7 @@ use embedded_graphics::{
 use embedded_graphics_web_simulator::{
     display::WebSimulatorDisplay, output_settings::OutputSettingsBuilder,
 };
+use foundation::application::state::ApplicationBuilder;
 use web_sys::window;
 
 const STORAGE_KEY_PRESETS: &str = "presets";
@@ -23,7 +24,7 @@ const STORAGE_KEY_PRESET_ID: &str = "preset_id";
 fn main() {
     console_error_panic_hook::set_once();
 
-    let local_storage = window()
+    let mut local_storage = window()
         .unwrap()
         .local_storage()
         .expect("Failed to access localStorage")
@@ -88,4 +89,8 @@ fn main() {
         ))
         .draw(&mut text_display)
         .unwrap();
+
+    let app = ApplicationBuilder::new()
+        .with_storage_manager(&mut LocalStorageManager::new(&mut local_storage))
+        .build();
 }

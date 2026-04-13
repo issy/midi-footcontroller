@@ -241,6 +241,12 @@ pub struct LocalStorageManager<'a> {
     local_storage: &'a mut Storage,
 }
 
+impl<'a> LocalStorageManager<'a> {
+    pub fn new(local_storage: &'a mut Storage) -> Self {
+        LocalStorageManager { local_storage }
+    }
+}
+
 const STORAGE_KEY_PRESETS: &str = "presets";
 const STORAGE_KEY_PRESET_ID: &str = "preset_id";
 

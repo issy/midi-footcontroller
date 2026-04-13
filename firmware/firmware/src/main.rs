@@ -65,42 +65,26 @@ type FirmwareApplication = Application<
     UartMidiWriter<'static, 'static>,
     FakeStorageManager,
 >;
+type FirmwareDisplay = Display<
+    SPIInterface<
+        SpiDevice<'static, NoopRawMutex, Spi<'static, Blocking>, Output<'static>>,
+        Output<'static>,
+    >,
+    ST7789,
+    NoResetPin,
+>;
 
-static APP: StaticCell<FirmwareApplication> = StaticCell::new();
 static RX: StaticCell<UartRx<Async>> = StaticCell::new();
 static TX: StaticCell<UartTx<Async>> = StaticCell::new();
-static DISPLAY_1: StaticCell<
-    Display<
-        SPIInterface<SpiDevice<NoopRawMutex, Spi<Blocking>, Output>, Output>,
-        ST7789,
-        NoResetPin,
-    >,
-> = StaticCell::new();
-static DISPLAY_2: StaticCell<
-    Display<
-        SPIInterface<SpiDevice<NoopRawMutex, Spi<Blocking>, Output>, Output>,
-        ST7789,
-        NoResetPin,
-    >,
-> = StaticCell::new();
-static DISPLAY_3: StaticCell<
-    Display<
-        SPIInterface<SpiDevice<NoopRawMutex, Spi<Blocking>, Output>, Output>,
-        ST7789,
-        NoResetPin,
-    >,
-> = StaticCell::new();
-static DISPLAY_4: StaticCell<
-    Display<
-        SPIInterface<SpiDevice<NoopRawMutex, Spi<Blocking>, Output>, Output>,
-        ST7789,
-        NoResetPin,
-    >,
-> = StaticCell::new();
+static DISPLAY_1: StaticCell<FirmwareDisplay> = StaticCell::new();
+static DISPLAY_2: StaticCell<FirmwareDisplay> = StaticCell::new();
+static DISPLAY_3: StaticCell<FirmwareDisplay> = StaticCell::new();
+static DISPLAY_4: StaticCell<FirmwareDisplay> = StaticCell::new();
 static UART_MIDI_READER: StaticCell<UartMidiReader> = StaticCell::new();
 static UART_MIDI_WRITER: StaticCell<UartMidiWriter> = StaticCell::new();
 static STORAGE_MANAGER: StaticCell<FakeStorageManager> = StaticCell::new();
 static SPI_BUS: StaticCell<Mutex<NoopRawMutex, RefCell<Spi<Blocking>>>> = StaticCell::new();
+static APP: StaticCell<FirmwareApplication> = StaticCell::new();
 
 #[embassy_executor::task]
 async fn midi_thru_task(app: &'static mut FirmwareApplication) -> ! {

@@ -21,7 +21,8 @@ use web_sys::window;
 const STORAGE_KEY_PRESETS: &str = "presets";
 const STORAGE_KEY_PRESET_ID: &str = "preset_id";
 
-fn main() {
+#[tokio::main]
+async fn main() {
     console_error_panic_hook::set_once();
 
     let mut local_storage = window()

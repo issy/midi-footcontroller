@@ -171,6 +171,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "async_wasm_task"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8daff5f108e2aaea387e7bbd080c3c61fb9533b6b78345b8ff49d11bd31892ad"
+dependencies = [
+ "futures-channel",
+ "js-sys",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+]
+
+[[package]]
 name = "atomic-waker"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4455,6 +4468,7 @@ checksum = "e3a9fe34e3e7a50316060351f37187a3f546bce95496156754b601a5fa71b76e"
 name = "simulator"
 version = "0.1.0"
 dependencies = [
+ "async_wasm_task",
  "console_error_panic_hook",
  "embedded-graphics",
  "embedded-graphics-web-simulator",

@@ -116,4 +116,9 @@ fn main() {
     );
 
     console::log_1(&"Hello world from main".into());
+
+    // FIXME
+    // async_wasm_task::spawn(async {
+    //     app.storage_read_task().await;
+    // });
 }

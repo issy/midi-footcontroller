@@ -51,20 +51,6 @@ use mipidsi::options::{ColorInversion, Orientation};
 use mipidsi::{Display, NoResetPin};
 use static_cell::StaticCell;
 
-type FirmwareApplication = Application<
-    'static,
-    Display<
-        SPIInterface<
-            SpiDevice<'static, NoopRawMutex, Spi<'static, Blocking>, Output<'static>>,
-            Output<'static>,
-        >,
-        ST7789,
-        NoResetPin,
-    >,
-    UartMidiReader<'static, 'static>,
-    UartMidiWriter<'static, 'static>,
-    FakeStorageManager,
->;
 type FirmwareDisplay = Display<
     SPIInterface<
         SpiDevice<'static, NoopRawMutex, Spi<'static, Blocking>, Output<'static>>,
@@ -73,6 +59,12 @@ type FirmwareDisplay = Display<
     ST7789,
     NoResetPin,
 >;
+type FirmwareApplication = Application<
+    'static,
+    UartMidiReader<'static, 'static>,
+    UartMidiWriter<'static, 'static>,
+    FakeStorageManager,
+>;
 
 static RX: StaticCell<UartRx<Async>> = StaticCell::new();
 static TX: StaticCell<UartTx<Async>> = StaticCell::new();
@@ -80,6 +72,7 @@ static DISPLAY_1: StaticCell<FirmwareDisplay> = StaticCell::new();
 static DISPLAY_2: StaticCell<FirmwareDisplay> = StaticCell::new();
 static DISPLAY_3: StaticCell<FirmwareDisplay> = StaticCell::new();
 static DISPLAY_4: StaticCell<FirmwareDisplay> = StaticCell::new();
+static DISPLAYS: StaticCell<Displays<FirmwareDisplay>> = StaticCell::new();
 static UART_MIDI_READER: StaticCell<UartMidiReader> = StaticCell::new();
 static UART_MIDI_WRITER: StaticCell<UartMidiWriter> = StaticCell::new();
 static STORAGE_MANAGER: StaticCell<FakeStorageManager> = StaticCell::new();
@@ -196,6 +189,8 @@ async fn main(spawner: Spawner) -> ! {
     display_3.clear(Rgb565::BLACK).unwrap();
     display_4.clear(Rgb565::BLACK).unwrap();
 
+    let displays = DISPLAYS.init(Displays::new(display_1, display_2, display_3, display_4));
+
     let uart = Uart::new(
         peripherals.UART1,
         UartConfig::default()
@@ -220,10 +215,6 @@ async fn main(spawner: Spawner) -> ! {
 
     let app = APP.init(
         ApplicationBuilder::new()
-            .with_display(display_1)
-            .with_display(display_2)
-            .with_display(display_3)
-            .with_display(display_4)
             .with_midi_reader(midi_reader)
             .with_midi_writer(midi_writer)
             .with_storage_manager(storage_manager)
@@ -233,8 +224,7 @@ async fn main(spawner: Spawner) -> ! {
     // Start app tasks here
     spawner.spawn(midi_thru_task(app)).unwrap();
     spawner.spawn(midi_out_task(app)).unwrap();
-    let foo = app.displays.get_mut();
-    spawner.spawn(display_task(app, foo)).unwrap();
+    spawner.spawn(display_task(app, displays)).unwrap();
 
     core::future::pending().await
 }

@@ -16,6 +16,22 @@ pub struct Displays<'a, D: DrawTarget<Color = Rgb565>> {
     pub(crate) display_4: &'a mut D,
 }
 
+impl<'a, D: DrawTarget<Color = Rgb565>> Displays<'a, D> {
+    pub fn new(
+        display_1: &'a mut D,
+        display_2: &'a mut D,
+        display_3: &'a mut D,
+        display_4: &'a mut D,
+    ) -> Self {
+        Self {
+            display_1,
+            display_2,
+            display_3,
+            display_4,
+        }
+    }
+}
+
 pub(crate) struct MidiStreams<'a, MR: MidiReader, MW: MidiWriter> {
     reader: Mutex<NoopRawMutex, &'a mut MR>,
     writer: Mutex<NoopRawMutex, &'a mut MW>,
@@ -28,14 +44,7 @@ pub(crate) struct InternalChannels {
     button_event: ButtonEventChannel,
 }
 
-pub struct Application<
-    'a,
-    D: DrawTarget<Color = Rgb565>,
-    MR: MidiReader,
-    MW: MidiWriter,
-    SM: StorageManager,
-> {
-    pub displays: Mutex<NoopRawMutex, Displays<'a, D>>,
+pub struct Application<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> {
     pub(crate) midi_streams: MidiStreams<'a, MR, MW>,
     pub(crate) channels: InternalChannels,
     pub(crate) storage_manager: &'a mut SM,
@@ -43,25 +52,13 @@ pub struct Application<
     // TODO: Add buttons
 }
 
-impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: StorageManager>
-    Application<'a, D, MR, MW, SM>
-{
+impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR, MW, SM> {
     pub fn new(
-        display_1: &'a mut D,
-        display_2: &'a mut D,
-        display_3: &'a mut D,
-        display_4: &'a mut D,
         midi_reader: &'a mut MR,
         midi_writer: &'a mut MW,
         storage_manager: &'a mut SM,
     ) -> Self {
         Self {
-            displays: Mutex::new(Displays {
-                display_1,
-                display_2,
-                display_3,
-                display_4,
-            }),
             midi_streams: MidiStreams {
                 reader: Mutex::new(midi_reader),
                 writer: Mutex::new(midi_writer),
@@ -113,7 +110,10 @@ impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: Stor
     }
 
     /// Read app state updates and render them to the display
-    pub async fn display_task(&self, displays: &mut Displays<'_, D>) -> ! {
+    pub async fn display_task<D: DrawTarget<Color = Rgb565>>(
+        &self,
+        displays: &mut Displays<'_, D>,
+    ) -> ! {
         let mut display_1_layout = DisplayLayout::new(displays.display_1);
         let mut display_2_layout = DisplayLayout::new(displays.display_2);
         let mut display_3_layout = DisplayLayout::new(displays.display_3);
@@ -134,50 +134,19 @@ impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: Stor
 }
 
 #[derive(Default)]
-pub struct ApplicationBuilder<
-    'a,
-    D: DrawTarget<Color = Rgb565>,
-    MR: MidiReader,
-    MW: MidiWriter,
-    SM: StorageManager,
-> {
-    display_1: Option<&'a mut D>,
-    display_2: Option<&'a mut D>,
-    display_3: Option<&'a mut D>,
-    display_4: Option<&'a mut D>,
+pub struct ApplicationBuilder<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> {
     midi_reader: Option<&'a mut MR>,
     midi_writer: Option<&'a mut MW>,
     storage_manager: Option<&'a mut SM>,
 }
 
-impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: StorageManager>
-    ApplicationBuilder<'a, D, MR, MW, SM>
-{
+impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> ApplicationBuilder<'a, MR, MW, SM> {
     pub fn new() -> Self {
         Self {
-            display_1: None,
-            display_2: None,
-            display_3: None,
-            display_4: None,
             midi_reader: None,
             midi_writer: None,
             storage_manager: None,
         }
-    }
-
-    pub fn with_display(mut self, display: &'a mut D) -> Self {
-        if self.display_1.is_none() {
-            self.display_1 = Some(display);
-        } else if self.display_2.is_none() {
-            self.display_2 = Some(display);
-        } else if self.display_3.is_none() {
-            self.display_3 = Some(display);
-        } else if self.display_4.is_none() {
-            self.display_4 = Some(display);
-        } else {
-            panic!("All 4 displays are already set");
-        }
-        self
     }
 
     pub fn with_midi_reader(mut self, reader: &'a mut MR) -> Self {
@@ -195,12 +164,8 @@ impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: Stor
         self
     }
 
-    pub fn build(self) -> Application<'a, D, MR, MW, SM> {
+    pub fn build(self) -> Application<'a, MR, MW, SM> {
         Application::new(
-            self.display_1.expect("Display 1 is required"),
-            self.display_2.expect("Display 2 is required"),
-            self.display_3.expect("Display 3 is required"),
-            self.display_4.expect("Display 4 is required"),
             self.midi_reader.expect("MIDI reader is required"),
             self.midi_writer.expect("MIDI writer is required"),
             self.storage_manager.expect("Storage manager is required"),

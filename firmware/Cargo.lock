@@ -4460,6 +4460,7 @@ dependencies = [
  "heapless 0.9.2",
  "serde",
  "serde_json",
+ "static_cell",
  "tokio",
  "trunk",
  "wasm-bindgen",

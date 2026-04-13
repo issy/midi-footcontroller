@@ -18,10 +18,7 @@ use embedded_graphics_web_simulator::{
     display::WebSimulatorDisplay, output_settings::OutputSettingsBuilder,
 };
 use foundation::application::state::{Application, ApplicationBuilder};
-use foundation::storage::StorageManager;
 use static_cell::StaticCell;
-use wasm_bindgen::prelude::wasm_bindgen;
-use web_sys::js_sys::Array;
 use web_sys::{Storage, console, window};
 
 const STORAGE_KEY_PRESETS: &str = "presets";
@@ -34,8 +31,7 @@ static STORAGE_MANAGER: StaticCell<LocalStorageManager> = StaticCell::new();
 static APP: StaticCell<Application<FakeMidiReader, FakeMidiWriter, LocalStorageManager>> =
     StaticCell::new();
 
-#[wasm_bindgen(main)]
-async fn main() {
+fn main() {
     console_error_panic_hook::set_once();
     console::log_1(&"Hello world from top of main".into());
 
@@ -124,6 +120,4 @@ async fn main() {
         console::log_1(&"Hello world".into());
         app.storage_read_task().await;
     });
-
-    core::future::pending().await
 }

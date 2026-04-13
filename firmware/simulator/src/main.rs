@@ -37,6 +37,7 @@ static APP: StaticCell<Application<FakeMidiReader, FakeMidiWriter, LocalStorageM
 #[wasm_bindgen(main)]
 async fn main() {
     console_error_panic_hook::set_once();
+    console::log_1(&"Hello world from top of main".into());
 
     let local_storage = LOCAL_STORAGE.init(
         window()

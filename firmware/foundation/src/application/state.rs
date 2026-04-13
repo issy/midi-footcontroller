@@ -1,5 +1,6 @@
 use crate::application::channels::{
-    ButtonEventChannel, DisplayStateUpdateChannel, MidiOutChannel, StorageStateUpdateChannel,
+    ButtonEventChannel, DisplayStateUpdateChannel, MidiOutChannel, StorageStateEvent,
+    StorageStateUpdateChannel,
 };
 use crate::layout::DisplayLayout;
 use crate::midi::{MidiReader, MidiWriter};
@@ -129,6 +130,20 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR,
                 _ => continue, // Invalid display index, ignore the message
             };
             // TODO: Update layout for display
+        }
+    }
+
+    pub async fn storage_read_task(&self) -> ! {
+        let _presets = self
+            .storage_manager
+            .load_presets()
+            .expect("Failed to load presets from storage");
+        loop {
+            let event = self.channels.storage_state_update.receive().await;
+            match event {
+                StorageStateEvent::PresetUpdate { .. } => todo!(),
+                StorageStateEvent::SavePreset => todo!(),
+            }
         }
     }
 }

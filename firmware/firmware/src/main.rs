@@ -97,6 +97,11 @@ async fn display_task(
     app.display_task(displays).await;
 }
 
+#[embassy_executor::task]
+async fn storage_read_task(app: &'static FirmwareApplication) -> ! {
+    app.storage_read_task().await;
+}
+
 // This creates a default app-descriptor required by the esp-idf bootloader.
 // For more information see: <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/app_image_format.html#application-description>
 esp_bootloader_esp_idf::esp_app_desc!();
@@ -225,6 +230,7 @@ async fn main(spawner: Spawner) -> ! {
     spawner.spawn(midi_thru_task(app)).unwrap();
     spawner.spawn(midi_out_task(app)).unwrap();
     spawner.spawn(display_task(app, displays)).unwrap();
+    spawner.spawn(storage_read_task(app)).unwrap();
 
     core::future::pending().await
 }

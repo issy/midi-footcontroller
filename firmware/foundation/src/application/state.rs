@@ -1,6 +1,7 @@
 use crate::application::channels::{
     ButtonEventChannel, DisplayStateUpdateChannel, MidiOutChannel, StorageStateUpdateChannel,
 };
+use crate::layout::DisplayLayout;
 use crate::midi::{MidiReader, MidiWriter};
 use crate::storage::StorageManager;
 use embassy_sync::blocking_mutex::raw::NoopRawMutex;
@@ -108,6 +109,27 @@ impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: Stor
     pub async fn button_task(&self) -> ! {
         loop {
             let button_event = self.channels.button_event.receive().await;
+        }
+    }
+
+    /// Read app state updates and render them to the display
+    pub async fn display_task(&mut self) -> ! {
+        let displays = self.displays.get_mut();
+        let mut display_1_layout = DisplayLayout::new(displays.display_1);
+        let mut display_2_layout = DisplayLayout::new(displays.display_2);
+        let mut display_3_layout = DisplayLayout::new(displays.display_3);
+        let mut display_4_layout = DisplayLayout::new(displays.display_4);
+
+        loop {
+            let update_message = self.channels.display_state_update.receive().await;
+            let target = match update_message.display_index {
+                0 => &mut display_1_layout,
+                1 => &mut display_2_layout,
+                2 => &mut display_3_layout,
+                3 => &mut display_4_layout,
+                _ => continue, // Invalid display index, ignore the message
+            };
+            // TODO: Update layout for display
         }
     }
 }

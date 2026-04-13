@@ -9,7 +9,7 @@ use embassy_sync::mutex::Mutex;
 use embedded_graphics::draw_target::DrawTarget;
 use embedded_graphics::pixelcolor::Rgb565;
 
-pub(crate) struct Displays<'a, D: DrawTarget<Color = Rgb565>> {
+pub struct Displays<'a, D: DrawTarget<Color = Rgb565>> {
     pub(crate) display_1: &'a mut D,
     pub(crate) display_2: &'a mut D,
     pub(crate) display_3: &'a mut D,
@@ -35,7 +35,7 @@ pub struct Application<
     MW: MidiWriter,
     SM: StorageManager,
 > {
-    pub(crate) displays: Mutex<NoopRawMutex, Displays<'a, D>>,
+    pub displays: Mutex<NoopRawMutex, Displays<'a, D>>,
     pub(crate) midi_streams: MidiStreams<'a, MR, MW>,
     pub(crate) channels: InternalChannels,
     pub(crate) storage_manager: &'a mut SM,
@@ -113,8 +113,7 @@ impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: Stor
     }
 
     /// Read app state updates and render them to the display
-    pub async fn display_task(&mut self) -> ! {
-        let displays = self.displays.get_mut();
+    pub async fn display_task(&self, displays: &mut Displays<'_, D>) -> ! {
         let mut display_1_layout = DisplayLayout::new(displays.display_1);
         let mut display_2_layout = DisplayLayout::new(displays.display_2);
         let mut display_3_layout = DisplayLayout::new(displays.display_3);

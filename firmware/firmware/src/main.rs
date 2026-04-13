@@ -42,7 +42,7 @@ use esp_hal::time::Rate;
 use esp_hal::timer::timg::TimerGroup;
 use esp_hal::uart::{Config as UartConfig, DataBits, Parity, StopBits, Uart, UartRx, UartTx};
 use esp_hal::{Async, Blocking};
-use foundation::application::state::{Application, ApplicationBuilder};
+use foundation::application::state::{Application, ApplicationBuilder, Displays};
 use log::info;
 use midi::{UartMidiReader, UartMidiWriter};
 use mipidsi::models::ST7789;
@@ -94,6 +94,14 @@ async fn midi_thru_task(app: &'static FirmwareApplication) -> ! {
 #[embassy_executor::task]
 async fn midi_out_task(app: &'static FirmwareApplication) -> ! {
     app.midi_out_task().await;
+}
+
+#[embassy_executor::task]
+async fn display_task(
+    app: &'static FirmwareApplication,
+    displays: &'static mut Displays<'static, FirmwareDisplay>,
+) -> ! {
+    app.display_task(displays).await;
 }
 
 // This creates a default app-descriptor required by the esp-idf bootloader.
@@ -225,6 +233,8 @@ async fn main(spawner: Spawner) -> ! {
     // Start app tasks here
     spawner.spawn(midi_thru_task(app)).unwrap();
     spawner.spawn(midi_out_task(app)).unwrap();
+    let foo = app.displays.get_mut();
+    spawner.spawn(display_task(app, foo)).unwrap();
 
     core::future::pending().await
 }

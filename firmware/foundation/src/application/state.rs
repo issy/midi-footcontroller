@@ -75,7 +75,7 @@ impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: Stor
         }
     }
 
-    pub async fn midi_thru_task(&mut self) {
+    pub async fn midi_thru_task(&self) {
         if let Some(packet) = self
             .midi_streams
             .reader
@@ -90,7 +90,7 @@ impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: Stor
         }
     }
 
-    pub async fn midi_out_task(&mut self) {
+    pub async fn midi_out_task(&self) {
         let packet = self.channels.midi_out.receive().await;
         self.midi_streams
             .writer

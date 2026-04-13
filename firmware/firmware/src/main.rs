@@ -87,9 +87,16 @@ static SPI_BUS: StaticCell<Mutex<NoopRawMutex, RefCell<Spi<Blocking>>>> = Static
 static APP: StaticCell<FirmwareApplication> = StaticCell::new();
 
 #[embassy_executor::task]
-async fn midi_thru_task(app: &'static mut FirmwareApplication) -> ! {
+async fn midi_thru_task(app: &'static FirmwareApplication) -> ! {
     loop {
         app.midi_thru_task().await;
+    }
+}
+
+#[embassy_executor::task]
+async fn midi_out_task(app: &'static FirmwareApplication) {
+    loop {
+        app.midi_out_task().await;
     }
 }
 
@@ -221,6 +228,7 @@ async fn main(spawner: Spawner) -> ! {
 
     // Start app tasks here
     spawner.spawn(midi_thru_task(app)).unwrap();
+    spawner.spawn(midi_out_task(app)).unwrap();
 
     core::future::pending().await
 }

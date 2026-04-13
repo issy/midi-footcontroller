@@ -1,137 +1,167 @@
 use crate::application::channels::{
-    ButtonEventChannel, DisplayStateUpdateChannel, MidiOutChannel, StorageStateUpdateChannel,
+    ButtonEventChannel, DisplayStateUpdateChannel, MidiOutChannel, StorageStateEvent,
+    StorageStateUpdateChannel,
 };
+use crate::layout::DisplayLayout;
 use crate::midi::{MidiReader, MidiWriter};
 use crate::storage::StorageManager;
+use embassy_sync::blocking_mutex::raw::NoopRawMutex;
+use embassy_sync::mutex::Mutex;
 use embedded_graphics::draw_target::DrawTarget;
 use embedded_graphics::pixelcolor::Rgb565;
 
-pub(crate) struct Displays<'a, D: DrawTarget<Color = Rgb565>> {
+pub struct Displays<'a, D: DrawTarget<Color = Rgb565>> {
     pub(crate) display_1: &'a mut D,
     pub(crate) display_2: &'a mut D,
     pub(crate) display_3: &'a mut D,
     pub(crate) display_4: &'a mut D,
 }
 
-pub(crate) struct MidiStreams<'a, MR: MidiReader, MW: MidiWriter> {
-    reader: &'a mut MR,
-    writer: &'a mut MW,
-}
-
-pub(crate) struct InternalChannels<'a> {
-    midi_out: &'a mut MidiOutChannel,
-    display_state_update: &'a mut DisplayStateUpdateChannel,
-    storage_state_update: &'a mut StorageStateUpdateChannel,
-    button_event: &'a mut ButtonEventChannel,
-}
-
-pub struct Application<
-    'a,
-    D: DrawTarget<Color = Rgb565>,
-    MR: MidiReader,
-    MW: MidiWriter,
-    SM: StorageManager,
-> {
-    pub(crate) displays: Displays<'a, D>,
-    pub(crate) midi_streams: MidiStreams<'a, MR, MW>,
-    pub(crate) channels: InternalChannels<'a>,
-    pub(crate) storage_manager: &'a mut SM,
-    // TODO: Add protocol streams
-    // TODO: Add buttons
-}
-
-impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: StorageManager>
-    Application<'a, D, MR, MW, SM>
-{
+impl<'a, D: DrawTarget<Color = Rgb565>> Displays<'a, D> {
     pub fn new(
         display_1: &'a mut D,
         display_2: &'a mut D,
         display_3: &'a mut D,
         display_4: &'a mut D,
+    ) -> Self {
+        Self {
+            display_1,
+            display_2,
+            display_3,
+            display_4,
+        }
+    }
+}
+
+pub(crate) struct MidiStreams<'a, MR: MidiReader, MW: MidiWriter> {
+    reader: Mutex<NoopRawMutex, &'a mut MR>,
+    writer: Mutex<NoopRawMutex, &'a mut MW>,
+}
+
+pub(crate) struct InternalChannels {
+    midi_out: MidiOutChannel,
+    display_state_update: DisplayStateUpdateChannel,
+    storage_state_update: StorageStateUpdateChannel,
+    button_event: ButtonEventChannel,
+}
+
+pub struct Application<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> {
+    pub(crate) midi_streams: MidiStreams<'a, MR, MW>,
+    pub(crate) channels: InternalChannels,
+    pub(crate) storage_manager: &'a mut SM,
+    // TODO: Add protocol streams
+    // TODO: Add buttons
+}
+
+impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR, MW, SM> {
+    pub fn new(
         midi_reader: &'a mut MR,
         midi_writer: &'a mut MW,
         storage_manager: &'a mut SM,
-        midi_out_channel: &'a mut MidiOutChannel,
-        display_state_update_channel: &'a mut DisplayStateUpdateChannel,
-        storage_state_update_channel: &'a mut StorageStateUpdateChannel,
-        button_event_channel: &'a mut ButtonEventChannel,
     ) -> Self {
-        // Maybe a good idea to create the channels here?
         Self {
-            displays: Displays {
-                display_1,
-                display_2,
-                display_3,
-                display_4,
-            },
             midi_streams: MidiStreams {
-                reader: midi_reader,
-                writer: midi_writer,
+                reader: Mutex::new(midi_reader),
+                writer: Mutex::new(midi_writer),
             },
             channels: InternalChannels {
-                midi_out: midi_out_channel,
-                display_state_update: display_state_update_channel,
-                storage_state_update: storage_state_update_channel,
-                button_event: button_event_channel,
+                midi_out: MidiOutChannel::new(),
+                display_state_update: DisplayStateUpdateChannel::new(),
+                storage_state_update: StorageStateUpdateChannel::new(),
+                button_event: ButtonEventChannel::new(),
             },
             storage_manager,
+        }
+    }
+
+    pub async fn midi_thru_task(&self) -> ! {
+        loop {
+            if let Some(packet) = self
+                .midi_streams
+                .reader
+                .lock()
+                .await
+                .read_midi_packet()
+                .await
+                .unwrap()
+            {
+                // TODO: If we decide to support MIDI command input in future, this would be a good place to process those
+                self.channels.midi_out.send(packet).await;
+            }
+        }
+    }
+
+    pub async fn midi_out_task(&self) -> ! {
+        loop {
+            let packet = self.channels.midi_out.receive().await;
+            self.midi_streams
+                .writer
+                .lock()
+                .await
+                .write_midi_packet(&packet)
+                .await
+                .unwrap();
+        }
+    }
+
+    pub async fn button_task(&self) -> ! {
+        loop {
+            let button_event = self.channels.button_event.receive().await;
+        }
+    }
+
+    /// Read app state updates and render them to the display
+    pub async fn display_task<D: DrawTarget<Color = Rgb565>>(
+        &self,
+        displays: &mut Displays<'_, D>,
+    ) -> ! {
+        let mut display_1_layout = DisplayLayout::new(displays.display_1);
+        let mut display_2_layout = DisplayLayout::new(displays.display_2);
+        let mut display_3_layout = DisplayLayout::new(displays.display_3);
+        let mut display_4_layout = DisplayLayout::new(displays.display_4);
+
+        loop {
+            let update_message = self.channels.display_state_update.receive().await;
+            let target = match update_message.display_index {
+                0 => &mut display_1_layout,
+                1 => &mut display_2_layout,
+                2 => &mut display_3_layout,
+                3 => &mut display_4_layout,
+                _ => continue, // Invalid display index, ignore the message
+            };
+            // TODO: Update layout for display
+        }
+    }
+
+    pub async fn storage_read_task(&self) -> ! {
+        let _presets = self
+            .storage_manager
+            .load_presets()
+            .expect("Failed to load presets from storage");
+        loop {
+            let event = self.channels.storage_state_update.receive().await;
+            match event {
+                StorageStateEvent::PresetUpdate { .. } => todo!(),
+                StorageStateEvent::SavePreset => todo!(),
+            }
         }
     }
 }
 
 #[derive(Default)]
-pub struct ApplicationBuilder<
-    'a,
-    D: DrawTarget<Color = Rgb565>,
-    MR: MidiReader,
-    MW: MidiWriter,
-    SM: StorageManager,
-> {
-    display_1: Option<&'a mut D>,
-    display_2: Option<&'a mut D>,
-    display_3: Option<&'a mut D>,
-    display_4: Option<&'a mut D>,
+pub struct ApplicationBuilder<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> {
     midi_reader: Option<&'a mut MR>,
     midi_writer: Option<&'a mut MW>,
     storage_manager: Option<&'a mut SM>,
-    midi_out_channel: Option<&'a mut MidiOutChannel>,
-    display_state_update_channel: Option<&'a mut DisplayStateUpdateChannel>,
-    storage_state_update_channel: Option<&'a mut StorageStateUpdateChannel>,
-    button_event_channel: Option<&'a mut ButtonEventChannel>,
 }
 
-impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: StorageManager>
-    ApplicationBuilder<'a, D, MR, MW, SM>
-{
+impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> ApplicationBuilder<'a, MR, MW, SM> {
     pub fn new() -> Self {
         Self {
-            display_1: None,
-            display_2: None,
-            display_3: None,
-            display_4: None,
             midi_reader: None,
             midi_writer: None,
-            midi_out_channel: None,
-            display_state_update_channel: None,
-            storage_state_update_channel: None,
             storage_manager: None,
-            button_event_channel: None,
         }
-    }
-
-    pub fn with_display(mut self, display: &'a mut D) -> Self {
-        if self.display_1.is_none() {
-            self.display_1 = Some(display);
-        } else if self.display_2.is_none() {
-            self.display_2 = Some(display);
-        } else if self.display_3.is_none() {
-            self.display_3 = Some(display);
-        } else if self.display_4.is_none() {
-            self.display_4 = Some(display);
-        } else {
-            panic!("All 4 displays are already set");
-        }
-        self
     }
 
     pub fn with_midi_reader(mut self, reader: &'a mut MR) -> Self {
@@ -144,41 +174,16 @@ impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: Stor
         self
     }
 
-    pub fn with_channels(
-        mut self,
-        midi_out_channel: &'a mut MidiOutChannel,
-        display_state_update_channel: &'a mut DisplayStateUpdateChannel,
-        storage_state_update_channel: &'a mut StorageStateUpdateChannel,
-        button_event_channel: &'a mut ButtonEventChannel,
-    ) -> Self {
-        self.midi_out_channel = Some(midi_out_channel);
-        self.display_state_update_channel = Some(display_state_update_channel);
-        self.storage_state_update_channel = Some(storage_state_update_channel);
-        self.button_event_channel = Some(button_event_channel);
-        self
-    }
-
     pub fn with_storage_manager(mut self, manager: &'a mut SM) -> Self {
         self.storage_manager = Some(manager);
         self
     }
 
-    pub fn build(self) -> Application<'a, D, MR, MW, SM> {
+    pub fn build(self) -> Application<'a, MR, MW, SM> {
         Application::new(
-            self.display_1.expect("Display 1 is required"),
-            self.display_2.expect("Display 2 is required"),
-            self.display_3.expect("Display 3 is required"),
-            self.display_4.expect("Display 4 is required"),
             self.midi_reader.expect("MIDI reader is required"),
             self.midi_writer.expect("MIDI writer is required"),
             self.storage_manager.expect("Storage manager is required"),
-            self.midi_out_channel.expect("MIDI out channel required"),
-            self.display_state_update_channel
-                .expect("Display state update channel required"),
-            self.storage_state_update_channel
-                .expect("Storage state update channel required"),
-            self.button_event_channel
-                .expect("Button event channel required"),
         )
     }
 }

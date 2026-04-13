@@ -20,6 +20,7 @@ use embedded_graphics_web_simulator::{
 use foundation::application::state::{Application, ApplicationBuilder};
 use foundation::storage::StorageManager;
 use static_cell::StaticCell;
+use wasm_bindgen::prelude::wasm_bindgen;
 use web_sys::{Storage, window};
 
 const STORAGE_KEY_PRESETS: &str = "presets";
@@ -32,8 +33,8 @@ static STORAGE_MANAGER: StaticCell<LocalStorageManager> = StaticCell::new();
 static APP: StaticCell<Application<FakeMidiReader, FakeMidiWriter, LocalStorageManager>> =
     StaticCell::new();
 
-#[tokio::main]
-async fn main() -> ! {
+#[wasm_bindgen(main)]
+async fn main() {
     console_error_panic_hook::set_once();
 
     let mut local_storage = LOCAL_STORAGE.init(
@@ -115,10 +116,6 @@ async fn main() -> ! {
             .with_storage_manager(storage_manager)
             .build(),
     );
-
-    tokio::spawn(async move {
-        app.storage_read_task().await;
-    });
 
     core::future::pending().await
 }

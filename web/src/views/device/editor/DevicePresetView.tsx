@@ -75,6 +75,7 @@ const mockPresetButtonsData: Array<PresetData> = [
   },
 ];
 
+// TODO: Should an action have an ID, or do we use index as ID
 type ButtonActionData = {
   channel: number;
 } & (
@@ -128,7 +129,8 @@ function DevicePresetView() {
   const { presetId } = useParams<{ presetId: string }>();
   const [activeButton, setActiveButton] = useState<string>(mockPresetButtonsData[0].id);
   const activeButtonData = mockPresetButtonsData.find((button) => button.id === activeButton);
-  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const isEditing = editingIndex !== null;
   const [buttonEditorExpanded, setButtonEditorExpanded] = useState<boolean>(true);
 
   return (
@@ -187,7 +189,7 @@ function DevicePresetView() {
                       variant="subtle"
                       color="neutral"
                       onClick={() => {
-                        setIsEditing(false);
+                        setEditingIndex(null);
                       }}
                     >
                       <MdClose />
@@ -197,7 +199,7 @@ function DevicePresetView() {
                     onSubmit={(values) =>
                       new Promise<void>((resolve) => {
                         console.log(values);
-                        setIsEditing(false);
+                        setEditingIndex(null);
                         resolve();
                       })
                     }
@@ -211,8 +213,8 @@ function DevicePresetView() {
               {mockButtonActions.map((action, index) => (
                 <Card
                   key={`action_${index.toString()}`}
-                  bd={isEditing ? 'solid 1px var(--mantine-primary-color-filled)' : undefined}
-                  bg={isEditing ? 'var(--mantine-primary-color-light)' : undefined}
+                  bd={editingIndex === index ? 'solid 1px var(--mantine-primary-color-filled)' : undefined}
+                  bg={editingIndex === index ? 'var(--mantine-primary-color-light)' : undefined}
                   withBorder
                 >
                   <Flex justify="space-between">
@@ -268,7 +270,7 @@ function DevicePresetView() {
                         size="lg"
                         aria-label="Edit"
                         onClick={() => {
-                          setIsEditing(true);
+                          setEditingIndex(index);
                         }}
                       >
                         <MdEdit />
@@ -282,7 +284,7 @@ function DevicePresetView() {
               ))}
               <Button
                 onClick={() => {
-                  setIsEditing(true);
+                  setEditingIndex(mockButtonActions.length);
                 }}
                 style={{ width: '100%' }}
                 variant="default"

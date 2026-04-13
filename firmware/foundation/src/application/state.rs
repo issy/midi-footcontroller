@@ -75,30 +75,34 @@ impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: Stor
         }
     }
 
-    pub async fn midi_thru_task(&self) {
-        if let Some(packet) = self
-            .midi_streams
-            .reader
-            .lock()
-            .await
-            .read_midi_packet()
-            .await
-            .unwrap()
-        {
-            // TODO: If we decide to support MIDI command input in future, this would be a good place to process those
-            self.channels.midi_out.send(packet).await;
+    pub async fn midi_thru_task(&self) -> ! {
+        loop {
+            if let Some(packet) = self
+                .midi_streams
+                .reader
+                .lock()
+                .await
+                .read_midi_packet()
+                .await
+                .unwrap()
+            {
+                // TODO: If we decide to support MIDI command input in future, this would be a good place to process those
+                self.channels.midi_out.send(packet).await;
+            }
         }
     }
 
-    pub async fn midi_out_task(&self) {
-        let packet = self.channels.midi_out.receive().await;
-        self.midi_streams
-            .writer
-            .lock()
-            .await
-            .write_midi_packet(&packet)
-            .await
-            .unwrap();
+    pub async fn midi_out_task(&self) -> ! {
+        loop {
+            let packet = self.channels.midi_out.receive().await;
+            self.midi_streams
+                .writer
+                .lock()
+                .await
+                .write_midi_packet(&packet)
+                .await
+                .unwrap();
+        }
     }
 }
 

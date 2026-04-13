@@ -88,16 +88,12 @@ static APP: StaticCell<FirmwareApplication> = StaticCell::new();
 
 #[embassy_executor::task]
 async fn midi_thru_task(app: &'static FirmwareApplication) -> ! {
-    loop {
-        app.midi_thru_task().await;
-    }
+    app.midi_thru_task().await;
 }
 
 #[embassy_executor::task]
-async fn midi_out_task(app: &'static FirmwareApplication) {
-    loop {
-        app.midi_out_task().await;
-    }
+async fn midi_out_task(app: &'static FirmwareApplication) -> ! {
+    app.midi_out_task().await;
 }
 
 // This creates a default app-descriptor required by the esp-idf bootloader.

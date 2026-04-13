@@ -104,6 +104,12 @@ impl<'a, D: DrawTarget<Color = Rgb565>, MR: MidiReader, MW: MidiWriter, SM: Stor
                 .unwrap();
         }
     }
+
+    pub async fn button_task(&self) -> ! {
+        loop {
+            let button_event = self.channels.button_event.receive().await;
+        }
+    }
 }
 
 #[derive(Default)]

@@ -1,5 +1,7 @@
+mod midi;
 mod storage;
 
+use crate::midi::{FakeMidiReader, FakeMidiWriter};
 use crate::storage::{LocalStorageManager, Preset};
 use embedded_graphics::geometry::Dimensions;
 use embedded_graphics::prelude::Primitive;
@@ -91,7 +93,12 @@ async fn main() {
         .draw(&mut text_display)
         .unwrap();
 
+    let mut midi_reader = FakeMidiReader::default();
+    let mut midi_writer = FakeMidiWriter::default();
+
     let app = ApplicationBuilder::new()
+        .with_midi_reader(&mut midi_reader)
+        .with_midi_writer(&mut midi_writer)
         .with_storage_manager(&mut LocalStorageManager::new(&mut local_storage))
         .build();
 }

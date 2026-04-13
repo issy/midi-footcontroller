@@ -121,7 +121,7 @@ async fn main(spawner: Spawner) -> ! {
         esp_hal::interrupt::software::SoftwareInterruptControl::new(peripherals.SW_INTERRUPT);
     esp_rtos::start(timg0.timer0, sw_interrupt.software_interrupt0);
 
-    info!("Embassy initialized!");
+    info!("✅ Embassy initialised");
 
     let spi = Spi::new(
         peripherals.SPI2,
@@ -194,6 +194,8 @@ async fn main(spawner: Spawner) -> ! {
     display_3.clear(Rgb565::BLACK).unwrap();
     display_4.clear(Rgb565::BLACK).unwrap();
 
+    info!("✅ Displays initialised");
+
     let displays = DISPLAYS.init(Displays::new(display_1, display_2, display_3, display_4));
 
     let uart = Uart::new(
@@ -212,8 +214,6 @@ async fn main(spawner: Spawner) -> ! {
     let rx = RX.init(local_rx);
     let tx = TX.init(local_tx);
 
-    info!("Startup complete.");
-
     let midi_reader = UART_MIDI_READER.init(UartMidiReader::new(rx));
     let midi_writer = UART_MIDI_WRITER.init(UartMidiWriter::new(tx));
     let storage_manager = STORAGE_MANAGER.init(FakeStorageManager::default());
@@ -226,11 +226,18 @@ async fn main(spawner: Spawner) -> ! {
             .build(),
     );
 
+    info!("✅ Application initialised");
+
     // Start app tasks here
+    info!("Starting tasks...");
     spawner.spawn(midi_thru_task(app)).unwrap();
+    info!("✅ midi_thru_task");
     spawner.spawn(midi_out_task(app)).unwrap();
+    info!("✅ midi_out_task");
     spawner.spawn(display_task(app, displays)).unwrap();
+    info!("✅ display_task");
     spawner.spawn(storage_read_task(app)).unwrap();
+    info!("✅ storage_read_task");
 
     core::future::pending().await
 }

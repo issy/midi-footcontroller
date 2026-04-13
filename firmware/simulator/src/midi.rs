@@ -4,7 +4,7 @@ use foundation::midi::{MidiPacket, MidiReader, MidiWriter};
 pub struct FakeMidiWriter;
 
 #[derive(Debug)]
-enum MyError {
+pub enum MyError {
     Foo,
 }
 

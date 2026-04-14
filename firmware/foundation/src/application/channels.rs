@@ -2,9 +2,8 @@ use crate::layout::DisplayText;
 use crate::midi::MidiPacket;
 use crate::protocol::Colour;
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
-use embassy_sync::channel::Channel;
 
-pub type MidiOutChannel = Channel<CriticalSectionRawMutex, MidiPacket, 128>;
+pub type MidiOutChannel = embassy_sync::channel::Channel<CriticalSectionRawMutex, MidiPacket, 128>;
 
 pub struct DisplayStateUpdateMessage {
     pub(crate) display_index: i8,
@@ -15,14 +14,15 @@ pub struct DisplayStateUpdateMessage {
 }
 
 pub type DisplayStateUpdateChannel =
-    Channel<CriticalSectionRawMutex, DisplayStateUpdateMessage, 16>;
+    embassy_sync::channel::Channel<CriticalSectionRawMutex, DisplayStateUpdateMessage, 16>;
 
 pub enum ButtonEvent {
     Pressed { button_index: i8 },
     Released { button_index: i8 },
 }
 
-pub type ButtonEventChannel = Channel<CriticalSectionRawMutex, ButtonEvent, 16>;
+pub type ButtonEventChannel =
+    embassy_sync::channel::Channel<CriticalSectionRawMutex, ButtonEvent, 16>;
 
 // TODO: Add channel for state updates
 pub enum StorageStateEvent {
@@ -53,6 +53,5 @@ pub enum StorageStateEvent {
     SavePreset,
 }
 
-pub type StorageStateUpdateChannel = Channel<CriticalSectionRawMutex, StorageStateEvent, 16>;
-
-// TODO: Add channel for button events
+pub type StorageStateUpdateChannel =
+    embassy_sync::channel::Channel<CriticalSectionRawMutex, StorageStateEvent, 16>;

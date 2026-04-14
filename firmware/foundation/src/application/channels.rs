@@ -1,9 +1,55 @@
 use crate::layout::DisplayText;
 use crate::midi::MidiPacket;
 use crate::protocol::Colour;
-use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 
-pub type MidiOutChannel = embassy_sync::channel::Channel<CriticalSectionRawMutex, MidiPacket, 128>;
+#[cfg(target_arch = "wasm32")]
+pub struct Inner<T, const N: usize> {
+    tx: async_channel::Sender<T>,
+    rx: async_channel::Receiver<T>,
+}
+
+impl<T, const N: usize> Inner<T, N> {
+    fn new() -> Self {
+        let (tx, rx) = async_channel::bounded(N);
+        Inner { tx, rx }
+    }
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+type Inner<T, const N: usize> = embassy_sync::channel::Channel<
+    embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex,
+    T,
+    N,
+>;
+
+pub struct AppChannel<T, const N: usize> {
+    pub(crate) inner: Inner<T, N>,
+}
+
+impl<T, const N: usize> AppChannel<T, N> {
+    pub fn new() -> Self {
+        Self {
+            inner: Inner::new(),
+        }
+    }
+
+    pub async fn send(&self, value: T) {
+        #[cfg(target_arch = "wasm32")]
+        self.inner.tx.send(value).await.unwrap();
+        #[cfg(not(target_arch = "wasm32"))]
+        self.inner.send(value).await;
+    }
+
+    pub async fn receive(&self) -> T {
+        #[cfg(target_arch = "wasm32")]
+        // TODO: Don't unwrap here
+        return self.inner.rx.recv().await.unwrap();
+        #[cfg(not(target_arch = "wasm32"))]
+        return self.inner.receive().await;
+    }
+}
+
+pub type MidiOutChannel = AppChannel<MidiPacket, 128>;
 
 pub struct DisplayStateUpdateMessage {
     pub(crate) display_index: i8,
@@ -13,16 +59,14 @@ pub struct DisplayStateUpdateMessage {
     pub(crate) bottom_row_color: Colour,
 }
 
-pub type DisplayStateUpdateChannel =
-    embassy_sync::channel::Channel<CriticalSectionRawMutex, DisplayStateUpdateMessage, 16>;
+pub type DisplayStateUpdateChannel = AppChannel<DisplayStateUpdateMessage, 16>;
 
 pub enum ButtonEvent {
     Pressed { button_index: i8 },
     Released { button_index: i8 },
 }
 
-pub type ButtonEventChannel =
-    embassy_sync::channel::Channel<CriticalSectionRawMutex, ButtonEvent, 16>;
+pub type ButtonEventChannel = AppChannel<ButtonEvent, 16>;
 
 // TODO: Add channel for state updates
 pub enum StorageStateEvent {
@@ -53,5 +97,4 @@ pub enum StorageStateEvent {
     SavePreset,
 }
 
-pub type StorageStateUpdateChannel =
-    embassy_sync::channel::Channel<CriticalSectionRawMutex, StorageStateEvent, 16>;
+pub type StorageStateUpdateChannel = AppChannel<StorageStateEvent, 16>;

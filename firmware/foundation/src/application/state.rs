@@ -5,8 +5,7 @@ use crate::application::channels::{
 use crate::layout::DisplayLayout;
 use crate::midi::{MidiReader, MidiWriter};
 use crate::storage::StorageManager;
-use embassy_sync::blocking_mutex::raw::NoopRawMutex;
-use embassy_sync::mutex::Mutex;
+use core::cell::RefCell;
 use embedded_graphics::draw_target::DrawTarget;
 use embedded_graphics::pixelcolor::Rgb565;
 
@@ -34,8 +33,8 @@ impl<'a, D: DrawTarget<Color = Rgb565>> Displays<'a, D> {
 }
 
 pub(crate) struct MidiStreams<'a, MR: MidiReader, MW: MidiWriter> {
-    reader: Mutex<NoopRawMutex, &'a mut MR>,
-    writer: Mutex<NoopRawMutex, &'a mut MW>,
+    reader: RefCell<&'a mut MR>,
+    writer: RefCell<&'a mut MW>,
 }
 
 pub(crate) struct InternalChannels {
@@ -61,8 +60,8 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR,
     ) -> Self {
         Self {
             midi_streams: MidiStreams {
-                reader: Mutex::new(midi_reader),
-                writer: Mutex::new(midi_writer),
+                reader: RefCell::new(midi_reader),
+                writer: RefCell::new(midi_writer),
             },
             channels: InternalChannels {
                 midi_out: MidiOutChannel::new(),
@@ -79,8 +78,7 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR,
             if let Some(packet) = self
                 .midi_streams
                 .reader
-                .lock()
-                .await
+                .borrow_mut()
                 .read_midi_packet()
                 .await
                 .unwrap()
@@ -96,8 +94,7 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR,
             let packet = self.channels.midi_out.receive().await;
             self.midi_streams
                 .writer
-                .lock()
-                .await
+                .borrow_mut()
                 .write_midi_packet(&packet)
                 .await
                 .unwrap();

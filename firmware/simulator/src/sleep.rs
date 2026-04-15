@@ -1,4 +1,4 @@
-pub(crate) async fn sleep(ms: u64) {
+pub(crate) async fn sleep(ms: i32) {
     web_sys::js_sys::Promise::new(&mut |resolve, _| {
         web_sys::window()
             .unwrap()

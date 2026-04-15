@@ -11,7 +11,7 @@ use embedded_graphics::prelude::RgbColor;
 use embedded_graphics::primitives::{PrimitiveStyleBuilder, StyledDrawable};
 use embedded_graphics::{
     Drawable,
-    mono_font::{MonoTextStyle, ascii::FONT_6X9},
+    mono_font::MonoTextStyle,
     pixelcolor::Rgb565,
     prelude::{Point, WebColors},
     text::Text,
@@ -23,9 +23,7 @@ use foundation::application::state::{Application, ApplicationBuilder, Displays};
 use log::{Level, info};
 use static_cell::StaticCell;
 use wasm_bindgen::JsCast;
-use wasm_bindgen::closure::Closure;
-use web_sys::js_sys::{JsString, Object};
-use web_sys::{Element, ElementCreationOptions, HtmlElement, Storage, window};
+use web_sys::{Element, Storage, window};
 
 const STORAGE_KEY_PRESETS: &str = "presets";
 const STORAGE_KEY_PRESET_ID: &str = "preset_id";

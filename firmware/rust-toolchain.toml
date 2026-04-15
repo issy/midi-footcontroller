@@ -1,4 +1,4 @@
 [toolchain]
-channel = "1.94.0"
-components = ["rust-src"]
+channel = "1.93.1"
+components = ["rust-src", "wasm-pack"]
 targets = ["riscv32imac-unknown-none-elf", "wasm32-unknown-unknown"]

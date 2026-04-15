@@ -58,7 +58,7 @@ pub fn main() {
             .expect("No localStorage"),
     );
 
-    let initial_preset_id: u8 = local_storage
+    let _initial_preset_id: u8 = local_storage
         .get_item(STORAGE_KEY_PRESET_ID)
         .expect("Failed to get item from localStorage")
         .map(|v| {
@@ -72,28 +72,28 @@ pub fn main() {
         .expect("Could not access the document");
     let root_element = document
         .get_element_by_id("simulator-root")
-        .map(|el| {
-            el.set_attribute("style", "display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 2em auto 2em; gap: 1rem;")?;
-            el
+        .and_then(|el| {
+            el.set_attribute("style", "display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 2em auto 2em; gap: 1rem;").ok()?;
+            Some(el)
         })
         .expect("Could not find root element with id 'simulator-root'");
 
     root_element
         .set_attribute("style", "display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 2em auto 2em; gap: 1rem;")
         .unwrap();
-    let button_1_element = root_element
+    let _button_1_element = root_element
         .append_child(&document.create_element("button").unwrap())
         .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
         .expect("Failed to create button 1 element");
-    let button_3_element = root_element
+    let _button_3_element = root_element
         .append_child(&document.create_element("button").unwrap())
         .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
         .expect("Failed to create button 3 element");
-    let button_5_element = root_element
+    let _button_5_element = root_element
         .append_child(&document.create_element("button").unwrap())
         .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
         .expect("Failed to create button 5 element");
-    let button_6_element = root_element
+    let _button_6_element = root_element
         .append_child(&document.create_element("button").unwrap())
         .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
         .expect("Failed to create button 6 element");
@@ -131,19 +131,19 @@ pub fn main() {
         })
         .expect("Failed to create display-4 element");
 
-    let button_2_element = root_element
+    let _button_2_element = root_element
         .append_child(&document.create_element("button").unwrap())
         .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
         .expect("Failed to create button 2 element");
-    let button_4_element = root_element
+    let _button_4_element = root_element
         .append_child(&document.create_element("button").unwrap())
         .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
         .expect("Failed to create button 4 element");
-    let button_6_element = root_element
+    let _button_6_element = root_element
         .append_child(&document.create_element("button").unwrap())
         .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
         .expect("Failed to create button 6 element");
-    let button_8_element = root_element
+    let _button_8_element = root_element
         .append_child(&document.create_element("button").unwrap())
         .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
         .expect("Failed to create button 8 element");

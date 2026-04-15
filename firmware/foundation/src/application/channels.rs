@@ -8,6 +8,7 @@ pub struct Inner<T, const N: usize> {
     rx: async_channel::Receiver<T>,
 }
 
+#[cfg(target_arch = "wasm32")]
 impl<T, const N: usize> Inner<T, N> {
     fn new() -> Self {
         let (tx, rx) = async_channel::bounded(N);
@@ -23,7 +24,7 @@ type Inner<T, const N: usize> = embassy_sync::channel::Channel<
 >;
 
 pub struct AppChannel<T, const N: usize> {
-    pub(crate) inner: Inner<T, N>,
+    inner: Inner<T, N>,
 }
 
 impl<T, const N: usize> AppChannel<T, N> {

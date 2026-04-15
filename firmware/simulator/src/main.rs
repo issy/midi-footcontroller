@@ -36,6 +36,11 @@ static MIDI_WRITER: StaticCell<FakeMidiWriter> = StaticCell::new();
 static STORAGE_MANAGER: StaticCell<LocalStorageManager> = StaticCell::new();
 static APP: StaticCell<Application<FakeMidiReader, FakeMidiWriter, LocalStorageManager>> =
     StaticCell::new();
+static DISPLAY_1: StaticCell<WebSimulatorDisplay<Rgb565>> = StaticCell::new();
+static DISPLAY_2: StaticCell<WebSimulatorDisplay<Rgb565>> = StaticCell::new();
+static DISPLAY_3: StaticCell<WebSimulatorDisplay<Rgb565>> = StaticCell::new();
+static DISPLAY_4: StaticCell<WebSimulatorDisplay<Rgb565>> = StaticCell::new();
+static DISPLAYS: StaticCell<Displays<WebSimulatorDisplay<Rgb565>>> = StaticCell::new();
 
 pub fn init_logging() {
     console_log::init_with_level(Level::Debug).expect("logger init failed");
@@ -91,23 +96,38 @@ fn main() {
         .scale(1)
         .pixel_spacing(0)
         .build();
-    let mut display_1 = WebSimulatorDisplay::new(
+    let display_1 = DISPLAY_1.init(WebSimulatorDisplay::new(
+        (240, 280),
+        &display_output_settings,
+        Some(display_1_element.as_ref()),
+    ));
+    let display_2 = DISPLAY_2.init(WebSimulatorDisplay::new(
+        (240, 280),
+        &display_output_settings,
+        Some(display_2_element.as_ref()),
+    ));
+    let display_3 = DISPLAY_3.init(WebSimulatorDisplay::new(
+        (240, 280),
+        &display_output_settings,
+        Some(display_3_element.as_ref()),
+    ));
+    let display_4 = DISPLAY_4.init(WebSimulatorDisplay::new(
         (240, 280),
         &display_output_settings,
         Some(display_4_element.as_ref()),
-    );
-    display_1.flush().unwrap();
+    ));
+
     display_1
         .bounding_box()
         .draw_styled(
             &PrimitiveStyleBuilder::new()
                 .fill_color(Rgb565::BLACK)
                 .build(),
-            &mut display_1,
+            display_1,
         )
         .unwrap();
     Text::new("Hello, world!", Point::new(10, 30), text_style)
-        .draw(&mut display_1)
+        .draw(display_1)
         .unwrap();
     display_1.flush().unwrap();
 
@@ -116,7 +136,7 @@ fn main() {
             Rgb565::CSS_WHITE,
             1,
         ))
-        .draw(&mut display_1)
+        .draw(display_1)
         .unwrap();
 
     let midi_reader = MIDI_READER.init(FakeMidiReader::default());
@@ -130,12 +150,7 @@ fn main() {
             .with_storage_manager(storage_manager)
             .build(),
     );
-    let displays = Displays {
-        display_1: &mut display_1,
-        display_2: &mut display_1,
-        display_3: &mut display_1,
-        display_4: &mut display_1,
-    };
+    let displays = DISPLAYS.init(Displays::new(display_1, display_2, display_3, display_4));
 
     info!("Hello world from main");
     async_wasm_task::spawn(async {
@@ -152,6 +167,10 @@ fn main() {
     info!("Started midi out task");
     async_wasm_task::spawn(async {
         app.button_task().await;
+    });
+    info!("Started button task");
+    async_wasm_task::spawn(async {
+        app.display_task(displays).await;
     });
     info!("Started button task");
 }

@@ -4,7 +4,7 @@ mod storage;
 
 use crate::midi::{FakeMidiReader, FakeMidiWriter};
 use crate::storage::{LocalStorageManager, Preset};
-use embedded_graphics::geometry::Dimensions;
+use embedded_graphics::draw_target::DrawTarget;
 use embedded_graphics::mono_font::ascii::FONT_10X20;
 use embedded_graphics::prelude::Primitive;
 use embedded_graphics::prelude::RgbColor;
@@ -169,51 +169,16 @@ fn main() {
         Some(display_4_element.as_ref()),
     ));
 
-    display_1
-        .bounding_box()
-        .draw_styled(
-            &PrimitiveStyleBuilder::new()
-                .fill_color(Rgb565::BLACK)
-                .build(),
-            display_1,
-        )
-        .unwrap();
-    display_2
-        .bounding_box()
-        .draw_styled(
-            &PrimitiveStyleBuilder::new()
-                .fill_color(Rgb565::BLACK)
-                .build(),
-            display_2,
-        )
-        .unwrap();
-    display_3
-        .bounding_box()
-        .draw_styled(
-            &PrimitiveStyleBuilder::new()
-                .fill_color(Rgb565::BLACK)
-                .build(),
-            display_3,
-        )
-        .unwrap();
-    display_4
-        .bounding_box()
-        .draw_styled(
-            &PrimitiveStyleBuilder::new()
-                .fill_color(Rgb565::BLACK)
-                .build(),
-            display_4,
-        )
-        .unwrap();
+    display_1.clear(Rgb565::BLACK).unwrap();
+    display_2.clear(Rgb565::BLACK).unwrap();
+    display_3.clear(Rgb565::BLACK).unwrap();
+    display_4.clear(Rgb565::BLACK).unwrap();
 
     Text::new("Hello, world!", Point::new(10, 30), text_style)
         .draw(display_1)
         .unwrap();
     Text::new("Hello, world!", Point::new(10, 30), text_style)
         .draw(display_3)
-        .unwrap();
-    Text::new("Bellooooo", Point::new(10, 30), text_style)
-        .draw(display_4)
         .unwrap();
     display_1.flush().unwrap();
     display_2.flush().unwrap();

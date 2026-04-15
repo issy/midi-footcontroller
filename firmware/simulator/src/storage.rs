@@ -241,6 +241,12 @@ pub struct LocalStorageManager<'a> {
     local_storage: &'a mut Storage,
 }
 
+impl<'a> LocalStorageManager<'a> {
+    pub fn new(local_storage: &'a mut Storage) -> Self {
+        LocalStorageManager { local_storage }
+    }
+}
+
 const STORAGE_KEY_PRESETS: &str = "presets";
 const STORAGE_KEY_PRESET_ID: &str = "preset_id";
 
@@ -250,7 +256,8 @@ impl StorageManager for LocalStorageManager<'_> {
             .local_storage
             .get_item(STORAGE_KEY_PRESETS)
             .map_err(|_| StorageManagerLoadError::ErrorReadingFromStorage)?
-            .ok_or(StorageManagerLoadError::NoValueStored)?;
+            .or_else(|| Some("[]".to_string()))
+            .unwrap();
 
         let deserialized: Vec<Preset> = serde_json::from_slice(value.as_bytes())
             .map_err(|_| StorageManagerLoadError::ErrorDeserializingData)?;

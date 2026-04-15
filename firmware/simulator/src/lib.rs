@@ -23,6 +23,7 @@ use foundation::application::state::{Application, ApplicationBuilder, Displays};
 use log::{Level, info};
 use static_cell::StaticCell;
 use wasm_bindgen::JsCast;
+use wasm_bindgen::prelude::*;
 use web_sys::{Element, HtmlButtonElement, Storage, window};
 
 const STORAGE_KEY_PRESETS: &str = "presets";
@@ -45,7 +46,7 @@ pub fn init_logging() {
 }
 
 #[wasm_bindgen]
-fn main() {
+pub fn main() {
     console_error_panic_hook::set_once();
     init_logging();
 
@@ -69,9 +70,12 @@ fn main() {
     let document = window()
         .and_then(|win| win.document())
         .expect("Could not access the document");
-    let body = document.body().expect("Could not access document.body");
     let root_element = document
         .get_element_by_id("simulator-root")
+        .map(|el| {
+            el.set_attribute("style", "display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 2em auto 2em; gap: 1rem;")?;
+            el
+        })
         .expect("Could not find root element with id 'simulator-root'");
 
     root_element

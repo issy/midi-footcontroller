@@ -41,6 +41,9 @@ importers:
       react-router-dom:
         specifier: ^7.13.0
         version: 7.13.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      simulator:
+        specifier: file:../firmware/simulator/pkg
+        version: file:../firmware/simulator/pkg
       zod:
         specifier: ^4.3.6
         version: 4.3.6
@@ -1895,6 +1898,9 @@ packages:
   shebang-regex@3.0.0:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
     engines: {node: '>=8'}
+
+  simulator@file:../firmware/simulator/pkg:
+    resolution: {directory: ../firmware/simulator/pkg, type: directory}
 
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
@@ -3781,6 +3787,8 @@ snapshots:
       shebang-regex: 3.0.0
 
   shebang-regex@3.0.0: {}
+
+  simulator@file:../firmware/simulator/pkg: {}
 
   source-map-js@1.2.1: {}
 

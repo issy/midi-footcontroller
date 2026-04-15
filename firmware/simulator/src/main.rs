@@ -1,4 +1,5 @@
 mod midi;
+mod sleep;
 mod storage;
 
 use crate::midi::{FakeMidiReader, FakeMidiWriter};
@@ -18,8 +19,11 @@ use embedded_graphics_web_simulator::{
     display::WebSimulatorDisplay, output_settings::OutputSettingsBuilder,
 };
 use foundation::application::state::{Application, ApplicationBuilder};
+use log::{Level, info};
 use static_cell::StaticCell;
-use web_sys::{Storage, console, window};
+use wasm_bindgen::JsCast;
+use wasm_bindgen::closure::Closure;
+use web_sys::{Storage, window};
 
 const STORAGE_KEY_PRESETS: &str = "presets";
 const STORAGE_KEY_PRESET_ID: &str = "preset_id";
@@ -31,9 +35,14 @@ static STORAGE_MANAGER: StaticCell<LocalStorageManager> = StaticCell::new();
 static APP: StaticCell<Application<FakeMidiReader, FakeMidiWriter, LocalStorageManager>> =
     StaticCell::new();
 
+pub fn init_logging() {
+    console_log::init_with_level(Level::Debug).expect("logger init failed");
+}
+
 fn main() {
     console_error_panic_hook::set_once();
-    console::log_1(&"Hello world from top of main".into());
+    init_logging();
+    info!("Hello world from top of main");
 
     let local_storage = LOCAL_STORAGE.init(
         window()
@@ -115,10 +124,21 @@ fn main() {
             .build(),
     );
 
-    console::log_1(&"Hello world from main".into());
-
-    // FIXME
-    // async_wasm_task::spawn(async {
-    //     app.storage_read_task().await;
-    // });
+    info!("Hello world from main");
+    async_wasm_task::spawn(async {
+        app.storage_read_task().await;
+    });
+    info!("Started storage task");
+    async_wasm_task::spawn(async {
+        app.midi_thru_task().await;
+    });
+    info!("Started midi thru task");
+    async_wasm_task::spawn(async {
+        app.midi_out_task().await;
+    });
+    info!("Started midi out task");
+    async_wasm_task::spawn(async {
+        app.button_task().await;
+    });
+    info!("Started button task");
 }

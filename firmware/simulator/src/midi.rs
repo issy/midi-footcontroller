@@ -1,3 +1,4 @@
+use crate::sleep::sleep;
 use foundation::midi::{MidiPacket, MidiReader, MidiWriter};
 
 #[derive(Default)]
@@ -23,6 +24,8 @@ impl MidiReader for FakeMidiReader {
     type Error = MyError;
 
     async fn read_midi_packet(&mut self) -> Result<Option<MidiPacket>, Self::Error> {
+        // Simulate IO
+        sleep(1_000).await;
         Ok(None)
     }
 }

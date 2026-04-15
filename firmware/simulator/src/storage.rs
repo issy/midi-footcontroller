@@ -256,7 +256,8 @@ impl StorageManager for LocalStorageManager<'_> {
             .local_storage
             .get_item(STORAGE_KEY_PRESETS)
             .map_err(|_| StorageManagerLoadError::ErrorReadingFromStorage)?
-            .ok_or(StorageManagerLoadError::NoValueStored)?;
+            .or_else(|| Some("[]".to_string()))
+            .unwrap();
 
         let deserialized: Vec<Preset> = serde_json::from_slice(value.as_bytes())
             .map_err(|_| StorageManagerLoadError::ErrorDeserializingData)?;

@@ -8,6 +8,7 @@ use crate::storage::StorageManager;
 use core::cell::RefCell;
 use embedded_graphics::draw_target::DrawTarget;
 use embedded_graphics::pixelcolor::Rgb565;
+use log::info;
 
 pub struct Displays<'a, D: DrawTarget<Color = Rgb565>> {
     pub(crate) display_1: &'a mut D,
@@ -131,6 +132,7 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR,
     }
 
     pub async fn storage_read_task(&self) -> ! {
+        info!("Loading presets");
         let _presets = self
             .storage_manager
             .load_presets()

@@ -44,6 +44,7 @@ pub fn init_logging() {
     console_log::init_with_level(Level::Debug).expect("logger init failed");
 }
 
+#[wasm_bindgen]
 fn main() {
     console_error_panic_hook::set_once();
     init_logging();
@@ -70,8 +71,8 @@ fn main() {
         .expect("Could not access the document");
     let body = document.body().expect("Could not access document.body");
     let root_element = document
-        .get_element_by_id("app")
-        .expect("Could not find root element with id 'app'");
+        .get_element_by_id("simulator-root")
+        .expect("Could not find root element with id 'simulator-root'");
 
     root_element
         .set_attribute("style", "display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 2em auto 2em; gap: 1rem;")

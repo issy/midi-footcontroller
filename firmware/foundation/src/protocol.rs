@@ -1,6 +1,5 @@
 use crate::generated::device_v1 as pb;
 use crate::generated::device_v1::Envelope;
-use crate::midi::MidiPacket;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::fmt::Debug;

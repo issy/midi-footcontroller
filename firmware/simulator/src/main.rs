@@ -23,7 +23,7 @@ use foundation::application::state::{Application, ApplicationBuilder, Displays};
 use log::{Level, info};
 use static_cell::StaticCell;
 use wasm_bindgen::JsCast;
-use web_sys::{Element, Storage, window};
+use web_sys::{Element, HtmlButtonElement, Storage, window};
 
 const STORAGE_KEY_PRESETS: &str = "presets";
 const STORAGE_KEY_PRESET_ID: &str = "preset_id";
@@ -72,22 +72,76 @@ fn main() {
     let root_element = document
         .get_element_by_id("app")
         .expect("Could not find root element with id 'app'");
+
+    root_element
+        .set_attribute("style", "display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 2em auto 2em; gap: 1rem;")
+        .unwrap();
+    let button_1_element = root_element
+        .append_child(&document.create_element("button").unwrap())
+        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
+        .expect("Failed to create button 1 element");
+    let button_3_element = root_element
+        .append_child(&document.create_element("button").unwrap())
+        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
+        .expect("Failed to create button 3 element");
+    let button_5_element = root_element
+        .append_child(&document.create_element("button").unwrap())
+        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
+        .expect("Failed to create button 5 element");
+    let button_6_element = root_element
+        .append_child(&document.create_element("button").unwrap())
+        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
+        .expect("Failed to create button 6 element");
+
     let display_1_element = root_element
         .append_child(&document.create_element("div").unwrap())
         .and_then(|el| Ok(el.dyn_into::<Element>()?))
+        .and_then(|el| {
+            el.set_attribute("style", "display: flex;")?;
+            Ok(el)
+        })
         .expect("Failed to create display-1 element");
     let display_2_element = root_element
         .append_child(&document.create_element("div").unwrap())
         .and_then(|el| Ok(el.dyn_into::<Element>()?))
+        .and_then(|el| {
+            el.set_attribute("style", "display: flex;")?;
+            Ok(el)
+        })
         .expect("Failed to create display-2 element");
     let display_3_element = root_element
         .append_child(&document.create_element("div").unwrap())
         .and_then(|el| Ok(el.dyn_into::<Element>()?))
+        .and_then(|el| {
+            el.set_attribute("style", "display: flex;")?;
+            Ok(el)
+        })
         .expect("Failed to create display-3 element");
     let display_4_element = root_element
         .append_child(&document.create_element("div").unwrap())
         .and_then(|el| Ok(el.dyn_into::<Element>()?))
+        .and_then(|el| {
+            el.set_attribute("style", "display: flex;")?;
+            Ok(el)
+        })
         .expect("Failed to create display-4 element");
+
+    let button_2_element = root_element
+        .append_child(&document.create_element("button").unwrap())
+        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
+        .expect("Failed to create button 2 element");
+    let button_4_element = root_element
+        .append_child(&document.create_element("button").unwrap())
+        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
+        .expect("Failed to create button 4 element");
+    let button_6_element = root_element
+        .append_child(&document.create_element("button").unwrap())
+        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
+        .expect("Failed to create button 6 element");
+    let button_8_element = root_element
+        .append_child(&document.create_element("button").unwrap())
+        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
+        .expect("Failed to create button 8 element");
 
     let text_style = MonoTextStyle::new(&FONT_10X20, Rgb565::CSS_ORANGE);
     let display_output_settings = OutputSettingsBuilder::new()
@@ -157,6 +211,9 @@ fn main() {
         .unwrap();
     Text::new("Hello, world!", Point::new(10, 30), text_style)
         .draw(display_3)
+        .unwrap();
+    Text::new("Bellooooo", Point::new(10, 30), text_style)
+        .draw(display_4)
         .unwrap();
     display_1.flush().unwrap();
     display_2.flush().unwrap();

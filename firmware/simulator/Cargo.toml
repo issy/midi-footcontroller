@@ -7,7 +7,7 @@ edition = "2024"
 foundation = { path = "../foundation" }
 wasm-bindgen = { version = "0.2.114" }
 async_wasm_task = { version = "0.2.3" }
-web-sys = { version = "0.3.91", features = ["console", "CanvasRenderingContext2d", "Document", "Element", "HtmlCanvasElement", "Window", "Text", "Storage"] }
+web-sys = { version = "0.3.91", features = ["console", "CanvasRenderingContext2d", "Document", "HtmlButtonElement", "Element", "HtmlCanvasElement", "Window", "Text", "Storage"] }
 console_error_panic_hook = { version = "0.1.7" }
 
 embedded-graphics = { workspace = true }

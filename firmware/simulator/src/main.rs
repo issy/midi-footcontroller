@@ -124,18 +124,53 @@ fn main() {
             display_1,
         )
         .unwrap();
+    display_2
+        .bounding_box()
+        .draw_styled(
+            &PrimitiveStyleBuilder::new()
+                .fill_color(Rgb565::BLACK)
+                .build(),
+            display_2,
+        )
+        .unwrap();
+    display_3
+        .bounding_box()
+        .draw_styled(
+            &PrimitiveStyleBuilder::new()
+                .fill_color(Rgb565::BLACK)
+                .build(),
+            display_3,
+        )
+        .unwrap();
+    display_4
+        .bounding_box()
+        .draw_styled(
+            &PrimitiveStyleBuilder::new()
+                .fill_color(Rgb565::BLACK)
+                .build(),
+            display_4,
+        )
+        .unwrap();
+
     Text::new("Hello, world!", Point::new(10, 30), text_style)
         .draw(display_1)
         .unwrap();
-    display_1.flush().unwrap();
-
-    embedded_graphics::primitives::Circle::new(Point::new(29, 29), 70)
-        .into_styled(embedded_graphics::primitives::PrimitiveStyle::with_stroke(
-            Rgb565::CSS_WHITE,
-            1,
-        ))
-        .draw(display_1)
+    Text::new("Hello, world!", Point::new(10, 30), text_style)
+        .draw(display_3)
         .unwrap();
+    display_1.flush().unwrap();
+    display_2.flush().unwrap();
+    display_3.flush().unwrap();
+    display_4.flush().unwrap();
+
+    let foo = embedded_graphics::primitives::Circle::new(Point::new(29, 29), 70).into_styled(
+        embedded_graphics::primitives::PrimitiveStyle::with_stroke(Rgb565::CSS_WHITE, 1),
+    );
+    foo.draw(display_1).unwrap();
+    foo.draw(display_2).unwrap();
+
+    display_1.flush().unwrap();
+    display_2.flush().unwrap();
 
     let midi_reader = MIDI_READER.init(FakeMidiReader::default());
     let midi_writer = MIDI_WRITER.init(FakeMidiWriter::default());
@@ -170,5 +205,5 @@ fn main() {
     async_wasm_task::spawn(async {
         app.display_task(displays).await;
     });
-    info!("Started button task");
+    info!("Started display task");
 }

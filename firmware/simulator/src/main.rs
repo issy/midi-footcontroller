@@ -5,6 +5,7 @@ mod storage;
 use crate::midi::{FakeMidiReader, FakeMidiWriter};
 use crate::storage::{LocalStorageManager, Preset};
 use embedded_graphics::geometry::Dimensions;
+use embedded_graphics::mono_font::ascii::FONT_10X20;
 use embedded_graphics::prelude::Primitive;
 use embedded_graphics::prelude::RgbColor;
 use embedded_graphics::primitives::{PrimitiveStyleBuilder, StyledDrawable};
@@ -18,12 +19,13 @@ use embedded_graphics::{
 use embedded_graphics_web_simulator::{
     display::WebSimulatorDisplay, output_settings::OutputSettingsBuilder,
 };
-use foundation::application::state::{Application, ApplicationBuilder};
+use foundation::application::state::{Application, ApplicationBuilder, Displays};
 use log::{Level, info};
 use static_cell::StaticCell;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
-use web_sys::{Storage, window};
+use web_sys::js_sys::{JsString, Object};
+use web_sys::{Element, ElementCreationOptions, HtmlElement, Storage, window};
 
 const STORAGE_KEY_PRESETS: &str = "presets";
 const STORAGE_KEY_PRESET_ID: &str = "preset_id";
@@ -42,7 +44,6 @@ pub fn init_logging() {
 fn main() {
     console_error_panic_hook::set_once();
     init_logging();
-    info!("Hello world from top of main");
 
     let local_storage = LOCAL_STORAGE.init(
         window()
@@ -51,16 +52,6 @@ fn main() {
             .expect("Failed to access localStorage")
             .expect("No localStorage"),
     );
-
-    let presets: Vec<Preset> = local_storage
-        .get_item(STORAGE_KEY_PRESETS)
-        .expect("Failed to get item from localStorage")
-        .map(|value| {
-            let f: Vec<Preset> = serde_json::from_slice(value.as_bytes())
-                .expect("Failed to parse localStorage value as JSON");
-            return f;
-        })
-        .unwrap_or(Vec::new());
 
     let initial_preset_id: u8 = local_storage
         .get_item(STORAGE_KEY_PRESET_ID)
@@ -75,41 +66,57 @@ fn main() {
         .and_then(|win| win.document())
         .expect("Could not access the document");
     let body = document.body().expect("Could not access document.body");
-    let text_node = document.create_text_node("Hello, world from Vanilla Rust!");
-    body.append_child(text_node.as_ref())
-        .expect("Failed to append text");
+    let root_element = document
+        .get_element_by_id("app")
+        .expect("Could not find root element with id 'app'");
+    let display_1_element = root_element
+        .append_child(&document.create_element("div").unwrap())
+        .and_then(|el| Ok(el.dyn_into::<Element>()?))
+        .expect("Failed to create display-1 element");
+    let display_2_element = root_element
+        .append_child(&document.create_element("div").unwrap())
+        .and_then(|el| Ok(el.dyn_into::<Element>()?))
+        .expect("Failed to create display-2 element");
+    let display_3_element = root_element
+        .append_child(&document.create_element("div").unwrap())
+        .and_then(|el| Ok(el.dyn_into::<Element>()?))
+        .expect("Failed to create display-3 element");
+    let display_4_element = root_element
+        .append_child(&document.create_element("div").unwrap())
+        .and_then(|el| Ok(el.dyn_into::<Element>()?))
+        .expect("Failed to create display-4 element");
 
-    let style = MonoTextStyle::new(&FONT_6X9, Rgb565::CSS_ORANGE);
-    let output_settings = OutputSettingsBuilder::new()
-        .scale(4)
+    let text_style = MonoTextStyle::new(&FONT_10X20, Rgb565::CSS_ORANGE);
+    let display_output_settings = OutputSettingsBuilder::new()
+        .scale(1)
         .pixel_spacing(0)
         .build();
-    let mut text_display = WebSimulatorDisplay::new(
-        (128, 64),
-        &output_settings,
-        document.get_element_by_id("app").as_ref(),
+    let mut display_1 = WebSimulatorDisplay::new(
+        (240, 280),
+        &display_output_settings,
+        Some(display_4_element.as_ref()),
     );
-    text_display.flush().unwrap();
-    text_display
+    display_1.flush().unwrap();
+    display_1
         .bounding_box()
         .draw_styled(
             &PrimitiveStyleBuilder::new()
                 .fill_color(Rgb565::BLACK)
                 .build(),
-            &mut text_display,
+            &mut display_1,
         )
         .unwrap();
-    Text::new("Hello, world!", Point::new(10, 30), style)
-        .draw(&mut text_display)
+    Text::new("Hello, world!", Point::new(10, 30), text_style)
+        .draw(&mut display_1)
         .unwrap();
-    text_display.flush().unwrap();
+    display_1.flush().unwrap();
 
     embedded_graphics::primitives::Circle::new(Point::new(29, 29), 70)
         .into_styled(embedded_graphics::primitives::PrimitiveStyle::with_stroke(
             Rgb565::CSS_WHITE,
             1,
         ))
-        .draw(&mut text_display)
+        .draw(&mut display_1)
         .unwrap();
 
     let midi_reader = MIDI_READER.init(FakeMidiReader::default());
@@ -123,6 +130,12 @@ fn main() {
             .with_storage_manager(storage_manager)
             .build(),
     );
+    let displays = Displays {
+        display_1: &mut display_1,
+        display_2: &mut display_1,
+        display_3: &mut display_1,
+        display_4: &mut display_1,
+    };
 
     info!("Hello world from main");
     async_wasm_task::spawn(async {

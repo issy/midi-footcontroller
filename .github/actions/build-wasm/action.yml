@@ -21,6 +21,7 @@ runs:
 
     - name: Install wasm-pack
       shell: bash
+      working-directory: "firmware/simulator"
       run: cargo install wasm-pack
 
     - name: Wasm pack

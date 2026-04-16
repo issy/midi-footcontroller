@@ -49,6 +49,9 @@ jobs:
         run: cargo build --target wasm32-unknown-unknown --release
         working-directory: "firmware/simulator"
 
+      - name: Build Simulator (wasm-pack)
+        uses: ./.github/actions/build-wasm
+
   rustfmt:
     name: Formatting
     runs-on: ubuntu-latest

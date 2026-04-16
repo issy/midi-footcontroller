@@ -1,9 +1,9 @@
 import init from '../../simulator-pkg/simulator';
 import { useMutation } from '@tanstack/react-query';
-import { Affix, Alert, Button } from '@mantine/core';
+import { ActionIcon, Affix, Alert, Button, Flex } from '@mantine/core';
 import { Fragment, useState } from 'react';
 import classes from './Simulator.module.scss';
-import { useClickOutside } from '@mantine/hooks';
+import { MdClose } from 'react-icons/md';
 
 async function initialiseSimulator() {
   const { main } = await init();
@@ -15,11 +15,6 @@ function SimulatorDrawer() {
   const { mutate, isPending, isError, error, isSuccess } = useMutation({
     mutationKey: ['simulator-initialised'],
     mutationFn: initialiseSimulator,
-  });
-  const drawerRef = useClickOutside(() => {
-    if (opened) {
-      setOpened(false);
-    }
   });
 
   return (
@@ -35,12 +30,23 @@ function SimulatorDrawer() {
           Simulator
         </Button>
       </Affix>
-      <div style={{ display: opened ? 'block' : 'none' }} className={classes.simulatorDrawer} ref={drawerRef}>
+      <div style={{ display: opened ? 'block' : 'none' }} className={classes.simulatorDrawer}>
         {isError && (
           <Alert color="red" title="Error">
             {error.message}
           </Alert>
         )}
+        <Flex mb="md" direction="row-reverse">
+          <ActionIcon
+            onClick={() => {
+              setOpened(false);
+            }}
+            variant="subtle"
+            color="gray"
+          >
+            <MdClose />
+          </ActionIcon>
+        </Flex>
         <div id="simulator-root" />
       </div>
     </Fragment>

@@ -46,6 +46,18 @@ pub fn init_logging() {
 }
 
 #[wasm_bindgen]
+pub fn teardown() {
+    let document = window()
+        .and_then(|win| win.document())
+        .expect("Could not access the document");
+    if let Some(root_element) = document.get_element_by_id("simulator-root") {
+        document
+            .remove_child(&root_element)
+            .expect("Failed to remove root element");
+    }
+}
+
+#[wasm_bindgen]
 pub fn main() {
     console_error_panic_hook::set_once();
     init_logging();

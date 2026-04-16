@@ -6,6 +6,7 @@ import { type ConnectionManager, useConnectionManagerContext } from '@/views/dev
 import { MdArrowDropDown, MdCode, MdDownload, MdOutlineUsb, MdOutlineUsbOff } from 'react-icons/md';
 import { useMutation } from '@tanstack/react-query';
 import classes from './DeviceLayout.module.scss';
+import SimulatorDrawer from '@/components/SimulatorDrawer';
 
 function ConnectButton({ connect }: Pick<Extract<ConnectionManager, { isConnected: false }>, 'connect'>) {
   const { isPending, mutate } = useMutation({
@@ -124,6 +125,7 @@ function DeviceLayout() {
         </Group>
       </AppShell.Header>
       <Outlet />
+      <SimulatorDrawer />
     </ConnectionManagerProvider>
   );
 }

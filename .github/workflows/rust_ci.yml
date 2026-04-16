@@ -27,7 +27,7 @@ jobs:
         uses: dtolnay/rust-toolchain@v1
         with:
           targets: riscv32imac-unknown-none-elf,wasm32-unknown-unknown
-          toolchain: "1.94.0"
+          toolchain: "1.93.1"
           components: rust-src
 
       - name: Enable caching
@@ -49,6 +49,9 @@ jobs:
         run: cargo build --target wasm32-unknown-unknown --release
         working-directory: "firmware/simulator"
 
+      - name: Build Simulator (wasm-pack)
+        uses: ./.github/actions/build-wasm
+
   rustfmt:
     name: Formatting
     runs-on: ubuntu-latest
@@ -62,7 +65,7 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@v1
         with:
-          toolchain: "1.94.0"
+          toolchain: "1.93.1"
           components: rustfmt
 
       - name: Check formatting
@@ -84,7 +87,7 @@ jobs:
         uses: dtolnay/rust-toolchain@v1
         with:
           targets: riscv32imac-unknown-none-elf,wasm32-unknown-unknown
-          toolchain: "1.94.0"
+          toolchain: "1.93.1"
           components: rust-src, rustfmt, clippy
 
       - name: Enable caching

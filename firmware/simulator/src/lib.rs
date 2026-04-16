@@ -23,6 +23,7 @@ use foundation::application::state::{Application, ApplicationBuilder, Displays};
 use log::{Level, info};
 use static_cell::StaticCell;
 use wasm_bindgen::JsCast;
+use wasm_bindgen::prelude::*;
 use web_sys::{Element, HtmlButtonElement, Storage, window};
 
 const STORAGE_KEY_PRESETS: &str = "presets";
@@ -44,7 +45,20 @@ pub fn init_logging() {
     console_log::init_with_level(Level::Debug).expect("logger init failed");
 }
 
-fn main() {
+#[wasm_bindgen]
+pub fn teardown() {
+    let document = window()
+        .and_then(|win| win.document())
+        .expect("Could not access the document");
+    if let Some(root_element) = document.get_element_by_id("simulator-root") {
+        document
+            .remove_child(&root_element)
+            .expect("Failed to remove root element");
+    }
+}
+
+#[wasm_bindgen]
+pub fn main() {
     console_error_panic_hook::set_once();
     init_logging();
 
@@ -56,7 +70,7 @@ fn main() {
             .expect("No localStorage"),
     );
 
-    let initial_preset_id: u8 = local_storage
+    let _initial_preset_id: u8 = local_storage
         .get_item(STORAGE_KEY_PRESET_ID)
         .expect("Failed to get item from localStorage")
         .map(|v| {
@@ -68,27 +82,30 @@ fn main() {
     let document = window()
         .and_then(|win| win.document())
         .expect("Could not access the document");
-    let body = document.body().expect("Could not access document.body");
     let root_element = document
-        .get_element_by_id("app")
-        .expect("Could not find root element with id 'app'");
+        .get_element_by_id("simulator-root")
+        .and_then(|el| {
+            el.set_attribute("style", "display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 2em auto 2em; gap: 1rem;").ok()?;
+            Some(el)
+        })
+        .expect("Could not find root element with id 'simulator-root'");
 
     root_element
         .set_attribute("style", "display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 2em auto 2em; gap: 1rem;")
         .unwrap();
-    let button_1_element = root_element
+    let _button_1_element = root_element
         .append_child(&document.create_element("button").unwrap())
         .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
         .expect("Failed to create button 1 element");
-    let button_3_element = root_element
+    let _button_3_element = root_element
         .append_child(&document.create_element("button").unwrap())
         .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
         .expect("Failed to create button 3 element");
-    let button_5_element = root_element
+    let _button_5_element = root_element
         .append_child(&document.create_element("button").unwrap())
         .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
         .expect("Failed to create button 5 element");
-    let button_6_element = root_element
+    let _button_6_element = root_element
         .append_child(&document.create_element("button").unwrap())
         .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
         .expect("Failed to create button 6 element");
@@ -97,7 +114,7 @@ fn main() {
         .append_child(&document.create_element("div").unwrap())
         .and_then(|el| Ok(el.dyn_into::<Element>()?))
         .and_then(|el| {
-            el.set_attribute("style", "display: flex;")?;
+            el.set_attribute("style", "display: flex; justify-content: center;")?;
             Ok(el)
         })
         .expect("Failed to create display-1 element");
@@ -105,7 +122,7 @@ fn main() {
         .append_child(&document.create_element("div").unwrap())
         .and_then(|el| Ok(el.dyn_into::<Element>()?))
         .and_then(|el| {
-            el.set_attribute("style", "display: flex;")?;
+            el.set_attribute("style", "display: flex; justify-content: center;")?;
             Ok(el)
         })
         .expect("Failed to create display-2 element");
@@ -113,7 +130,7 @@ fn main() {
         .append_child(&document.create_element("div").unwrap())
         .and_then(|el| Ok(el.dyn_into::<Element>()?))
         .and_then(|el| {
-            el.set_attribute("style", "display: flex;")?;
+            el.set_attribute("style", "display: flex; justify-content: center;")?;
             Ok(el)
         })
         .expect("Failed to create display-3 element");
@@ -121,24 +138,24 @@ fn main() {
         .append_child(&document.create_element("div").unwrap())
         .and_then(|el| Ok(el.dyn_into::<Element>()?))
         .and_then(|el| {
-            el.set_attribute("style", "display: flex;")?;
+            el.set_attribute("style", "display: flex; justify-content: center;")?;
             Ok(el)
         })
         .expect("Failed to create display-4 element");
 
-    let button_2_element = root_element
+    let _button_2_element = root_element
         .append_child(&document.create_element("button").unwrap())
         .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
         .expect("Failed to create button 2 element");
-    let button_4_element = root_element
+    let _button_4_element = root_element
         .append_child(&document.create_element("button").unwrap())
         .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
         .expect("Failed to create button 4 element");
-    let button_6_element = root_element
+    let _button_6_element = root_element
         .append_child(&document.create_element("button").unwrap())
         .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
         .expect("Failed to create button 6 element");
-    let button_8_element = root_element
+    let _button_8_element = root_element
         .append_child(&document.create_element("button").unwrap())
         .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
         .expect("Failed to create button 8 element");

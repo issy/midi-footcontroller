@@ -20,6 +20,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v6
 
+      - name: Build Simulator
+        uses: ./.github/actions/build-wasm
+
       - name: Setup Node
         uses: actions/setup-node@v6
         with:

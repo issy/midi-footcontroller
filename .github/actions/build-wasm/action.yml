@@ -1,0 +1,34 @@
+name: build-wasm
+author: issy
+description: build-wasm
+runs:
+  using: composite
+  steps:
+    - name: Setup Rust
+      uses: dtolnay/rust-toolchain@v1
+      with:
+        targets: riscv32imac-unknown-none-elf,wasm32-unknown-unknown
+        toolchain: "1.93.1"
+        components: rust-src
+
+#    - name: Enable caching
+#      uses: Swatinem/rust-cache@v2
+
+    - name: Build simulator
+      shell: bash
+      working-directory: "firmware/simulator"
+      run: cargo build --target wasm32-unknown-unknown --release
+
+    - name: Install wasm-pack
+      shell: bash
+      working-directory: "firmware/simulator"
+      run: cargo install wasm-pack
+
+    - name: Wasm pack
+      shell: bash
+      working-directory: "firmware/simulator"
+      run: wasm-pack build --target web --out-dir ../../web/simulator-pkg
+
+    - name: Debug
+      shell: bash
+      run: ls -lah web/

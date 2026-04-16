@@ -12,7 +12,7 @@ import tanstackQuery from '@tanstack/eslint-plugin-query';
 export default defineConfig([
   globalIgnores(['dist']),
   {
-    ignores: ['src/generated/**/*'],
+    ignores: ['src/generated/**/*', 'simulator-pkg/**/*'],
   },
   {
     files: ['**/*.{ts,tsx}'],

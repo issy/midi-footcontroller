@@ -11,8 +11,8 @@ runs:
         toolchain: "1.94.0"
         components: rust-src
 
-    - name: Enable caching
-      uses: Swatinem/rust-cache@v2
+#    - name: Enable caching
+#      uses: Swatinem/rust-cache@v2
 
     - name: Build simulator
       shell: bash

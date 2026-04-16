@@ -114,7 +114,7 @@ pub fn main() {
         .append_child(&document.create_element("div").unwrap())
         .and_then(|el| Ok(el.dyn_into::<Element>()?))
         .and_then(|el| {
-            el.set_attribute("style", "display: flex;")?;
+            el.set_attribute("style", "display: flex; justify-content: center;")?;
             Ok(el)
         })
         .expect("Failed to create display-1 element");
@@ -122,7 +122,7 @@ pub fn main() {
         .append_child(&document.create_element("div").unwrap())
         .and_then(|el| Ok(el.dyn_into::<Element>()?))
         .and_then(|el| {
-            el.set_attribute("style", "display: flex;")?;
+            el.set_attribute("style", "display: flex; justify-content: center;")?;
             Ok(el)
         })
         .expect("Failed to create display-2 element");
@@ -130,7 +130,7 @@ pub fn main() {
         .append_child(&document.create_element("div").unwrap())
         .and_then(|el| Ok(el.dyn_into::<Element>()?))
         .and_then(|el| {
-            el.set_attribute("style", "display: flex;")?;
+            el.set_attribute("style", "display: flex; justify-content: center;")?;
             Ok(el)
         })
         .expect("Failed to create display-3 element");
@@ -138,7 +138,7 @@ pub fn main() {
         .append_child(&document.create_element("div").unwrap())
         .and_then(|el| Ok(el.dyn_into::<Element>()?))
         .and_then(|el| {
-            el.set_attribute("style", "display: flex;")?;
+            el.set_attribute("style", "display: flex; justify-content: center;")?;
             Ok(el)
         })
         .expect("Failed to create display-4 element");

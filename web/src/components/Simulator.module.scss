@@ -1,0 +1,11 @@
+.simulatorDrawer {
+  position: absolute;
+  bottom: 0;
+  width: 100vw;
+  height: 40vh;
+  z-index: 1;
+  background: var(--mantine-color-dark-9);
+  border-top: 1px solid var(--mantine-color-default-border);
+  box-shadow: var(--mantine-shadow-md);
+  padding: 1rem;
+}

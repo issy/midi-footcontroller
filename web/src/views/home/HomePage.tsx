@@ -5,7 +5,7 @@ import { MdOpenInNew } from 'react-icons/md';
 import { Fragment } from 'react';
 import ColourSchemeButton from '@/components/ColourSchemeButton';
 import { Link, useNavigate } from 'react-router';
-import Simulator from '@/components/Simulator';
+import SimulatorDrawer from '@/components/SimulatorDrawer';
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -71,7 +71,7 @@ export function HomePage() {
           </Flex>
         </Container>
       </div>
-      <Simulator />
+      <SimulatorDrawer />
     </Fragment>
   );
 }

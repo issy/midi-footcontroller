@@ -1,6 +1,6 @@
 import init from '../../simulator-pkg/simulator';
 import { useMutation } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { Button } from '@mantine/core';
 
 const initialiseSimulator = async () => {
   const { main } = await init();
@@ -13,12 +13,15 @@ function Simulator() {
     mutationFn: initialiseSimulator,
   });
 
-  useEffect(() => {
-    mutate();
-  }, [mutate]);
-
   return (
     <div>
+      <Button
+        onClick={() => {
+          mutate();
+        }}
+      >
+        Start Simulator
+      </Button>
       {isPending && <p>Loading simulator...</p>}
       {isError && <p>Error loading simulator: {error.message}</p>}
       {isSuccess && <p>Simulator loaded successfully!</p>}

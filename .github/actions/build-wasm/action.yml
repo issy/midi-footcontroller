@@ -28,3 +28,7 @@ runs:
       shell: bash
       working-directory: "firmware/simulator"
       run: wasm-pack build --target web --out-dir ../../web/simulator-pkg
+
+    - name: Debug
+      shell: bash
+      run: ls -lah web/

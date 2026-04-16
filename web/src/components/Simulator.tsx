@@ -1,4 +1,4 @@
-import init from 'simulator';
+import init from '../../simulator-pkg/simulator';
 import { useMutation } from '@tanstack/react-query';
 import { useEffect } from 'react';
 

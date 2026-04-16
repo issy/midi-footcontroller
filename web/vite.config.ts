@@ -10,6 +10,9 @@ export default defineConfig({
       },
     }),
   ],
+  optimizeDeps: {
+    exclude: ['simulator-pkg'],
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

@@ -31,11 +31,6 @@ function SimulatorDrawer() {
         </Button>
       </Affix>
       <div style={{ display: opened ? 'block' : 'none' }} className={classes.simulatorDrawer}>
-        {isError && (
-          <Alert color="red" title="Error">
-            {error.message}
-          </Alert>
-        )}
         <Flex mb="md" direction="row-reverse">
           <ActionIcon
             onClick={() => {
@@ -47,6 +42,11 @@ function SimulatorDrawer() {
             <MdClose />
           </ActionIcon>
         </Flex>
+        {isError && (
+          <Alert color="red" title="Error">
+            {error.message}
+          </Alert>
+        )}
         <div id="simulator-root" />
       </div>
     </Fragment>

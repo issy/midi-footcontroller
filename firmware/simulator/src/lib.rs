@@ -41,8 +41,20 @@ static DISPLAY_3: StaticCell<WebSimulatorDisplay<Rgb565>> = StaticCell::new();
 static DISPLAY_4: StaticCell<WebSimulatorDisplay<Rgb565>> = StaticCell::new();
 static DISPLAYS: StaticCell<Displays<WebSimulatorDisplay<Rgb565>>> = StaticCell::new();
 
-pub fn init_logging() {
+fn init_logging() {
     console_log::init_with_level(Level::Debug).expect("logger init failed");
+}
+
+fn create_button_element(root_element: &Element) -> Result<HtmlButtonElement, JsValue> {
+    root_element
+        .append_child(
+            &window()
+                .unwrap()
+                .document()
+                .unwrap()
+                .create_element("button")?,
+        )
+        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
 }
 
 #[wasm_bindgen]
@@ -93,22 +105,14 @@ pub fn main() {
     root_element
         .set_attribute("style", "display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 2em auto 2em; gap: 1rem;")
         .unwrap();
-    let _button_1_element = root_element
-        .append_child(&document.create_element("button").unwrap())
-        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
-        .expect("Failed to create button 1 element");
-    let _button_3_element = root_element
-        .append_child(&document.create_element("button").unwrap())
-        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
-        .expect("Failed to create button 3 element");
-    let _button_5_element = root_element
-        .append_child(&document.create_element("button").unwrap())
-        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
-        .expect("Failed to create button 5 element");
-    let _button_6_element = root_element
-        .append_child(&document.create_element("button").unwrap())
-        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
-        .expect("Failed to create button 6 element");
+    let _button_1_element =
+        create_button_element(&root_element).expect("Failed to create button 1 element");
+    let _button_3_element =
+        create_button_element(&root_element).expect("Failed to create button 3 element");
+    let _button_5_element =
+        create_button_element(&root_element).expect("Failed to create button 5 element");
+    let _button_7_element =
+        create_button_element(&root_element).expect("Failed to create button 7 element");
 
     let display_1_element = root_element
         .append_child(&document.create_element("div").unwrap())
@@ -143,22 +147,14 @@ pub fn main() {
         })
         .expect("Failed to create display-4 element");
 
-    let _button_2_element = root_element
-        .append_child(&document.create_element("button").unwrap())
-        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
-        .expect("Failed to create button 2 element");
-    let _button_4_element = root_element
-        .append_child(&document.create_element("button").unwrap())
-        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
-        .expect("Failed to create button 4 element");
-    let _button_6_element = root_element
-        .append_child(&document.create_element("button").unwrap())
-        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
-        .expect("Failed to create button 6 element");
-    let _button_8_element = root_element
-        .append_child(&document.create_element("button").unwrap())
-        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
-        .expect("Failed to create button 8 element");
+    let _button_2_element =
+        create_button_element(&root_element).expect("Failed to create button 2 element");
+    let _button_4_element =
+        create_button_element(&root_element).expect("Failed to create button 4 element");
+    let _button_6_element =
+        create_button_element(&root_element).expect("Failed to create button 6 element");
+    let _button_8_element =
+        create_button_element(&root_element).expect("Failed to create button 8 element");
 
     let text_style = MonoTextStyle::new(&FONT_10X20, Rgb565::CSS_ORANGE);
     let display_output_settings = OutputSettingsBuilder::new()

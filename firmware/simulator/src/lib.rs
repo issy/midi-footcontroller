@@ -109,9 +109,14 @@ pub fn main() {
         })
         .expect("Could not find root element with id 'simulator-root'");
 
+    // Buttons   1 3 5 7
+    // Displays  1 2 3 4
+    // Buttons   2 4 6 8
+
     root_element
         .set_attribute("style", "display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 2em auto 2em; gap: 1rem;")
         .unwrap();
+
     let _button_1_element =
         create_button_element(&document, &root_element).expect("Failed to create button 1 element");
     let _button_3_element =

@@ -24,7 +24,7 @@ use log::{Level, info};
 use static_cell::StaticCell;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
-use web_sys::{Element, HtmlButtonElement, Storage, window};
+use web_sys::{Document, Element, HtmlButtonElement, HtmlElement, Storage, window};
 
 const STORAGE_KEY_PRESETS: &str = "presets";
 const STORAGE_KEY_PRESET_ID: &str = "preset_id";
@@ -45,16 +45,23 @@ fn init_logging() {
     console_log::init_with_level(Level::Debug).expect("logger init failed");
 }
 
-fn create_button_element(root_element: &Element) -> Result<HtmlButtonElement, JsValue> {
-    root_element
-        .append_child(
-            &window()
-                .unwrap()
-                .document()
-                .unwrap()
-                .create_element("button")?,
-        )
+fn create_button_element(
+    document: &Document,
+    parent: &Element,
+) -> Result<HtmlButtonElement, JsValue> {
+    parent
+        .append_child(&document.create_element("button")?)
         .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
+}
+
+fn create_display_element(document: &Document, parent: &Element) -> Result<Element, JsValue> {
+    parent
+        .append_child(&document.create_element("div")?)
+        .and_then(|el| Ok(el.dyn_into::<Element>()?))
+        .and_then(|el| {
+            el.set_attribute("style", "display: flex; justify-content: center;")?;
+            Ok(el)
+        })
 }
 
 #[wasm_bindgen]
@@ -106,13 +113,13 @@ pub fn main() {
         .set_attribute("style", "display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 2em auto 2em; gap: 1rem;")
         .unwrap();
     let _button_1_element =
-        create_button_element(&root_element).expect("Failed to create button 1 element");
+        create_button_element(&document, &root_element).expect("Failed to create button 1 element");
     let _button_3_element =
-        create_button_element(&root_element).expect("Failed to create button 3 element");
+        create_button_element(&document, &root_element).expect("Failed to create button 3 element");
     let _button_5_element =
-        create_button_element(&root_element).expect("Failed to create button 5 element");
+        create_button_element(&document, &root_element).expect("Failed to create button 5 element");
     let _button_7_element =
-        create_button_element(&root_element).expect("Failed to create button 7 element");
+        create_button_element(&document, &root_element).expect("Failed to create button 7 element");
 
     let display_1_element = root_element
         .append_child(&document.create_element("div").unwrap())
@@ -148,13 +155,13 @@ pub fn main() {
         .expect("Failed to create display-4 element");
 
     let _button_2_element =
-        create_button_element(&root_element).expect("Failed to create button 2 element");
+        create_button_element(&document, &root_element).expect("Failed to create button 2 element");
     let _button_4_element =
-        create_button_element(&root_element).expect("Failed to create button 4 element");
+        create_button_element(&document, &root_element).expect("Failed to create button 4 element");
     let _button_6_element =
-        create_button_element(&root_element).expect("Failed to create button 6 element");
+        create_button_element(&document, &root_element).expect("Failed to create button 6 element");
     let _button_8_element =
-        create_button_element(&root_element).expect("Failed to create button 8 element");
+        create_button_element(&document, &root_element).expect("Failed to create button 8 element");
 
     let text_style = MonoTextStyle::new(&FONT_10X20, Rgb565::CSS_ORANGE);
     let display_output_settings = OutputSettingsBuilder::new()

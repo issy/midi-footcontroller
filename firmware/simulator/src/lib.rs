@@ -121,38 +121,14 @@ pub fn main() {
     let _button_7_element =
         create_button_element(&document, &root_element).expect("Failed to create button 7 element");
 
-    let display_1_element = root_element
-        .append_child(&document.create_element("div").unwrap())
-        .and_then(|el| Ok(el.dyn_into::<Element>()?))
-        .and_then(|el| {
-            el.set_attribute("style", "display: flex; justify-content: center;")?;
-            Ok(el)
-        })
-        .expect("Failed to create display-1 element");
-    let display_2_element = root_element
-        .append_child(&document.create_element("div").unwrap())
-        .and_then(|el| Ok(el.dyn_into::<Element>()?))
-        .and_then(|el| {
-            el.set_attribute("style", "display: flex; justify-content: center;")?;
-            Ok(el)
-        })
-        .expect("Failed to create display-2 element");
-    let display_3_element = root_element
-        .append_child(&document.create_element("div").unwrap())
-        .and_then(|el| Ok(el.dyn_into::<Element>()?))
-        .and_then(|el| {
-            el.set_attribute("style", "display: flex; justify-content: center;")?;
-            Ok(el)
-        })
-        .expect("Failed to create display-3 element");
-    let display_4_element = root_element
-        .append_child(&document.create_element("div").unwrap())
-        .and_then(|el| Ok(el.dyn_into::<Element>()?))
-        .and_then(|el| {
-            el.set_attribute("style", "display: flex; justify-content: center;")?;
-            Ok(el)
-        })
-        .expect("Failed to create display-4 element");
+    let display_1_element = create_display_element(&document, &root_element)
+        .expect("Failed to create display 1 element");
+    let display_2_element = create_display_element(&document, &root_element)
+        .expect("Failed to create display 2 element");
+    let display_3_element = create_display_element(&document, &root_element)
+        .expect("Failed to create display 3 element");
+    let display_4_element = create_display_element(&document, &root_element)
+        .expect("Failed to create display 4 element");
 
     let _button_2_element =
         create_button_element(&document, &root_element).expect("Failed to create button 2 element");

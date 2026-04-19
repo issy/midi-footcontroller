@@ -121,10 +121,10 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR,
         loop {
             let update_message = self.channels.display_state_update.receive().await;
             let target = match update_message.display_identifier {
-                DisplayIdentifier::DisplayOne => &mut display_1_layout,
-                DisplayIdentifier::DisplayTwo => &mut display_2_layout,
-                DisplayIdentifier::DisplayThree => &mut display_3_layout,
-                DisplayIdentifier::DisplayFour => &mut display_4_layout,
+                DisplayIdentifier::Display1 => &mut display_1_layout,
+                DisplayIdentifier::Display2 => &mut display_2_layout,
+                DisplayIdentifier::Display3 => &mut display_3_layout,
+                DisplayIdentifier::Display4 => &mut display_4_layout,
             };
             target.set_top_box_colour(update_message.top_row_color.into());
             target.set_bottom_box_colour(update_message.bottom_row_color.into());

@@ -53,10 +53,10 @@ impl<T, const N: usize> AppChannel<T, N> {
 pub type MidiOutChannel = AppChannel<MidiPacket, 128>;
 
 pub enum DisplayIdentifier {
-    DisplayOne,
-    DisplayTwo,
-    DisplayThree,
-    DisplayFour,
+    Display1,
+    Display2,
+    Display3,
+    Display4,
 }
 
 pub struct DisplayStateUpdateMessage {
@@ -69,9 +69,20 @@ pub struct DisplayStateUpdateMessage {
 
 pub type DisplayStateUpdateChannel = AppChannel<DisplayStateUpdateMessage, 16>;
 
+pub enum ButtonIdentifier {
+    Button1,
+    Button2,
+    Button3,
+    Button4,
+    Button5,
+    Button6,
+    Button7,
+    Button8,
+}
+
 pub enum ButtonEvent {
-    Pressed { button_index: i8 },
-    Released { button_index: i8 },
+    Pressed { button_identifier: ButtonIdentifier },
+    Released { button_identifier: ButtonIdentifier },
 }
 
 pub type ButtonEventChannel = AppChannel<ButtonEvent, 16>;

@@ -51,16 +51,15 @@ fn create_button_element(
     document: &Document,
     parent: &Element,
     button_identifier: ButtonIdentifier,
-    button_event_channel: &ButtonEventChannel,
+    button_event_channel: ButtonEventChannel,
 ) -> Result<HtmlButtonElement, JsValue> {
     let element = parent
         .append_child(&document.create_element("button")?.into())
         .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))?;
-    let sender = button_event_channel.clone();
     let button_identifier_new = button_identifier.clone();
     let closure = Closure::wrap(Box::new(move || {
         spawn_local(async move {
-            sender
+            button_event_channel
                 .send(ButtonEvent::Pressed {
                     button_identifier: button_identifier_new,
                 })

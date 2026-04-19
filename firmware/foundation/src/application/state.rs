@@ -58,6 +58,7 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR,
         midi_reader: &'a mut MR,
         midi_writer: &'a mut MW,
         storage_manager: &'a mut SM,
+        button_event_channel: ButtonEventChannel,
     ) -> Self {
         Self {
             midi_streams: MidiStreams {
@@ -68,7 +69,7 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR,
                 midi_out: MidiOutChannel::new(),
                 display_state_update: DisplayStateUpdateChannel::new(),
                 storage_state_update: StorageStateUpdateChannel::new(),
-                button_event: ButtonEventChannel::new(),
+                button_event: button_event_channel,
             },
             storage_manager,
         }
@@ -157,6 +158,7 @@ pub struct ApplicationBuilder<'a, MR: MidiReader, MW: MidiWriter, SM: StorageMan
     midi_reader: Option<&'a mut MR>,
     midi_writer: Option<&'a mut MW>,
     storage_manager: Option<&'a mut SM>,
+    button_event_channel: Option<ButtonEventChannel>,
 }
 
 impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> ApplicationBuilder<'a, MR, MW, SM> {
@@ -165,6 +167,7 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> ApplicationBuilder<
             midi_reader: None,
             midi_writer: None,
             storage_manager: None,
+            button_event_channel: None,
         }
     }
 
@@ -183,11 +186,18 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> ApplicationBuilder<
         self
     }
 
+    pub fn with_button_event_channel(mut self, button_event_channel: ButtonEventChannel) -> Self {
+        self.button_event_channel = Some(button_event_channel);
+        self
+    }
+
     pub fn build(self) -> Application<'a, MR, MW, SM> {
         Application::new(
             self.midi_reader.expect("MIDI reader is required"),
             self.midi_writer.expect("MIDI writer is required"),
             self.storage_manager.expect("Storage manager is required"),
+            self.button_event_channel
+                .expect("Button event channel is required"),
         )
     }
 }

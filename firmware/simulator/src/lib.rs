@@ -50,13 +50,13 @@ fn create_button_element(
     parent: &Element,
 ) -> Result<HtmlButtonElement, JsValue> {
     parent
-        .append_child(&document.create_element("button")?)
+        .append_child(&document.create_element("button")?.into())
         .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
 }
 
 fn create_display_element(document: &Document, parent: &Element) -> Result<Element, JsValue> {
     parent
-        .append_child(&document.create_element("div")?)
+        .append_child(&document.create_element("div")?.into())
         .and_then(|el| Ok(el.dyn_into::<Element>()?))
         .and_then(|el| {
             el.set_attribute("style", "display: flex; justify-content: center;")?;
@@ -198,12 +198,14 @@ pub fn main() {
     let midi_reader = MIDI_READER.init(FakeMidiReader::default());
     let midi_writer = MIDI_WRITER.init(FakeMidiWriter::default());
     let storage_manager = STORAGE_MANAGER.init(LocalStorageManager::new(local_storage));
+    let button_event_channel = foundation::application::channels::ButtonEventChannel::new();
 
     let app = APP.init(
         ApplicationBuilder::new()
             .with_midi_reader(midi_reader)
             .with_midi_writer(midi_writer)
             .with_storage_manager(storage_manager)
+            .with_button_event_channel(button_event_channel)
             .build(),
     );
     let displays = DISPLAYS.init(Displays::new(display_1, display_2, display_3, display_4));

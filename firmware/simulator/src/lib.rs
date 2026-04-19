@@ -138,16 +138,8 @@ pub fn main() {
         create_button_element(&document, &root_element).expect("Failed to create button 4 element");
     let _button_6_element =
         create_button_element(&document, &root_element).expect("Failed to create button 6 element");
-    let button_8_element =
+    let _button_8_element =
         create_button_element(&document, &root_element).expect("Failed to create button 8 element");
-
-    let closure = Closure::wrap(Box::new(move || {
-        web_sys::console::log_1(&"Clicked!".into());
-    }) as Box<dyn FnMut()>);
-    button_8_element
-        .add_event_listener_with_callback("click", closure.as_ref().unchecked_ref())
-        .expect("Failed to add event listener to button 8");
-    closure.forget();
 
     let text_style = MonoTextStyle::new(&FONT_10X20, Rgb565::CSS_ORANGE);
     let display_output_settings = OutputSettingsBuilder::new()

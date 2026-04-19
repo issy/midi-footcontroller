@@ -126,7 +126,13 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR,
                 DisplayIdentifier::DisplayThree => &mut display_3_layout,
                 DisplayIdentifier::DisplayFour => &mut display_4_layout,
             };
-            // TODO: Update layout for display
+            target.set_top_box_colour(update_message.top_row_color.into());
+            target.set_bottom_box_colour(update_message.bottom_row_color.into());
+
+            target.set_top_text(update_message.top_row_text);
+            target.set_bottom_text(update_message.bottom_row_text);
+
+            target.draw().unwrap();
         }
     }
 

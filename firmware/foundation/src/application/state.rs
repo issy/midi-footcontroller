@@ -1,6 +1,6 @@
 use crate::application::channels::{
-    ButtonEventChannel, DisplayStateUpdateChannel, MidiOutChannel, StorageStateEvent,
-    StorageStateUpdateChannel,
+    ButtonEventChannel, DisplayIdentifier, DisplayStateUpdateChannel, MidiOutChannel,
+    StorageStateEvent, StorageStateUpdateChannel,
 };
 use crate::layout::DisplayLayout;
 use crate::midi::{MidiReader, MidiWriter};
@@ -120,12 +120,11 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR,
 
         loop {
             let update_message = self.channels.display_state_update.receive().await;
-            let target = match update_message.display_index {
-                0 => &mut display_1_layout,
-                1 => &mut display_2_layout,
-                2 => &mut display_3_layout,
-                3 => &mut display_4_layout,
-                _ => continue, // Invalid display index, ignore the message
+            let target = match update_message.display_identifier {
+                DisplayIdentifier::DisplayOne => &mut display_1_layout,
+                DisplayIdentifier::DisplayTwo => &mut display_2_layout,
+                DisplayIdentifier::DisplayThree => &mut display_3_layout,
+                DisplayIdentifier::DisplayFour => &mut display_4_layout,
             };
             // TODO: Update layout for display
         }

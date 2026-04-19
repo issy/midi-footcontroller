@@ -52,8 +52,15 @@ impl<T, const N: usize> AppChannel<T, N> {
 
 pub type MidiOutChannel = AppChannel<MidiPacket, 128>;
 
+pub enum DisplayIdentifier {
+    DisplayOne,
+    DisplayTwo,
+    DisplayThree,
+    DisplayFour,
+}
+
 pub struct DisplayStateUpdateMessage {
-    pub(crate) display_index: i8,
+    pub(crate) display_identifier: DisplayIdentifier,
     pub(crate) top_row_text: DisplayText,
     pub(crate) top_row_color: Colour,
     pub(crate) bottom_row_text: DisplayText,

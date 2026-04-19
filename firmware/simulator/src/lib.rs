@@ -3,12 +3,11 @@ mod sleep;
 mod storage;
 
 use crate::midi::{FakeMidiReader, FakeMidiWriter};
-use crate::storage::{LocalStorageManager, Preset};
+use crate::storage::LocalStorageManager;
 use embedded_graphics::draw_target::DrawTarget;
 use embedded_graphics::mono_font::ascii::FONT_10X20;
 use embedded_graphics::prelude::Primitive;
 use embedded_graphics::prelude::RgbColor;
-use embedded_graphics::primitives::{PrimitiveStyleBuilder, StyledDrawable};
 use embedded_graphics::{
     Drawable,
     mono_font::MonoTextStyle,
@@ -19,14 +18,12 @@ use embedded_graphics::{
 use embedded_graphics_web_simulator::{
     display::WebSimulatorDisplay, output_settings::OutputSettingsBuilder,
 };
-use foundation::application::channels::{ButtonEvent, ButtonEventChannel, ButtonIdentifier};
 use foundation::application::state::{Application, ApplicationBuilder, Displays};
 use log::{Level, info};
 use static_cell::StaticCell;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
-use web_sys::js_sys::futures::spawn_local;
-use web_sys::{Document, Element, HtmlButtonElement, HtmlElement, Storage, window};
+use web_sys::{Document, Element, HtmlButtonElement, Storage, window};
 
 const STORAGE_KEY_PRESETS: &str = "presets";
 const STORAGE_KEY_PRESET_ID: &str = "preset_id";

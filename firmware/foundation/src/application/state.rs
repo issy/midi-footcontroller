@@ -113,7 +113,10 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR,
     pub async fn display_task<D: DrawTarget<Color = Rgb565>>(
         &self,
         displays: &mut Displays<'_, D>,
-    ) -> ! {
+    ) -> !
+    where
+        <D as embedded_graphics::draw_target::DrawTarget>::Error: core::fmt::Debug,
+    {
         let mut display_1_layout = DisplayLayout::new(displays.display_1);
         let mut display_2_layout = DisplayLayout::new(displays.display_2);
         let mut display_3_layout = DisplayLayout::new(displays.display_3);

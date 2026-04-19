@@ -19,11 +19,13 @@ use embedded_graphics::{
 use embedded_graphics_web_simulator::{
     display::WebSimulatorDisplay, output_settings::OutputSettingsBuilder,
 };
+use foundation::application::channels::{ButtonEvent, ButtonEventChannel, ButtonIdentifier};
 use foundation::application::state::{Application, ApplicationBuilder, Displays};
 use log::{Level, info};
 use static_cell::StaticCell;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
+use web_sys::js_sys::futures::spawn_local;
 use web_sys::{Document, Element, HtmlButtonElement, HtmlElement, Storage, window};
 
 const STORAGE_KEY_PRESETS: &str = "presets";
@@ -48,10 +50,25 @@ fn init_logging() {
 fn create_button_element(
     document: &Document,
     parent: &Element,
+    button_identifier: ButtonIdentifier,
+    button_event_channel: &ButtonEventChannel,
 ) -> Result<HtmlButtonElement, JsValue> {
-    parent
+    let element = parent
         .append_child(&document.create_element("button")?.into())
-        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
+        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))?;
+    let sender = button_event_channel.clone();
+    let button_identifier_new = button_identifier.clone();
+    let closure = Closure::wrap(Box::new(move || {
+        spawn_local(async move {
+            sender
+                .send(ButtonEvent::Pressed {
+                    button_identifier: button_identifier_new,
+                })
+                .await;
+        });
+    }) as Box<dyn Fn()>);
+    element.add_event_listener_with_callback("click", closure.as_ref().unchecked_ref())?;
+    Ok(element)
 }
 
 fn create_display_element(document: &Document, parent: &Element) -> Result<Element, JsValue> {
@@ -88,15 +105,10 @@ pub fn main() {
             .expect("Failed to access localStorage")
             .expect("No localStorage"),
     );
-
-    let _initial_preset_id: u8 = local_storage
-        .get_item(STORAGE_KEY_PRESET_ID)
-        .expect("Failed to get item from localStorage")
-        .map(|v| {
-            v.parse::<u8>()
-                .expect("Failed to parse item from localStorage")
-        })
-        .unwrap_or(0);
+    let midi_reader = MIDI_READER.init(FakeMidiReader::default());
+    let midi_writer = MIDI_WRITER.init(FakeMidiWriter::default());
+    let storage_manager = STORAGE_MANAGER.init(LocalStorageManager::new(local_storage));
+    let button_event_channel = foundation::application::channels::ButtonEventChannel::new();
 
     let document = window()
         .and_then(|win| win.document())
@@ -117,14 +129,34 @@ pub fn main() {
         .set_attribute("style", "display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 2em auto 2em; gap: 1rem;")
         .unwrap();
 
-    let _button_1_element =
-        create_button_element(&document, &root_element).expect("Failed to create button 1 element");
-    let _button_3_element =
-        create_button_element(&document, &root_element).expect("Failed to create button 3 element");
-    let _button_5_element =
-        create_button_element(&document, &root_element).expect("Failed to create button 5 element");
-    let _button_7_element =
-        create_button_element(&document, &root_element).expect("Failed to create button 7 element");
+    let _button_1_element = create_button_element(
+        &document,
+        &root_element,
+        ButtonIdentifier::Button1,
+        &button_event_channel,
+    )
+    .expect("Failed to create button 1 element");
+    let _button_3_element = create_button_element(
+        &document,
+        &root_element,
+        ButtonIdentifier::Button3,
+        &button_event_channel,
+    )
+    .expect("Failed to create button 3 element");
+    let _button_5_element = create_button_element(
+        &document,
+        &root_element,
+        ButtonIdentifier::Button5,
+        &button_event_channel,
+    )
+    .expect("Failed to create button 5 element");
+    let _button_7_element = create_button_element(
+        &document,
+        &root_element,
+        ButtonIdentifier::Button7,
+        &button_event_channel,
+    )
+    .expect("Failed to create button 7 element");
 
     let display_1_element = create_display_element(&document, &root_element)
         .expect("Failed to create display 1 element");
@@ -135,14 +167,34 @@ pub fn main() {
     let display_4_element = create_display_element(&document, &root_element)
         .expect("Failed to create display 4 element");
 
-    let _button_2_element =
-        create_button_element(&document, &root_element).expect("Failed to create button 2 element");
-    let _button_4_element =
-        create_button_element(&document, &root_element).expect("Failed to create button 4 element");
-    let _button_6_element =
-        create_button_element(&document, &root_element).expect("Failed to create button 6 element");
-    let _button_8_element =
-        create_button_element(&document, &root_element).expect("Failed to create button 8 element");
+    let _button_2_element = create_button_element(
+        &document,
+        &root_element,
+        ButtonIdentifier::Button2,
+        &button_event_channel,
+    )
+    .expect("Failed to create button 2 element");
+    let _button_4_element = create_button_element(
+        &document,
+        &root_element,
+        ButtonIdentifier::Button4,
+        &button_event_channel,
+    )
+    .expect("Failed to create button 4 element");
+    let _button_6_element = create_button_element(
+        &document,
+        &root_element,
+        ButtonIdentifier::Button6,
+        &button_event_channel,
+    )
+    .expect("Failed to create button 6 element");
+    let _button_8_element = create_button_element(
+        &document,
+        &root_element,
+        ButtonIdentifier::Button8,
+        &button_event_channel,
+    )
+    .expect("Failed to create button 8 element");
 
     let text_style = MonoTextStyle::new(&FONT_10X20, Rgb565::CSS_ORANGE);
     let display_output_settings = OutputSettingsBuilder::new()
@@ -194,11 +246,6 @@ pub fn main() {
 
     display_1.flush().unwrap();
     display_2.flush().unwrap();
-
-    let midi_reader = MIDI_READER.init(FakeMidiReader::default());
-    let midi_writer = MIDI_WRITER.init(FakeMidiWriter::default());
-    let storage_manager = STORAGE_MANAGER.init(LocalStorageManager::new(local_storage));
-    let button_event_channel = foundation::application::channels::ButtonEventChannel::new();
 
     let app = APP.init(
         ApplicationBuilder::new()

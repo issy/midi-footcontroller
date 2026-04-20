@@ -70,10 +70,11 @@ fn create_display_element(document: &Document, parent: &Element) -> Result<Eleme
         })
 }
 
-fn create_event_listeners(
+fn setup_event_listeners(
     button_event_sender: &'static ButtonEventSender,
+    button_element: &HtmlButtonElement,
     button_identifier: ButtonIdentifier,
-) -> (EventListener, EventListener) {
+) {
     let press_listener = EventListener::new();
     let press_handler = Closure::wrap(Box::new(|_event: web_sys::Event| {
         spawn_local(async {
@@ -98,7 +99,12 @@ fn create_event_listeners(
     release_listener.set_handle_event(release_handler.as_ref().unchecked_ref());
     release_handler.forget();
 
-    (press_listener, release_listener)
+    button_element
+        .add_event_listener_with_event_listener("mousedown", &press_listener)
+        .unwrap();
+    button_element
+        .add_event_listener_with_event_listener("mouseup", &release_listener)
+        .unwrap();
 }
 
 #[wasm_bindgen]
@@ -152,13 +158,13 @@ pub fn main() {
             .set_attribute("style", "display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 2em auto 2em; gap: 1rem;")
             .unwrap();
 
-    let _button_1_element =
+    let button_1_element =
         create_button_element(&document, &root_element).expect("Failed to create button 1 element");
-    let _button_3_element =
+    let button_3_element =
         create_button_element(&document, &root_element).expect("Failed to create button 3 element");
-    let _button_5_element =
+    let button_5_element =
         create_button_element(&document, &root_element).expect("Failed to create button 5 element");
-    let _button_7_element =
+    let button_7_element =
         create_button_element(&document, &root_element).expect("Failed to create button 7 element");
 
     let display_1_element = create_display_element(&document, &root_element)
@@ -170,32 +176,55 @@ pub fn main() {
     let display_4_element = create_display_element(&document, &root_element)
         .expect("Failed to create display 4 element");
 
-    let _button_2_element =
+    let button_2_element =
         create_button_element(&document, &root_element).expect("Failed to create button 2 element");
-    let _button_4_element =
+    let button_4_element =
         create_button_element(&document, &root_element).expect("Failed to create button 4 element");
-    let _button_6_element =
+    let button_6_element =
         create_button_element(&document, &root_element).expect("Failed to create button 6 element");
-    let _button_8_element =
+    let button_8_element =
         create_button_element(&document, &root_element).expect("Failed to create button 8 element");
 
-    let l = EventListener::new();
-    let f = Closure::wrap(Box::new(|_event: web_sys::Event| {
-        spawn_local(async {
-            button_event_sender
-                .send(ButtonEvent::Pressed {
-                    button_identifier: ButtonIdentifier::Button8,
-                })
-                .await
-                .unwrap();
-        });
-    }) as Box<dyn FnMut(_)>);
-    l.set_handle_event(f.as_ref().unchecked_ref());
-    f.forget();
-
-    _button_8_element
-        .add_event_listener_with_event_listener("mousedown", &l)
-        .unwrap();
+    setup_event_listeners(
+        button_event_sender,
+        &button_1_element,
+        ButtonIdentifier::Button1,
+    );
+    setup_event_listeners(
+        button_event_sender,
+        &button_2_element,
+        ButtonIdentifier::Button2,
+    );
+    setup_event_listeners(
+        button_event_sender,
+        &button_3_element,
+        ButtonIdentifier::Button3,
+    );
+    setup_event_listeners(
+        button_event_sender,
+        &button_4_element,
+        ButtonIdentifier::Button4,
+    );
+    setup_event_listeners(
+        button_event_sender,
+        &button_5_element,
+        ButtonIdentifier::Button5,
+    );
+    setup_event_listeners(
+        button_event_sender,
+        &button_6_element,
+        ButtonIdentifier::Button6,
+    );
+    setup_event_listeners(
+        button_event_sender,
+        &button_7_element,
+        ButtonIdentifier::Button7,
+    );
+    setup_event_listeners(
+        button_event_sender,
+        &button_8_element,
+        ButtonIdentifier::Button8,
+    );
 
     let text_style = MonoTextStyle::new(&FONT_10X20, Rgb565::CSS_ORANGE);
     let display_output_settings = OutputSettingsBuilder::new()

@@ -5,7 +5,7 @@ use crate::protocol::Colour;
 #[cfg(target_arch = "wasm32")]
 pub struct Inner<T, const N: usize> {
     tx: async_channel::Sender<T>,
-    rx: async_channel::Receiver<T, N>,
+    rx: async_channel::Receiver<T>,
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -88,7 +88,7 @@ pub enum ButtonEvent {
 }
 
 #[cfg(target_arch = "wasm32")]
-type Receiver<'a, T, const N: usize> = async_channel::Receiver<'a, T>;
+type Receiver<'a, T, const N: usize> = async_channel::Receiver<T>;
 #[cfg(not(target_arch = "wasm32"))]
 type Receiver<'a, T, const N: usize> = embassy_sync::channel::Receiver<
     'a,

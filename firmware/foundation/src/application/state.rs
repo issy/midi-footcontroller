@@ -6,8 +6,6 @@ use crate::layout::DisplayLayout;
 use crate::midi::{MidiReader, MidiWriter};
 use crate::storage::StorageManager;
 use core::cell::RefCell;
-use embassy_sync::blocking_mutex::raw::NoopRawMutex;
-use embassy_sync::channel::Receiver;
 use embedded_graphics::draw_target::DrawTarget;
 use embedded_graphics::pixelcolor::Rgb565;
 use log::info;
@@ -126,7 +124,7 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR,
         displays: &mut Displays<'_, D>,
     ) -> !
     where
-        <D as embedded_graphics::draw_target::DrawTarget>::Error: core::fmt::Debug,
+        <D as DrawTarget>::Error: core::fmt::Debug,
     {
         let mut display_1_layout = DisplayLayout::new(displays.display_1);
         let mut display_2_layout = DisplayLayout::new(displays.display_2);
@@ -202,7 +200,7 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> ApplicationBuilder<
 
     pub fn with_button_event_receiver(
         mut self,
-        button_event_receiver: &mut ButtonEventReceiver,
+        button_event_receiver: &'a mut ButtonEventReceiver<'a>,
     ) -> Self {
         self.button_event_receiver = Some(button_event_receiver);
         self

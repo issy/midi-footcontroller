@@ -218,7 +218,7 @@ pub fn main() {
             .with_midi_reader(midi_reader)
             .with_midi_writer(midi_writer)
             .with_storage_manager(storage_manager)
-            .with_button_event_channel(button_event_channel)
+            .with_button_event_channel(&button_event_channel)
             .build(),
     );
     let displays = DISPLAYS.init(Displays::new(display_1, display_2, display_3, display_4));

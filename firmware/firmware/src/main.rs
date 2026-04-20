@@ -31,6 +31,7 @@ use display_interface_spi::SPIInterface;
 use embassy_embedded_hal::shared_bus::blocking::spi::SpiDevice;
 use embassy_executor::Spawner;
 use embassy_sync::blocking_mutex::{Mutex, raw::NoopRawMutex};
+use embassy_sync::channel::{Receiver, Sender};
 use embassy_time::Delay;
 use embedded_graphics::draw_target::DrawTarget;
 use embedded_graphics::pixelcolor::Rgb565;
@@ -226,7 +227,7 @@ async fn main(spawner: Spawner) -> ! {
             .with_midi_reader(midi_reader)
             .with_midi_writer(midi_writer)
             .with_storage_manager(storage_manager)
-            .with_button_event_channel(*button_event_channel)
+            .with_button_event_channel(button_event_channel)
             .build(),
     );
 

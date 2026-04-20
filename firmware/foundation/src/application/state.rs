@@ -38,16 +38,16 @@ pub(crate) struct MidiStreams<'a, MR: MidiReader, MW: MidiWriter> {
     writer: RefCell<&'a mut MW>,
 }
 
-pub(crate) struct InternalChannels {
+pub(crate) struct InternalChannels<'a> {
     midi_out: MidiOutChannel,
     display_state_update: DisplayStateUpdateChannel,
     storage_state_update: StorageStateUpdateChannel,
-    button_event: ButtonEventChannel,
+    button_event: &'a ButtonEventChannel,
 }
 
 pub struct Application<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> {
     pub(crate) midi_streams: MidiStreams<'a, MR, MW>,
-    pub(crate) channels: InternalChannels,
+    pub(crate) channels: InternalChannels<'a>,
     pub(crate) storage_manager: &'a mut SM,
     // TODO: Add protocol streams
     // TODO: Add buttons
@@ -58,7 +58,7 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR,
         midi_reader: &'a mut MR,
         midi_writer: &'a mut MW,
         storage_manager: &'a mut SM,
-        button_event_channel: ButtonEventChannel,
+        button_event_channel: &'a ButtonEventChannel,
     ) -> Self {
         Self {
             midi_streams: MidiStreams {
@@ -161,7 +161,7 @@ pub struct ApplicationBuilder<'a, MR: MidiReader, MW: MidiWriter, SM: StorageMan
     midi_reader: Option<&'a mut MR>,
     midi_writer: Option<&'a mut MW>,
     storage_manager: Option<&'a mut SM>,
-    button_event_channel: Option<ButtonEventChannel>,
+    button_event_channel: Option<&'a ButtonEventChannel>,
 }
 
 impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> ApplicationBuilder<'a, MR, MW, SM> {
@@ -189,7 +189,10 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> ApplicationBuilder<
         self
     }
 
-    pub fn with_button_event_channel(mut self, button_event_channel: ButtonEventChannel) -> Self {
+    pub fn with_button_event_channel(
+        mut self,
+        button_event_channel: &'a ButtonEventChannel,
+    ) -> Self {
         self.button_event_channel = Some(button_event_channel);
         self
     }

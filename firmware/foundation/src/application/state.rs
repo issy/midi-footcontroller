@@ -1,11 +1,13 @@
 use crate::application::channels::{
-    ButtonEvent, ButtonEventChannel, DisplayIdentifier, DisplayStateUpdateChannel, MidiOutChannel,
+    ButtonEvent, ButtonEventReceiver, DisplayIdentifier, DisplayStateUpdateChannel, MidiOutChannel,
     StorageStateEvent, StorageStateUpdateChannel,
 };
 use crate::layout::DisplayLayout;
 use crate::midi::{MidiReader, MidiWriter};
 use crate::storage::StorageManager;
 use core::cell::RefCell;
+use embassy_sync::blocking_mutex::raw::NoopRawMutex;
+use embassy_sync::channel::Receiver;
 use embedded_graphics::draw_target::DrawTarget;
 use embedded_graphics::pixelcolor::Rgb565;
 use log::info;
@@ -42,7 +44,7 @@ pub(crate) struct InternalChannels<'a> {
     midi_out: MidiOutChannel,
     display_state_update: DisplayStateUpdateChannel,
     storage_state_update: StorageStateUpdateChannel,
-    button_event: &'a ButtonEventChannel,
+    button_event: &'a ButtonEventReceiver,
 }
 
 pub struct Application<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> {
@@ -58,7 +60,7 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR,
         midi_reader: &'a mut MR,
         midi_writer: &'a mut MW,
         storage_manager: &'a mut SM,
-        button_event_channel: &'a mut ButtonEventChannel,
+        button_event_receiver: &'a mut ButtonEventReceiver,
     ) -> Self {
         Self {
             midi_streams: MidiStreams {
@@ -69,7 +71,7 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR,
                 midi_out: MidiOutChannel::new(),
                 display_state_update: DisplayStateUpdateChannel::new(),
                 storage_state_update: StorageStateUpdateChannel::new(),
-                button_event: button_event_channel,
+                button_event: button_event_receiver,
             },
             storage_manager,
         }
@@ -105,6 +107,9 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR,
 
     pub async fn button_task(&self) -> ! {
         loop {
+            #[cfg(target_arch = "wasm32")]
+            let button_event = self.channels.button_event.recv().await.unwrap();
+            #[cfg(not(target_arch = "wasm32"))]
             let button_event = self.channels.button_event.receive().await;
             match button_event {
                 ButtonEvent::Pressed { button_identifier } => {
@@ -167,7 +172,7 @@ pub struct ApplicationBuilder<'a, MR: MidiReader, MW: MidiWriter, SM: StorageMan
     midi_reader: Option<&'a mut MR>,
     midi_writer: Option<&'a mut MW>,
     storage_manager: Option<&'a mut SM>,
-    button_event_channel: Option<&'a mut ButtonEventChannel>,
+    button_event_receiver: Option<&'a mut ButtonEventReceiver>,
 }
 
 impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> ApplicationBuilder<'a, MR, MW, SM> {
@@ -176,7 +181,7 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> ApplicationBuilder<
             midi_reader: None,
             midi_writer: None,
             storage_manager: None,
-            button_event_channel: None,
+            button_event_receiver: None,
         }
     }
 
@@ -197,9 +202,9 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> ApplicationBuilder<
 
     pub fn with_button_event_receiver(
         mut self,
-        button_event_channel: &'a mut ButtonEventChannel,
+        button_event_receiver: Receiver<NoopRawMutex, ButtonEvent, 64>,
     ) -> Self {
-        self.button_event_channel = Some(button_event_channel);
+        self.button_event_receiver = Some(button_event_receiver);
         self
     }
 
@@ -208,7 +213,7 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> ApplicationBuilder<
             self.midi_reader.expect("MIDI reader is required"),
             self.midi_writer.expect("MIDI writer is required"),
             self.storage_manager.expect("Storage manager is required"),
-            self.button_event_channel
+            self.button_event_receiver
                 .expect("Button event channel is required"),
         )
     }

@@ -19,7 +19,7 @@ use embedded_graphics::{
 use embedded_graphics_web_simulator::{
     display::WebSimulatorDisplay, output_settings::OutputSettingsBuilder,
 };
-use foundation::application::channels::{ButtonEvent, ButtonEventChannel, ButtonIdentifier};
+use foundation::application::channels::{ButtonEvent, ButtonEventReceiver, ButtonIdentifier};
 use foundation::application::state::{Application, ApplicationBuilder, Displays};
 use log::{Level, info};
 use static_cell::StaticCell;
@@ -32,11 +32,14 @@ use web_sys::{Document, Element, EventListener, HtmlButtonElement, Storage, wind
 const STORAGE_KEY_PRESETS: &str = "presets";
 const STORAGE_KEY_PRESET_ID: &str = "preset_id";
 
+type ButtonEventSender = async_channel::Sender<ButtonEvent>;
+
 static LOCAL_STORAGE: StaticCell<Storage> = StaticCell::new();
 static MIDI_READER: StaticCell<FakeMidiReader> = StaticCell::new();
 static MIDI_WRITER: StaticCell<FakeMidiWriter> = StaticCell::new();
 static STORAGE_MANAGER: StaticCell<LocalStorageManager> = StaticCell::new();
-static BUTTON_EVENT_CHANNEL: StaticCell<ButtonEventChannel> = StaticCell::new();
+static BUTTON_EVENT_SENDER: StaticCell<ButtonEventSender> = StaticCell::new();
+static BUTTON_EVENT_RECEIVER: StaticCell<ButtonEventReceiver> = StaticCell::new();
 static APP: StaticCell<Application<FakeMidiReader, FakeMidiWriter, LocalStorageManager>> =
     StaticCell::new();
 static DISPLAY_1: StaticCell<WebSimulatorDisplay<Rgb565>> = StaticCell::new();
@@ -101,7 +104,10 @@ pub fn main() {
     let midi_reader = MIDI_READER.init(FakeMidiReader::default());
     let midi_writer = MIDI_WRITER.init(FakeMidiWriter::default());
     let storage_manager = STORAGE_MANAGER.init(LocalStorageManager::new(local_storage));
-    let button_event_channel = BUTTON_EVENT_CHANNEL.init(ButtonEventChannel::new());
+
+    let (_button_event_sender, _button_event_receiver) = async_channel::bounded(64);
+    let button_event_sender = BUTTON_EVENT_SENDER.init(_button_event_sender);
+    let button_event_receiver = BUTTON_EVENT_RECEIVER.init(_button_event_receiver);
 
     let document = window()
         .and_then(|win| win.document())
@@ -224,7 +230,7 @@ pub fn main() {
             .with_midi_reader(midi_reader)
             .with_midi_writer(midi_writer)
             .with_storage_manager(storage_manager)
-            .with_button_event_receiver(button_event_channel)
+            .with_button_event_receiver(button_event_receiver)
             .build(),
     );
     let displays = DISPLAYS.init(Displays::new(display_1, display_2, display_3, display_4));

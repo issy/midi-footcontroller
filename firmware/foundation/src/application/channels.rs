@@ -87,7 +87,13 @@ pub enum ButtonEvent {
     Released { button_identifier: ButtonIdentifier },
 }
 
-pub type ButtonEventChannel = AppChannel<ButtonEvent, 16>;
+#[cfg(target_arch = "wasm32")]
+type Receiver<T> = async_channel::Receiver<T>;
+#[cfg(not(target_arch = "wasm32"))]
+type Receiver<T> =
+    embassy_sync::channel::Receiver<embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex, T>;
+
+pub type ButtonEventReceiver = Receiver<ButtonEvent>;
 
 // TODO: Add channel for state updates
 pub enum StorageStateEvent {

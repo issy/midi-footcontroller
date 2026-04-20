@@ -31,7 +31,7 @@ use display_interface_spi::SPIInterface;
 use embassy_embedded_hal::shared_bus::blocking::spi::SpiDevice;
 use embassy_executor::Spawner;
 use embassy_sync::blocking_mutex::{Mutex, raw::NoopRawMutex};
-use embassy_sync::channel::{Receiver, Sender};
+use embassy_sync::channel::{Channel, Receiver, Sender};
 use embassy_time::Delay;
 use embedded_graphics::draw_target::DrawTarget;
 use embedded_graphics::pixelcolor::Rgb565;
@@ -43,7 +43,7 @@ use esp_hal::time::Rate;
 use esp_hal::timer::timg::TimerGroup;
 use esp_hal::uart::{Config as UartConfig, DataBits, Parity, StopBits, Uart, UartRx, UartTx};
 use esp_hal::{Async, Blocking};
-use foundation::application::channels::ButtonEventChannel;
+use foundation::application::channels::{ButtonEvent, ButtonEventReceiver};
 use foundation::application::state::{Application, ApplicationBuilder, Displays};
 use log::info;
 use midi::{UartMidiReader, UartMidiWriter};
@@ -78,7 +78,7 @@ static DISPLAYS: StaticCell<Displays<FirmwareDisplay>> = StaticCell::new();
 static UART_MIDI_READER: StaticCell<UartMidiReader> = StaticCell::new();
 static UART_MIDI_WRITER: StaticCell<UartMidiWriter> = StaticCell::new();
 static STORAGE_MANAGER: StaticCell<FakeStorageManager> = StaticCell::new();
-static BUTTON_EVENT_CHANNEL: StaticCell<ButtonEventChannel> = StaticCell::new();
+static BUTTON_EVENT_CHANNEL: StaticCell<ButtonEventReceiver> = StaticCell::new();
 static SPI_BUS: StaticCell<Mutex<NoopRawMutex, RefCell<Spi<Blocking>>>> = StaticCell::new();
 static APP: StaticCell<FirmwareApplication> = StaticCell::new();
 
@@ -220,14 +220,16 @@ async fn main(spawner: Spawner) -> ! {
     let midi_reader = UART_MIDI_READER.init(UartMidiReader::new(rx));
     let midi_writer = UART_MIDI_WRITER.init(UartMidiWriter::new(tx));
     let storage_manager = STORAGE_MANAGER.init(FakeStorageManager::default());
-    let button_event_channel = BUTTON_EVENT_CHANNEL.init(ButtonEventChannel::new());
+    let button_event_channel = Channel::<NoopRawMutex, ButtonEvent, 64>::new();
+    let button_event_sender = button_event_channel.sender();
+    let button_event_receiver = button_event_channel.receiver();
 
     let app = APP.init(
         ApplicationBuilder::new()
             .with_midi_reader(midi_reader)
             .with_midi_writer(midi_writer)
             .with_storage_manager(storage_manager)
-            .with_button_event_receiver(button_event_channel)
+            .with_button_event_receiver(button_event_receiver)
             .build(),
     );
 

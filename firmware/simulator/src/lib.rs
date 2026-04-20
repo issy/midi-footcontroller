@@ -19,6 +19,7 @@ use embedded_graphics::{
 use embedded_graphics_web_simulator::{
     display::WebSimulatorDisplay, output_settings::OutputSettingsBuilder,
 };
+use foundation::application::channels::ButtonEventChannel;
 use foundation::application::state::{Application, ApplicationBuilder, Displays};
 use log::{Level, info};
 use static_cell::StaticCell;
@@ -35,6 +36,7 @@ static LOCAL_STORAGE: StaticCell<Storage> = StaticCell::new();
 static MIDI_READER: StaticCell<FakeMidiReader> = StaticCell::new();
 static MIDI_WRITER: StaticCell<FakeMidiWriter> = StaticCell::new();
 static STORAGE_MANAGER: StaticCell<LocalStorageManager> = StaticCell::new();
+static BUTTON_EVENT_CHANNEL: StaticCell<ButtonEventChannel> = StaticCell::new();
 static APP: StaticCell<Application<FakeMidiReader, FakeMidiWriter, LocalStorageManager>> =
     StaticCell::new();
 static DISPLAY_1: StaticCell<WebSimulatorDisplay<Rgb565>> = StaticCell::new();
@@ -99,7 +101,7 @@ pub fn main() {
     let midi_reader = MIDI_READER.init(FakeMidiReader::default());
     let midi_writer = MIDI_WRITER.init(FakeMidiWriter::default());
     let storage_manager = STORAGE_MANAGER.init(LocalStorageManager::new(local_storage));
-    let button_event_channel = foundation::application::channels::ButtonEventChannel::new();
+    let button_event_channel = BUTTON_EVENT_CHANNEL.init(ButtonEventChannel::new());
 
     let document = window()
         .and_then(|win| win.document())
@@ -217,7 +219,7 @@ pub fn main() {
             .with_midi_reader(midi_reader)
             .with_midi_writer(midi_writer)
             .with_storage_manager(storage_manager)
-            .with_button_event_channel(&button_event_channel)
+            .with_button_event_channel(button_event_channel)
             .build(),
     );
     let displays = DISPLAYS.init(Displays::new(display_1, display_2, display_3, display_4));

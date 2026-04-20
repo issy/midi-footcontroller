@@ -70,6 +70,37 @@ fn create_display_element(document: &Document, parent: &Element) -> Result<Eleme
         })
 }
 
+fn create_event_listeners(
+    button_event_sender: &'static ButtonEventSender,
+    button_identifier: ButtonIdentifier,
+) -> (EventListener, EventListener) {
+    let press_listener = EventListener::new();
+    let press_handler = Closure::wrap(Box::new(|_event: web_sys::Event| {
+        spawn_local(async {
+            button_event_sender
+                .send(ButtonEvent::Pressed { button_identifier })
+                .await
+                .unwrap();
+        });
+    }) as Box<dyn FnMut(_)>);
+    press_listener.set_handle_event(press_handler.as_ref().unchecked_ref());
+    press_handler.forget();
+
+    let release_listener = EventListener::new();
+    let release_handler = Closure::wrap(Box::new(|_event: web_sys::Event| {
+        spawn_local(async {
+            button_event_sender
+                .send(ButtonEvent::Pressed { button_identifier })
+                .await
+                .unwrap();
+        });
+    }) as Box<dyn FnMut(_)>);
+    release_listener.set_handle_event(release_handler.as_ref().unchecked_ref());
+    release_handler.forget();
+
+    (press_listener, release_listener)
+}
+
 #[wasm_bindgen]
 pub fn teardown() {
     let document = window()
@@ -100,7 +131,7 @@ pub fn main() {
 
     let (_button_event_sender, _button_event_receiver) = async_channel::bounded(64);
     let button_event_sender = BUTTON_EVENT_SENDER.init(_button_event_sender);
-    let button_event_receiver = BUTTON_EVENT_RECEIVER.init(_button_event_receiver);
+    let button_event_receiver = BUTTON_EVENT_RECEIVER.init(_button_event_receiver.into());
 
     let document = window()
         .and_then(|win| win.document())

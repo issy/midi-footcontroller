@@ -23,7 +23,6 @@ use log::{Level, info};
 use static_cell::StaticCell;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::spawn_local;
 use web_sys::{Document, Element, EventListener, HtmlButtonElement, Storage, window};
 
 const STORAGE_KEY_PRESETS: &str = "presets";
@@ -142,12 +141,13 @@ pub fn main() {
         create_button_element(&document, &root_element).expect("Failed to create button 8 element");
 
     let l = EventListener::new();
-    l.set_handle_event(move || {
-        spawn_local(async {
-            bloop().await;
-            info!("Hello from the event listener!");
-        });
-    });
+    l.set_handle_event(
+        Closure::wrap(Box::new(move |_event: web_sys::Event| {
+            info!("Button clicked!");
+        }) as Box<dyn FnMut(_)>)
+        .as_ref()
+        .unchecked_ref(),
+    );
     _button_8_element
         .add_event_listener_with_event_listener("click", &l)
         .unwrap();

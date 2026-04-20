@@ -150,13 +150,13 @@ pub fn main() {
         create_button_element(&document, &root_element).expect("Failed to create button 8 element");
 
     let l = EventListener::new();
-    let f = Closure::wrap(Box::new(move |_event: web_sys::Event| {
-        spawn_local(async move {
-            // button_event_channel
-            //     .send(ButtonEvent::Pressed {
-            //         button_identifier: ButtonIdentifier::Button8,
-            //     })
-            //     .await;
+    let f = Closure::wrap(Box::new(|_event: web_sys::Event| {
+        spawn_local(async {
+            button_event_channel
+                .send(ButtonEvent::Pressed {
+                    button_identifier: ButtonIdentifier::Button8,
+                })
+                .await;
             bloop().await;
         });
         info!("Button clicked!");

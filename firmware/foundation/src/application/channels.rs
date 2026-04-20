@@ -69,7 +69,7 @@ pub struct DisplayStateUpdateMessage {
 
 pub type DisplayStateUpdateChannel = AppChannel<DisplayStateUpdateMessage, 16>;
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum ButtonIdentifier {
     Button1,
     Button2,
@@ -81,7 +81,7 @@ pub enum ButtonIdentifier {
     Button8,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Debug, Copy, Clone)]
 pub enum ButtonEvent {
     Pressed { button_identifier: ButtonIdentifier },
     Released { button_identifier: ButtonIdentifier },

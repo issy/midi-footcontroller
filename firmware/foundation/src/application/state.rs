@@ -1,5 +1,5 @@
 use crate::application::channels::{
-    ButtonEventChannel, DisplayIdentifier, DisplayStateUpdateChannel, MidiOutChannel,
+    ButtonEvent, ButtonEventChannel, DisplayIdentifier, DisplayStateUpdateChannel, MidiOutChannel,
     StorageStateEvent, StorageStateUpdateChannel,
 };
 use crate::layout::DisplayLayout;
@@ -106,6 +106,11 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR,
     pub async fn button_task(&self) -> ! {
         loop {
             let button_event = self.channels.button_event.receive().await;
+            match button_event {
+                ButtonEvent::Pressed { button_identifier } => {
+                    info!("Button {:?} pressed", button_identifier);
+                }
+            }
         }
     }
 

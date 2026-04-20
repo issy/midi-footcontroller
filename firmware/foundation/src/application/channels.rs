@@ -88,12 +88,16 @@ pub enum ButtonEvent {
 }
 
 #[cfg(target_arch = "wasm32")]
-type Receiver<T> = async_channel::Receiver<T>;
+type Receiver<'a, T, const N: usize> = async_channel::Receiver<'a, T>;
 #[cfg(not(target_arch = "wasm32"))]
-type Receiver<T> =
-    embassy_sync::channel::Receiver<embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex, T>;
+type Receiver<'a, T, const N: usize> = embassy_sync::channel::Receiver<
+    'a,
+    embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex,
+    T,
+    N,
+>;
 
-pub type ButtonEventReceiver = Receiver<ButtonEvent>;
+pub type ButtonEventReceiver<'a> = Receiver<'a, ButtonEvent, 64>;
 
 // TODO: Add channel for state updates
 pub enum StorageStateEvent {

@@ -44,7 +44,7 @@ pub(crate) struct InternalChannels<'a> {
     midi_out: MidiOutChannel,
     display_state_update: DisplayStateUpdateChannel,
     storage_state_update: StorageStateUpdateChannel,
-    button_event: &'a ButtonEventReceiver,
+    button_event: &'a ButtonEventReceiver<'a>,
 }
 
 pub struct Application<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> {
@@ -172,7 +172,7 @@ pub struct ApplicationBuilder<'a, MR: MidiReader, MW: MidiWriter, SM: StorageMan
     midi_reader: Option<&'a mut MR>,
     midi_writer: Option<&'a mut MW>,
     storage_manager: Option<&'a mut SM>,
-    button_event_receiver: Option<&'a mut ButtonEventReceiver>,
+    button_event_receiver: Option<&'a mut ButtonEventReceiver<'a>>,
 }
 
 impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> ApplicationBuilder<'a, MR, MW, SM> {

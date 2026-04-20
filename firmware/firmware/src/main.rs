@@ -30,6 +30,7 @@ use core::cell::RefCell;
 use display_interface_spi::SPIInterface;
 use embassy_embedded_hal::shared_bus::blocking::spi::SpiDevice;
 use embassy_executor::Spawner;
+use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use embassy_sync::blocking_mutex::{Mutex, raw::NoopRawMutex};
 use embassy_sync::channel::{Channel, Receiver, Sender};
 use embassy_time::Delay;
@@ -68,6 +69,8 @@ type FirmwareApplication = Application<
     FakeStorageManager,
 >;
 
+type ButtonEventChannel = Channel<CriticalSectionRawMutex, ButtonEvent, 64>;
+
 static RX: StaticCell<UartRx<Async>> = StaticCell::new();
 static TX: StaticCell<UartTx<Async>> = StaticCell::new();
 static DISPLAY_1: StaticCell<FirmwareDisplay> = StaticCell::new();
@@ -78,7 +81,9 @@ static DISPLAYS: StaticCell<Displays<FirmwareDisplay>> = StaticCell::new();
 static UART_MIDI_READER: StaticCell<UartMidiReader> = StaticCell::new();
 static UART_MIDI_WRITER: StaticCell<UartMidiWriter> = StaticCell::new();
 static STORAGE_MANAGER: StaticCell<FakeStorageManager> = StaticCell::new();
-static BUTTON_EVENT_CHANNEL: StaticCell<ButtonEventReceiver> = StaticCell::new();
+static BUTTON_EVENT_CHANNEL: StaticCell<ButtonEventChannel> = StaticCell::new();
+static BUTTON_EVENT_SENDER: StaticCell<Sender<NoopRawMutex, ButtonEvent, 64>> = StaticCell::new();
+static BUTTON_EVENT_RECEIVER: StaticCell<ButtonEventReceiver> = StaticCell::new();
 static SPI_BUS: StaticCell<Mutex<NoopRawMutex, RefCell<Spi<Blocking>>>> = StaticCell::new();
 static APP: StaticCell<FirmwareApplication> = StaticCell::new();
 
@@ -220,9 +225,10 @@ async fn main(spawner: Spawner) -> ! {
     let midi_reader = UART_MIDI_READER.init(UartMidiReader::new(rx));
     let midi_writer = UART_MIDI_WRITER.init(UartMidiWriter::new(tx));
     let storage_manager = STORAGE_MANAGER.init(FakeStorageManager::default());
-    let button_event_channel = Channel::<NoopRawMutex, ButtonEvent, 64>::new();
-    let button_event_sender = button_event_channel.sender();
-    let button_event_receiver = button_event_channel.receiver();
+    let button_event_channel =
+        BUTTON_EVENT_CHANNEL.init(Channel::<CriticalSectionRawMutex, ButtonEvent, 64>::new());
+    let button_event_sender = BUTTON_EVENT_SENDER.init(button_event_channel.sender());
+    let button_event_receiver = BUTTON_EVENT_RECEIVER.init(button_event_channel.receiver());
 
     let app = APP.init(
         ApplicationBuilder::new()

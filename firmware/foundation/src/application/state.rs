@@ -202,7 +202,7 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> ApplicationBuilder<
 
     pub fn with_button_event_receiver(
         mut self,
-        button_event_receiver: Receiver<NoopRawMutex, ButtonEvent, 64>,
+        button_event_receiver: &mut ButtonEventReceiver,
     ) -> Self {
         self.button_event_receiver = Some(button_event_receiver);
         self

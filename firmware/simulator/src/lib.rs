@@ -158,11 +158,12 @@ pub fn main() {
     let l = EventListener::new();
     let f = Closure::wrap(Box::new(|_event: web_sys::Event| {
         spawn_local(async {
-            button_event_channel
+            button_event_sender
                 .send(ButtonEvent::Pressed {
                     button_identifier: ButtonIdentifier::Button8,
                 })
-                .await;
+                .await
+                .unwrap();
             bloop().await;
         });
         info!("Button clicked!");

@@ -5,7 +5,7 @@ use crate::protocol::Colour;
 #[cfg(target_arch = "wasm32")]
 pub struct Inner<T, const N: usize> {
     tx: async_channel::Sender<T>,
-    rx: async_channel::Receiver<T>,
+    rx: async_channel::Receiver<T, N>,
 }
 
 #[cfg(target_arch = "wasm32")]

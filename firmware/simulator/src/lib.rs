@@ -3,6 +3,7 @@ mod sleep;
 mod storage;
 
 use crate::midi::{FakeMidiReader, FakeMidiWriter};
+use crate::sleep::sleep;
 use crate::storage::LocalStorageManager;
 use embedded_graphics::draw_target::DrawTarget;
 use embedded_graphics::mono_font::ascii::FONT_10X20;
@@ -23,6 +24,7 @@ use log::{Level, info};
 use static_cell::StaticCell;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
+use web_sys::console::info;
 use web_sys::js_sys::futures::spawn_local;
 use web_sys::{Document, Element, EventListener, HtmlButtonElement, Storage, window};
 
@@ -76,7 +78,11 @@ pub fn teardown() {
     }
 }
 
-async fn bloop() {}
+async fn bloop() {
+    info!("Starting bloop...");
+    sleep(1000).await;
+    info!("Bloop complete!");
+}
 
 #[wasm_bindgen]
 pub fn main() {

@@ -82,7 +82,8 @@ static UART_MIDI_READER: StaticCell<UartMidiReader> = StaticCell::new();
 static UART_MIDI_WRITER: StaticCell<UartMidiWriter> = StaticCell::new();
 static STORAGE_MANAGER: StaticCell<FakeStorageManager> = StaticCell::new();
 static BUTTON_EVENT_CHANNEL: StaticCell<ButtonEventChannel> = StaticCell::new();
-static BUTTON_EVENT_SENDER: StaticCell<Sender<NoopRawMutex, ButtonEvent, 64>> = StaticCell::new();
+static BUTTON_EVENT_SENDER: StaticCell<Sender<CriticalSectionRawMutex, ButtonEvent, 64>> =
+    StaticCell::new();
 static BUTTON_EVENT_RECEIVER: StaticCell<ButtonEventReceiver> = StaticCell::new();
 static SPI_BUS: StaticCell<Mutex<NoopRawMutex, RefCell<Spi<Blocking>>>> = StaticCell::new();
 static APP: StaticCell<FirmwareApplication> = StaticCell::new();

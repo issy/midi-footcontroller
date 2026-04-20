@@ -164,15 +164,13 @@ pub fn main() {
                 })
                 .await
                 .unwrap();
-            bloop().await;
         });
-        info!("Button clicked!");
     }) as Box<dyn FnMut(_)>);
     l.set_handle_event(f.as_ref().unchecked_ref());
     f.forget();
 
     _button_8_element
-        .add_event_listener_with_event_listener("click", &l)
+        .add_event_listener_with_event_listener("mousedown", &l)
         .unwrap();
 
     let text_style = MonoTextStyle::new(&FONT_10X20, Rgb565::CSS_ORANGE);

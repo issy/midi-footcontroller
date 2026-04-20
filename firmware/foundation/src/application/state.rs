@@ -58,7 +58,7 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR,
         midi_reader: &'a mut MR,
         midi_writer: &'a mut MW,
         storage_manager: &'a mut SM,
-        button_event_channel: &'a ButtonEventChannel,
+        button_event_channel: &'a mut ButtonEventChannel,
     ) -> Self {
         Self {
             midi_streams: MidiStreams {
@@ -161,7 +161,7 @@ pub struct ApplicationBuilder<'a, MR: MidiReader, MW: MidiWriter, SM: StorageMan
     midi_reader: Option<&'a mut MR>,
     midi_writer: Option<&'a mut MW>,
     storage_manager: Option<&'a mut SM>,
-    button_event_channel: Option<&'a ButtonEventChannel>,
+    button_event_channel: Option<&'a mut ButtonEventChannel>,
 }
 
 impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> ApplicationBuilder<'a, MR, MW, SM> {
@@ -191,7 +191,7 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> ApplicationBuilder<
 
     pub fn with_button_event_channel(
         mut self,
-        button_event_channel: &'a ButtonEventChannel,
+        button_event_channel: &'a mut ButtonEventChannel,
     ) -> Self {
         self.button_event_channel = Some(button_event_channel);
         self

@@ -19,7 +19,7 @@ use embedded_graphics::{
 use embedded_graphics_web_simulator::{
     display::WebSimulatorDisplay, output_settings::OutputSettingsBuilder,
 };
-use foundation::application::channels::ButtonEventChannel;
+use foundation::application::channels::{ButtonEvent, ButtonEventChannel, ButtonIdentifier};
 use foundation::application::state::{Application, ApplicationBuilder, Displays};
 use log::{Level, info};
 use static_cell::StaticCell;
@@ -152,6 +152,11 @@ pub fn main() {
     let l = EventListener::new();
     let f = Closure::wrap(Box::new(move |_event: web_sys::Event| {
         spawn_local(async move {
+            // button_event_channel
+            //     .send(ButtonEvent::Pressed {
+            //         button_identifier: ButtonIdentifier::Button8,
+            //     })
+            //     .await;
             bloop().await;
         });
         info!("Button clicked!");

@@ -110,6 +110,7 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR,
                 ButtonEvent::Pressed { button_identifier } => {
                     info!("Button {:?} pressed", button_identifier);
                 }
+                ButtonEvent::Released { .. } => todo!(),
             }
         }
     }

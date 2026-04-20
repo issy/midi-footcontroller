@@ -23,6 +23,7 @@ use log::{Level, info};
 use static_cell::StaticCell;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
+use web_sys::js_sys::futures::spawn_local;
 use web_sys::{Document, Element, EventListener, HtmlButtonElement, Storage, window};
 
 const STORAGE_KEY_PRESETS: &str = "presets";
@@ -143,6 +144,9 @@ pub fn main() {
     let l = EventListener::new();
     l.set_handle_event(
         Closure::wrap(Box::new(move |_event: web_sys::Event| {
+            spawn_local(async move {
+                bloop().await;
+            });
             info!("Button clicked!");
         }) as Box<dyn FnMut(_)>)
         .as_ref()

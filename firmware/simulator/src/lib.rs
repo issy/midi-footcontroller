@@ -77,9 +77,12 @@ fn setup_event_listeners(
 ) {
     let press_listener = EventListener::new();
     let press_handler = Closure::wrap(Box::new(|_event: web_sys::Event| {
-        spawn_local(async {
+        let id = button_identifier.clone();
+        spawn_local(async move {
             button_event_sender
-                .send(ButtonEvent::Pressed { button_identifier })
+                .send(ButtonEvent::Pressed {
+                    button_identifier: id,
+                })
                 .await
                 .unwrap();
         });
@@ -89,7 +92,8 @@ fn setup_event_listeners(
 
     let release_listener = EventListener::new();
     let release_handler = Closure::wrap(Box::new(|_event: web_sys::Event| {
-        spawn_local(async {
+        let id = button_identifier.clone();
+        spawn_local(async move {
             button_event_sender
                 .send(ButtonEvent::Pressed { button_identifier })
                 .await

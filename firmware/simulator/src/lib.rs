@@ -23,7 +23,8 @@ use log::{Level, info};
 use static_cell::StaticCell;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
-use web_sys::{Document, Element, HtmlButtonElement, Storage, window};
+use wasm_bindgen_futures::spawn_local;
+use web_sys::{Document, Element, EventListener, HtmlButtonElement, Storage, window};
 
 const STORAGE_KEY_PRESETS: &str = "presets";
 const STORAGE_KEY_PRESET_ID: &str = "preset_id";
@@ -75,6 +76,8 @@ pub fn teardown() {
     }
 }
 
+async fn bloop() {}
+
 #[wasm_bindgen]
 pub fn main() {
     console_error_panic_hook::set_once();
@@ -108,8 +111,8 @@ pub fn main() {
     // Buttons   2 4 6 8
 
     root_element
-        .set_attribute("style", "display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 2em auto 2em; gap: 1rem;")
-        .unwrap();
+            .set_attribute("style", "display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 2em auto 2em; gap: 1rem;")
+            .unwrap();
 
     let _button_1_element =
         create_button_element(&document, &root_element).expect("Failed to create button 1 element");
@@ -137,6 +140,17 @@ pub fn main() {
         create_button_element(&document, &root_element).expect("Failed to create button 6 element");
     let _button_8_element =
         create_button_element(&document, &root_element).expect("Failed to create button 8 element");
+
+    let l = EventListener::new();
+    l.set_handle_event(move || {
+        spawn_local(async {
+            bloop().await;
+            info!("Hello from the event listener!");
+        });
+    });
+    _button_8_element
+        .add_event_listener_with_event_listener("click", &l)
+        .unwrap();
 
     let text_style = MonoTextStyle::new(&FONT_10X20, Rgb565::CSS_ORANGE);
     let display_output_settings = OutputSettingsBuilder::new()

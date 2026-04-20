@@ -195,7 +195,7 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> ApplicationBuilder<
         self
     }
 
-    pub fn with_button_event_channel(
+    pub fn with_button_event_receiver(
         mut self,
         button_event_channel: &'a mut ButtonEventChannel,
     ) -> Self {

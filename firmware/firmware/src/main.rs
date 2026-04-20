@@ -227,7 +227,7 @@ async fn main(spawner: Spawner) -> ! {
             .with_midi_reader(midi_reader)
             .with_midi_writer(midi_writer)
             .with_storage_manager(storage_manager)
-            .with_button_event_channel(button_event_channel)
+            .with_button_event_receiver(button_event_channel)
             .build(),
     );
 

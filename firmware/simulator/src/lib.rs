@@ -3,7 +3,6 @@ mod sleep;
 mod storage;
 
 use crate::midi::{FakeMidiReader, FakeMidiWriter};
-use crate::sleep::sleep;
 use crate::storage::LocalStorageManager;
 use embedded_graphics::draw_target::DrawTarget;
 use embedded_graphics::mono_font::ascii::FONT_10X20;
@@ -81,12 +80,6 @@ pub fn teardown() {
             .remove_child(&root_element)
             .expect("Failed to remove root element");
     }
-}
-
-async fn bloop() {
-    info!("Starting bloop...");
-    sleep(1000).await;
-    info!("Bloop complete!");
 }
 
 #[wasm_bindgen]

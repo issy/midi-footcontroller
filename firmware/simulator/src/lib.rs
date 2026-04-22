@@ -49,7 +49,6 @@ static DISPLAYS: StaticCell<Displays<WebSimulatorDisplay<Rgb565>>> = StaticCell:
 
 fn init_logging() {
     wasm_logger::init(wasm_logger::Config::default());
-    // console_log::init_with_level(Level::Debug).expect("logger init failed");
 }
 
 fn create_button_element(

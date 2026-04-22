@@ -24,7 +24,6 @@ serde_json = { version = "1.0.149" }
 heapless = { workspace = true }
 static_cell = { workspace = true }
 
-console_log = { version = "1.0.0", features = ["wasm-bindgen"] }
 log = { workspace = true }
 wasm-logger = { version = "0.2.0" }
 

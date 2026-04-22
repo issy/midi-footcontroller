@@ -20,3 +20,4 @@ embassy-sync = { workspace = true, features = ["log"] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 async-channel = { workspace = true }
+console_log = { version = "1.0.0", features = ["wasm-bindgen"] }

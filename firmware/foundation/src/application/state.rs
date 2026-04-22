@@ -106,6 +106,7 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR,
     pub async fn button_task(&self) -> ! {
         info!("Starting button task (inside task)");
         loop {
+            info!("Waiting for button event");
             #[cfg(target_arch = "wasm32")]
             let button_event = self.channels.button_event.recv().await.unwrap();
             #[cfg(not(target_arch = "wasm32"))]

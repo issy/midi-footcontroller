@@ -97,7 +97,7 @@ fn setup_event_listeners(
         spawn_local(async move {
             info!("Button {:?} released", id);
             button_event_sender
-                .send(ButtonEvent::Pressed {
+                .send(ButtonEvent::Released {
                     button_identifier: id,
                 })
                 .await

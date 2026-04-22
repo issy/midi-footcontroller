@@ -75,11 +75,6 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR,
         }
     }
 
-    pub fn init_logger(&self) {
-        #[cfg(target_arch = "wasm32")]
-        console_log::init_with_level(log::Level::Trace).expect("Failed to initialize logger");
-    }
-
     pub async fn midi_thru_task(&self) -> ! {
         loop {
             if let Some(packet) = self

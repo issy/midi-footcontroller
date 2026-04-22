@@ -24,6 +24,7 @@ use log::{Level, info};
 use static_cell::StaticCell;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
+use web_sys::console::info;
 use web_sys::js_sys::futures::spawn_local;
 use web_sys::{Document, Element, EventListener, HtmlButtonElement, Storage, window};
 
@@ -289,8 +290,6 @@ pub fn main() {
             .build(),
     );
     let displays = DISPLAYS.init(Displays::new(display_1, display_2, display_3, display_4));
-
-    app.init_logger();
 
     info!("Hello world from main");
     async_wasm_task::spawn(async {

@@ -26,6 +26,7 @@ static_cell = { workspace = true }
 
 console_log = { version = "1.0.0", features = ["wasm-bindgen"] }
 log = { workspace = true }
+wasm-logger = { version = "0.2.0" }
 
 [dev-dependencies]
 trunk = { version = "0.21.14" }

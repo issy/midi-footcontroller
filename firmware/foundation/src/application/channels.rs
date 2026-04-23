@@ -83,8 +83,24 @@ pub enum ButtonIdentifier {
 
 #[derive(Debug, Copy, Clone)]
 pub enum ButtonEvent {
-    Pressed { button_identifier: ButtonIdentifier },
-    Released { button_identifier: ButtonIdentifier },
+    SinglePress {
+        button_identifier: ButtonIdentifier,
+    },
+    LongPress {
+        button_identifier: ButtonIdentifier,
+    },
+    DoublePress {
+        button_identifier: ButtonIdentifier,
+    },
+
+    #[deprecated]
+    Pressed {
+        button_identifier: ButtonIdentifier,
+    },
+    #[deprecated]
+    Released {
+        button_identifier: ButtonIdentifier,
+    },
 }
 
 #[cfg(target_arch = "wasm32")]

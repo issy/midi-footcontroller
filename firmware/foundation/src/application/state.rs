@@ -111,6 +111,7 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR,
             let button_event = self.channels.button_event.recv().await.unwrap();
             #[cfg(not(target_arch = "wasm32"))]
             let button_event = self.channels.button_event.receive().await;
+            info!("Received button event: {:?}", button_event);
             match button_event {
                 ButtonEvent::Pressed { button_identifier } => {
                     info!("Button {:?} pressed", button_identifier);
@@ -207,7 +208,7 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> ApplicationBuilder<
 
     pub fn with_button_event_receiver(
         mut self,
-        button_event_receiver: &'a mut ButtonEventReceiver<'a>,
+        button_event_receiver: &'a mut ButtonEventReceiver,
     ) -> Self {
         self.button_event_receiver = Some(button_event_receiver);
         self

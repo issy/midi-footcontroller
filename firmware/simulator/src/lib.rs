@@ -145,7 +145,7 @@ pub fn main() {
 
     let (_button_event_sender, _button_event_receiver) = async_channel::bounded(64);
     let button_event_sender = BUTTON_EVENT_SENDER.init(_button_event_sender);
-    let button_event_receiver = BUTTON_EVENT_RECEIVER.init(_button_event_receiver.into());
+    let button_event_receiver = BUTTON_EVENT_RECEIVER.init(_button_event_receiver);
 
     let document = window()
         .and_then(|win| win.document())

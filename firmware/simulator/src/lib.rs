@@ -3,7 +3,6 @@ mod sleep;
 mod storage;
 
 use crate::midi::{FakeMidiReader, FakeMidiWriter};
-use crate::sleep::sleep;
 use crate::storage::LocalStorageManager;
 use embedded_graphics::draw_target::DrawTarget;
 use embedded_graphics::mono_font::ascii::FONT_10X20;
@@ -76,9 +75,9 @@ fn setup_event_listeners(
     button_identifier: ButtonIdentifier,
 ) {
     let press_listener = EventListener::new();
-    let press_handler = Closure::wrap(Box::new(|_event: web_sys::Event| {
-        let id = button_identifier.clone();
+    let press_handler = Closure::wrap(Box::new(move |_event: web_sys::Event| {
         spawn_local(async move {
+            let id = button_identifier.clone();
             button_event_sender
                 .send(ButtonEvent::Pressed {
                     button_identifier: id,
@@ -91,7 +90,7 @@ fn setup_event_listeners(
     press_handler.forget();
 
     let release_listener = EventListener::new();
-    let release_handler = Closure::wrap(Box::new(|_event: web_sys::Event| {
+    let release_handler = Closure::wrap(Box::new(move |_event: web_sys::Event| {
         let id = button_identifier.clone();
         spawn_local(async move {
             button_event_sender
@@ -292,18 +291,6 @@ pub fn main() {
             .build(),
     );
     let displays = DISPLAYS.init(Displays::new(display_1, display_2, display_3, display_4));
-
-    async_wasm_task::spawn(async {
-        loop {
-            sleep(1_000).await;
-            button_event_sender
-                .send(ButtonEvent::Pressed {
-                    button_identifier: ButtonIdentifier::Button1,
-                })
-                .await
-                .unwrap();
-        }
-    });
 
     info!("Hello world from main");
     async_wasm_task::spawn(async {

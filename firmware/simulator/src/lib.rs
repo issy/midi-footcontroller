@@ -3,6 +3,7 @@ mod sleep;
 mod storage;
 
 use crate::midi::{FakeMidiReader, FakeMidiWriter};
+use crate::sleep::sleep;
 use crate::storage::LocalStorageManager;
 use embedded_graphics::draw_target::DrawTarget;
 use embedded_graphics::mono_font::ascii::FONT_10X20;
@@ -24,7 +25,6 @@ use log::{Level, info};
 use static_cell::StaticCell;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
-use web_sys::console::info;
 use web_sys::js_sys::futures::spawn_local;
 use web_sys::{Document, Element, EventListener, HtmlButtonElement, Storage, window};
 
@@ -79,7 +79,6 @@ fn setup_event_listeners(
     let press_handler = Closure::wrap(Box::new(|_event: web_sys::Event| {
         let id = button_identifier.clone();
         spawn_local(async move {
-            info!("Button {:?} pressed", id);
             button_event_sender
                 .send(ButtonEvent::Pressed {
                     button_identifier: id,
@@ -95,7 +94,6 @@ fn setup_event_listeners(
     let release_handler = Closure::wrap(Box::new(|_event: web_sys::Event| {
         let id = button_identifier.clone();
         spawn_local(async move {
-            info!("Button {:?} released", id);
             button_event_sender
                 .send(ButtonEvent::Released {
                     button_identifier: id,
@@ -294,6 +292,18 @@ pub fn main() {
             .build(),
     );
     let displays = DISPLAYS.init(Displays::new(display_1, display_2, display_3, display_4));
+
+    async_wasm_task::spawn(async {
+        loop {
+            sleep(1_000).await;
+            button_event_sender
+                .send(ButtonEvent::Pressed {
+                    button_identifier: ButtonIdentifier::Button1,
+                })
+                .await
+                .unwrap();
+        }
+    });
 
     info!("Hello world from main");
     async_wasm_task::spawn(async {

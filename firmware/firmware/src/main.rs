@@ -235,7 +235,6 @@ async fn main(spawner: Spawner) -> ! {
     // TODO: Use this in tasks later
     let _button_event_sender = BUTTON_EVENT_SENDER.init(button_event_channel.sender());
     let button_event_receiver = BUTTON_EVENT_RECEIVER.init(button_event_channel.receiver());
-
     let time_source = TIME_SOURCE.init(EmbassyTimeSource::default());
 
     let app = APP.init(

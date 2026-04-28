@@ -89,6 +89,7 @@ static BUTTON_EVENT_SENDER: StaticCell<Sender<CriticalSectionRawMutex, ButtonEve
     StaticCell::new();
 static BUTTON_EVENT_RECEIVER: StaticCell<ButtonEventReceiver> = StaticCell::new();
 static SPI_BUS: StaticCell<Mutex<NoopRawMutex, RefCell<Spi<Blocking>>>> = StaticCell::new();
+static TIME_SOURCE: StaticCell<EmbassyTimeSource> = StaticCell::new();
 static APP: StaticCell<FirmwareApplication> = StaticCell::new();
 
 #[embassy_executor::task]
@@ -235,7 +236,7 @@ async fn main(spawner: Spawner) -> ! {
     let _button_event_sender = BUTTON_EVENT_SENDER.init(button_event_channel.sender());
     let button_event_receiver = BUTTON_EVENT_RECEIVER.init(button_event_channel.receiver());
 
-    let time_source = EmbassyTimeSource::default();
+    let time_source = TIME_SOURCE.init(EmbassyTimeSource::default());
 
     let app = APP.init(
         ApplicationBuilder::new()
@@ -243,7 +244,7 @@ async fn main(spawner: Spawner) -> ! {
             .with_midi_writer(midi_writer)
             .with_storage_manager(storage_manager)
             .with_button_event_receiver(button_event_receiver)
-            .with_time_source(&time_source)
+            .with_time_source(time_source)
             .build(),
     );
 

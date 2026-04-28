@@ -41,6 +41,7 @@ static MIDI_WRITER: StaticCell<FakeMidiWriter> = StaticCell::new();
 static STORAGE_MANAGER: StaticCell<LocalStorageManager> = StaticCell::new();
 static BUTTON_EVENT_SENDER: StaticCell<ButtonEventSender> = StaticCell::new();
 static BUTTON_EVENT_RECEIVER: StaticCell<ButtonEventReceiver> = StaticCell::new();
+static TIME_SOURCE: StaticCell<BrowserTimeSource> = StaticCell::new();
 static APP: StaticCell<
     Application<FakeMidiReader, FakeMidiWriter, LocalStorageManager, BrowserTimeSource>,
 > = StaticCell::new();
@@ -286,7 +287,7 @@ pub fn main() {
     display_1.flush().unwrap();
     display_2.flush().unwrap();
 
-    let time_source = BrowserTimeSource::default();
+    let time_source = TIME_SOURCE.init(BrowserTimeSource::default());
 
     let app = APP.init(
         ApplicationBuilder::new()
@@ -294,7 +295,7 @@ pub fn main() {
             .with_midi_writer(midi_writer)
             .with_storage_manager(storage_manager)
             .with_button_event_receiver(button_event_receiver)
-            .with_time_source(&time_source)
+            .with_time_source(time_source)
             .build(),
     );
     let displays = DISPLAYS.init(Displays::new(display_1, display_2, display_3, display_4));

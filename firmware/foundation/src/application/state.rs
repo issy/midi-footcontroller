@@ -1,6 +1,6 @@
 use crate::application::channels::{
-    ButtonEvent, ButtonEventReceiver, DisplayIdentifier, DisplayStateUpdateChannel, MidiOutChannel,
-    StorageStateEvent, StorageStateUpdateChannel,
+    ButtonEvent, ButtonEventReceiver, ButtonIdentifier, DisplayIdentifier,
+    DisplayStateUpdateChannel, MidiOutChannel, StorageStateEvent, StorageStateUpdateChannel,
 };
 use crate::application::time::TimeSource;
 use crate::layout::DisplayLayout;
@@ -9,6 +9,7 @@ use crate::storage::StorageManager;
 use core::cell::RefCell;
 use embedded_graphics::draw_target::DrawTarget;
 use embedded_graphics::pixelcolor::Rgb565;
+use hashbrown::HashMap;
 use log::info;
 
 pub struct Displays<'a, D: DrawTarget<Color = Rgb565>> {
@@ -110,6 +111,11 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager, TS: TimeSource>
 
     pub async fn button_task(&self) -> ! {
         info!("Starting button task (inside task)");
+
+        // TODO: Maybe create an enum to represent a single button's state machine
+        let mut button_pressed_at = HashMap::<ButtonIdentifier, u64>::with_capacity(8);
+        let mut button_released_at = HashMap::<ButtonIdentifier, u64>::with_capacity(8);
+
         loop {
             #[cfg(target_arch = "wasm32")]
             let button_event = self.channels.button_event.recv().await.unwrap();
@@ -117,11 +123,24 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager, TS: TimeSource>
             let button_event = self.channels.button_event.receive().await;
             info!("Received button event: {:?}", button_event);
             match button_event {
-                ButtonEvent::Pressed { .. } => {}
-                ButtonEvent::Released { .. } => {}
-                ButtonEvent::SinglePress { .. }
-                | ButtonEvent::LongPress { .. }
-                | ButtonEvent::DoublePress { .. } => todo!(),
+                ButtonEvent::Pressed { button_identifier } => {
+                    // TODO: We can do some logic here to register double-presses
+                    button_released_at.remove(&button_identifier);
+                    button_pressed_at.insert(button_identifier, self.time_source.now());
+                    // TODO: Trigger momentary button pressed event?
+                }
+                ButtonEvent::Released { button_identifier } => {
+                    if let Some(pressed_at) = button_pressed_at.remove(&button_identifier) {
+                        let duration_pressed = self
+                            .time_source
+                            .duration(pressed_at, self.time_source.now());
+                        if duration_pressed.as_secs().ge(&1) {
+                            // TODO: Long press?
+                        }
+                    }
+                    // TODO: Trigger momentary button released event?
+                    // TODO: Trigger regular button press event?
+                }
             }
         }
     }

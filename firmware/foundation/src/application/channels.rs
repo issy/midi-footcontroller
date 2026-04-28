@@ -69,7 +69,7 @@ pub struct DisplayStateUpdateMessage {
 
 pub type DisplayStateUpdateChannel = AppChannel<DisplayStateUpdateMessage, 16>;
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub enum ButtonIdentifier {
     Button1,
     Button2,
@@ -83,24 +83,8 @@ pub enum ButtonIdentifier {
 
 #[derive(Debug, Copy, Clone)]
 pub enum ButtonEvent {
-    SinglePress {
-        button_identifier: ButtonIdentifier,
-    },
-    LongPress {
-        button_identifier: ButtonIdentifier,
-    },
-    DoublePress {
-        button_identifier: ButtonIdentifier,
-    },
-
-    #[deprecated]
-    Pressed {
-        button_identifier: ButtonIdentifier,
-    },
-    #[deprecated]
-    Released {
-        button_identifier: ButtonIdentifier,
-    },
+    Pressed { button_identifier: ButtonIdentifier },
+    Released { button_identifier: ButtonIdentifier },
 }
 
 #[cfg(target_arch = "wasm32")]

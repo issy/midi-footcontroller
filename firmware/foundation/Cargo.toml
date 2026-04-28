@@ -14,6 +14,7 @@ prost = { version = "0.14.3", default-features = false, features = ["derive"] }
 heapless = { workspace = true, features = ["serde"] }
 serde = { workspace = true, features = ["derive"] }
 log = { workspace = true }
+hashbrown = { version = "0.17.0", features = ["alloc"] }
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 embassy-sync = { workspace = true, features = ["log"] }

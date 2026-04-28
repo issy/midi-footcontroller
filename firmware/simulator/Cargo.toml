@@ -9,8 +9,10 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 foundation = { path = "../foundation" }
 wasm-bindgen = { version = "0.2.114" }
+wasm-bindgen-futures = { version = "0.4.68" }
 async_wasm_task = { version = "0.2.3" }
-web-sys = { version = "0.3.91", features = ["console", "CanvasRenderingContext2d", "Document", "HtmlButtonElement", "Element", "HtmlCanvasElement", "Window", "Text", "Storage"] }
+async-channel = { workspace = true }
+web-sys = { version = "0.3.91", features = ["console", "CanvasRenderingContext2d", "Document", "HtmlButtonElement", "Element", "HtmlCanvasElement", "Window", "Text", "Storage", "EventListener", "EventListenerOptions", "Event", "EventTarget"] }
 console_error_panic_hook = { version = "0.1.7" }
 
 embedded-graphics = { workspace = true }
@@ -22,8 +24,8 @@ serde_json = { version = "1.0.149" }
 heapless = { workspace = true }
 static_cell = { workspace = true }
 
-console_log = { version = "1.0.0", features = ["wasm-bindgen"] }
 log = { workspace = true }
+wasm-logger = { version = "0.2.0" }
 
 [dev-dependencies]
 trunk = { version = "0.21.14" }

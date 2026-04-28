@@ -1,14 +1,15 @@
 mod midi;
 mod sleep;
 mod storage;
+mod time;
 
 use crate::midi::{FakeMidiReader, FakeMidiWriter};
-use crate::storage::{LocalStorageManager, Preset};
+use crate::storage::LocalStorageManager;
+use crate::time::BrowserTimeSource;
 use embedded_graphics::draw_target::DrawTarget;
 use embedded_graphics::mono_font::ascii::FONT_10X20;
 use embedded_graphics::prelude::Primitive;
 use embedded_graphics::prelude::RgbColor;
-use embedded_graphics::primitives::{PrimitiveStyleBuilder, StyledDrawable};
 use embedded_graphics::{
     Drawable,
     mono_font::MonoTextStyle,
@@ -19,30 +20,101 @@ use embedded_graphics::{
 use embedded_graphics_web_simulator::{
     display::WebSimulatorDisplay, output_settings::OutputSettingsBuilder,
 };
+use foundation::application::channels::{ButtonEvent, ButtonEventReceiver, ButtonIdentifier};
 use foundation::application::state::{Application, ApplicationBuilder, Displays};
 use log::{Level, info};
 use static_cell::StaticCell;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
-use web_sys::{Element, HtmlButtonElement, Storage, window};
+use web_sys::js_sys::Date;
+use web_sys::js_sys::futures::spawn_local;
+use web_sys::{Document, Element, EventListener, HtmlButtonElement, Storage, window};
 
 const STORAGE_KEY_PRESETS: &str = "presets";
 const STORAGE_KEY_PRESET_ID: &str = "preset_id";
+
+type ButtonEventSender = async_channel::Sender<ButtonEvent>;
 
 static LOCAL_STORAGE: StaticCell<Storage> = StaticCell::new();
 static MIDI_READER: StaticCell<FakeMidiReader> = StaticCell::new();
 static MIDI_WRITER: StaticCell<FakeMidiWriter> = StaticCell::new();
 static STORAGE_MANAGER: StaticCell<LocalStorageManager> = StaticCell::new();
-static APP: StaticCell<Application<FakeMidiReader, FakeMidiWriter, LocalStorageManager>> =
-    StaticCell::new();
+static BUTTON_EVENT_SENDER: StaticCell<ButtonEventSender> = StaticCell::new();
+static BUTTON_EVENT_RECEIVER: StaticCell<ButtonEventReceiver> = StaticCell::new();
+static TIME_SOURCE: StaticCell<BrowserTimeSource> = StaticCell::new();
+static APP: StaticCell<
+    Application<FakeMidiReader, FakeMidiWriter, LocalStorageManager, BrowserTimeSource>,
+> = StaticCell::new();
 static DISPLAY_1: StaticCell<WebSimulatorDisplay<Rgb565>> = StaticCell::new();
 static DISPLAY_2: StaticCell<WebSimulatorDisplay<Rgb565>> = StaticCell::new();
 static DISPLAY_3: StaticCell<WebSimulatorDisplay<Rgb565>> = StaticCell::new();
 static DISPLAY_4: StaticCell<WebSimulatorDisplay<Rgb565>> = StaticCell::new();
 static DISPLAYS: StaticCell<Displays<WebSimulatorDisplay<Rgb565>>> = StaticCell::new();
 
-pub fn init_logging() {
-    console_log::init_with_level(Level::Debug).expect("logger init failed");
+fn init_logging() {
+    wasm_logger::init(wasm_logger::Config::default());
+}
+
+fn create_button_element(
+    document: &Document,
+    parent: &Element,
+) -> Result<HtmlButtonElement, JsValue> {
+    parent
+        .append_child(&document.create_element("button")?.into())
+        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
+}
+
+fn create_display_element(document: &Document, parent: &Element) -> Result<Element, JsValue> {
+    parent
+        .append_child(&document.create_element("div")?.into())
+        .and_then(|el| Ok(el.dyn_into::<Element>()?))
+        .and_then(|el| {
+            el.set_attribute("style", "display: flex; justify-content: center;")?;
+            Ok(el)
+        })
+}
+
+fn setup_event_listeners(
+    button_event_sender: &'static ButtonEventSender,
+    button_element: &HtmlButtonElement,
+    button_identifier: ButtonIdentifier,
+) {
+    let press_listener = EventListener::new();
+    let press_handler = Closure::wrap(Box::new(move |_event: web_sys::Event| {
+        spawn_local(async move {
+            let id = button_identifier.clone();
+            button_event_sender
+                .send(ButtonEvent::Pressed {
+                    button_identifier: id,
+                })
+                .await
+                .unwrap();
+        });
+    }) as Box<dyn FnMut(_)>);
+    press_listener.set_handle_event(press_handler.as_ref().unchecked_ref());
+    press_handler.forget();
+
+    let release_listener = EventListener::new();
+    let release_handler = Closure::wrap(Box::new(move |_event: web_sys::Event| {
+        let id = button_identifier.clone();
+        spawn_local(async move {
+            button_event_sender
+                .send(ButtonEvent::Released {
+                    button_identifier: id,
+                })
+                .await
+                .unwrap();
+        });
+    }) as Box<dyn FnMut(_)>);
+    release_listener.set_handle_event(release_handler.as_ref().unchecked_ref());
+    release_handler.forget();
+
+    button_element
+        .add_event_listener_with_event_listener("mousedown", &press_listener)
+        .unwrap();
+    button_element
+        .add_event_listener_with_event_listener("mouseup", &release_listener)
+        .unwrap();
 }
 
 #[wasm_bindgen]
@@ -69,15 +141,13 @@ pub fn main() {
             .expect("Failed to access localStorage")
             .expect("No localStorage"),
     );
+    let midi_reader = MIDI_READER.init(FakeMidiReader::default());
+    let midi_writer = MIDI_WRITER.init(FakeMidiWriter::default());
+    let storage_manager = STORAGE_MANAGER.init(LocalStorageManager::new(local_storage));
 
-    let _initial_preset_id: u8 = local_storage
-        .get_item(STORAGE_KEY_PRESET_ID)
-        .expect("Failed to get item from localStorage")
-        .map(|v| {
-            v.parse::<u8>()
-                .expect("Failed to parse item from localStorage")
-        })
-        .unwrap_or(0);
+    let (_button_event_sender, _button_event_receiver) = async_channel::bounded(64);
+    let button_event_sender = BUTTON_EVENT_SENDER.init(_button_event_sender);
+    let button_event_receiver = BUTTON_EVENT_RECEIVER.init(_button_event_receiver);
 
     let document = window()
         .and_then(|win| win.document())
@@ -90,75 +160,81 @@ pub fn main() {
         })
         .expect("Could not find root element with id 'simulator-root'");
 
+    // Buttons   1 3 5 7
+    // Displays  1 2 3 4
+    // Buttons   2 4 6 8
+
     root_element
-        .set_attribute("style", "display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 2em auto 2em; gap: 1rem;")
-        .unwrap();
-    let _button_1_element = root_element
-        .append_child(&document.create_element("button").unwrap())
-        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
-        .expect("Failed to create button 1 element");
-    let _button_3_element = root_element
-        .append_child(&document.create_element("button").unwrap())
-        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
-        .expect("Failed to create button 3 element");
-    let _button_5_element = root_element
-        .append_child(&document.create_element("button").unwrap())
-        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
-        .expect("Failed to create button 5 element");
-    let _button_6_element = root_element
-        .append_child(&document.create_element("button").unwrap())
-        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
-        .expect("Failed to create button 6 element");
+            .set_attribute("style", "display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: 2em auto 2em; gap: 1rem;")
+            .unwrap();
 
-    let display_1_element = root_element
-        .append_child(&document.create_element("div").unwrap())
-        .and_then(|el| Ok(el.dyn_into::<Element>()?))
-        .and_then(|el| {
-            el.set_attribute("style", "display: flex; justify-content: center;")?;
-            Ok(el)
-        })
-        .expect("Failed to create display-1 element");
-    let display_2_element = root_element
-        .append_child(&document.create_element("div").unwrap())
-        .and_then(|el| Ok(el.dyn_into::<Element>()?))
-        .and_then(|el| {
-            el.set_attribute("style", "display: flex; justify-content: center;")?;
-            Ok(el)
-        })
-        .expect("Failed to create display-2 element");
-    let display_3_element = root_element
-        .append_child(&document.create_element("div").unwrap())
-        .and_then(|el| Ok(el.dyn_into::<Element>()?))
-        .and_then(|el| {
-            el.set_attribute("style", "display: flex; justify-content: center;")?;
-            Ok(el)
-        })
-        .expect("Failed to create display-3 element");
-    let display_4_element = root_element
-        .append_child(&document.create_element("div").unwrap())
-        .and_then(|el| Ok(el.dyn_into::<Element>()?))
-        .and_then(|el| {
-            el.set_attribute("style", "display: flex; justify-content: center;")?;
-            Ok(el)
-        })
-        .expect("Failed to create display-4 element");
+    let button_1_element =
+        create_button_element(&document, &root_element).expect("Failed to create button 1 element");
+    let button_3_element =
+        create_button_element(&document, &root_element).expect("Failed to create button 3 element");
+    let button_5_element =
+        create_button_element(&document, &root_element).expect("Failed to create button 5 element");
+    let button_7_element =
+        create_button_element(&document, &root_element).expect("Failed to create button 7 element");
 
-    let _button_2_element = root_element
-        .append_child(&document.create_element("button").unwrap())
-        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
-        .expect("Failed to create button 2 element");
-    let _button_4_element = root_element
-        .append_child(&document.create_element("button").unwrap())
-        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
-        .expect("Failed to create button 4 element");
-    let _button_6_element = root_element
-        .append_child(&document.create_element("button").unwrap())
-        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
-        .expect("Failed to create button 6 element");
-    let _button_8_element = root_element
-        .append_child(&document.create_element("button").unwrap())
-        .and_then(|el| Ok(el.unchecked_into::<HtmlButtonElement>()))
-        .expect("Failed to create button 8 element");
+    let display_1_element = create_display_element(&document, &root_element)
+        .expect("Failed to create display 1 element");
+    let display_2_element = create_display_element(&document, &root_element)
+        .expect("Failed to create display 2 element");
+    let display_3_element = create_display_element(&document, &root_element)
+        .expect("Failed to create display 3 element");
+    let display_4_element = create_display_element(&document, &root_element)
+        .expect("Failed to create display 4 element");
+
+    let button_2_element =
+        create_button_element(&document, &root_element).expect("Failed to create button 2 element");
+    let button_4_element =
+        create_button_element(&document, &root_element).expect("Failed to create button 4 element");
+    let button_6_element =
+        create_button_element(&document, &root_element).expect("Failed to create button 6 element");
+    let button_8_element =
+        create_button_element(&document, &root_element).expect("Failed to create button 8 element");
+
+    setup_event_listeners(
+        button_event_sender,
+        &button_1_element,
+        ButtonIdentifier::Button1,
+    );
+    setup_event_listeners(
+        button_event_sender,
+        &button_2_element,
+        ButtonIdentifier::Button2,
+    );
+    setup_event_listeners(
+        button_event_sender,
+        &button_3_element,
+        ButtonIdentifier::Button3,
+    );
+    setup_event_listeners(
+        button_event_sender,
+        &button_4_element,
+        ButtonIdentifier::Button4,
+    );
+    setup_event_listeners(
+        button_event_sender,
+        &button_5_element,
+        ButtonIdentifier::Button5,
+    );
+    setup_event_listeners(
+        button_event_sender,
+        &button_6_element,
+        ButtonIdentifier::Button6,
+    );
+    setup_event_listeners(
+        button_event_sender,
+        &button_7_element,
+        ButtonIdentifier::Button7,
+    );
+    setup_event_listeners(
+        button_event_sender,
+        &button_8_element,
+        ButtonIdentifier::Button8,
+    );
 
     let text_style = MonoTextStyle::new(&FONT_10X20, Rgb565::CSS_ORANGE);
     let display_output_settings = OutputSettingsBuilder::new()
@@ -211,15 +287,15 @@ pub fn main() {
     display_1.flush().unwrap();
     display_2.flush().unwrap();
 
-    let midi_reader = MIDI_READER.init(FakeMidiReader::default());
-    let midi_writer = MIDI_WRITER.init(FakeMidiWriter::default());
-    let storage_manager = STORAGE_MANAGER.init(LocalStorageManager::new(local_storage));
+    let time_source = TIME_SOURCE.init(BrowserTimeSource::default());
 
     let app = APP.init(
         ApplicationBuilder::new()
             .with_midi_reader(midi_reader)
             .with_midi_writer(midi_writer)
             .with_storage_manager(storage_manager)
+            .with_button_event_receiver(button_event_receiver)
+            .with_time_source(time_source)
             .build(),
     );
     let displays = DISPLAYS.init(Displays::new(display_1, display_2, display_3, display_4));

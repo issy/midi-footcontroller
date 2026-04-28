@@ -3,6 +3,7 @@ use crate::generated::device_v1::Envelope;
 use alloc::string::String;
 use alloc::vec::Vec;
 use core::fmt::Debug;
+use embedded_graphics::pixelcolor::{Rgb565, WebColors};
 use serde::{Deserialize, Serialize};
 
 const PROTOCOL_VERSION: u32 = 1;
@@ -38,6 +39,21 @@ pub enum Colour {
     Purple = 6,
     Cyan = 7,
     White = 8,
+}
+
+impl Into<Rgb565> for Colour {
+    fn into(self) -> Rgb565 {
+        match self {
+            Colour::Red => Rgb565::CSS_RED,
+            Colour::Green => Rgb565::CSS_GREEN,
+            Colour::Blue => Rgb565::CSS_BLUE,
+            Colour::Yellow => Rgb565::CSS_YELLOW,
+            Colour::Orange => Rgb565::CSS_ORANGE,
+            Colour::Purple => Rgb565::CSS_MAGENTA,
+            Colour::Cyan => Rgb565::CSS_CYAN,
+            Colour::White => Rgb565::CSS_WHITE,
+        }
+    }
 }
 
 impl From<Option<Colour>> for pb::Colour {

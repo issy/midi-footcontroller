@@ -61,7 +61,7 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager, TS: TimeSource>
         midi_reader: &'a mut MR,
         midi_writer: &'a mut MW,
         storage_manager: &'a mut SM,
-        button_event_receiver: &'a mut ButtonEventReceiver,
+        button_event_receiver: &'a mut ButtonEventReceiver<'a>,
         time_source: &'a TS,
     ) -> Self {
         Self {
@@ -218,7 +218,7 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager, TS: TimeSource>
 
     pub fn with_button_event_receiver(
         mut self,
-        button_event_receiver: &'a mut ButtonEventReceiver,
+        button_event_receiver: &'a mut ButtonEventReceiver<'a>,
     ) -> Self {
         self.button_event_receiver = Some(button_event_receiver);
         self

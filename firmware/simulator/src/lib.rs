@@ -41,8 +41,9 @@ static MIDI_WRITER: StaticCell<FakeMidiWriter> = StaticCell::new();
 static STORAGE_MANAGER: StaticCell<LocalStorageManager> = StaticCell::new();
 static BUTTON_EVENT_SENDER: StaticCell<ButtonEventSender> = StaticCell::new();
 static BUTTON_EVENT_RECEIVER: StaticCell<ButtonEventReceiver> = StaticCell::new();
-static APP: StaticCell<Application<FakeMidiReader, FakeMidiWriter, LocalStorageManager>> =
-    StaticCell::new();
+static APP: StaticCell<
+    Application<FakeMidiReader, FakeMidiWriter, LocalStorageManager, BrowserTimeSource>,
+> = StaticCell::new();
 static DISPLAY_1: StaticCell<WebSimulatorDisplay<Rgb565>> = StaticCell::new();
 static DISPLAY_2: StaticCell<WebSimulatorDisplay<Rgb565>> = StaticCell::new();
 static DISPLAY_3: StaticCell<WebSimulatorDisplay<Rgb565>> = StaticCell::new();

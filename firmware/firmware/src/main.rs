@@ -10,6 +10,7 @@
 extern crate alloc;
 mod midi;
 mod storage;
+mod time;
 
 include!(concat!(env!("OUT_DIR"), "/version.rs"));
 
@@ -26,13 +27,14 @@ use esp_backtrace as _;
 
 use crate::storage::FakeStorageManager;
 
+use crate::time::EmbassyTimeSource;
 use core::cell::RefCell;
 use display_interface_spi::SPIInterface;
 use embassy_embedded_hal::shared_bus::blocking::spi::SpiDevice;
 use embassy_executor::Spawner;
 use embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex;
 use embassy_sync::blocking_mutex::{Mutex, raw::NoopRawMutex};
-use embassy_sync::channel::{Channel, Receiver, Sender};
+use embassy_sync::channel::{Channel, Sender};
 use embassy_time::Delay;
 use embedded_graphics::draw_target::DrawTarget;
 use embedded_graphics::pixelcolor::Rgb565;
@@ -67,6 +69,7 @@ type FirmwareApplication = Application<
     UartMidiReader<'static, 'static>,
     UartMidiWriter<'static, 'static>,
     FakeStorageManager,
+    EmbassyTimeSource,
 >;
 
 type ButtonEventChannel = Channel<CriticalSectionRawMutex, ButtonEvent, 64>;
@@ -228,8 +231,11 @@ async fn main(spawner: Spawner) -> ! {
     let storage_manager = STORAGE_MANAGER.init(FakeStorageManager::default());
     let button_event_channel =
         BUTTON_EVENT_CHANNEL.init(Channel::<CriticalSectionRawMutex, ButtonEvent, 64>::new());
-    let button_event_sender = BUTTON_EVENT_SENDER.init(button_event_channel.sender());
+    // TODO: Use this in tasks later
+    let _button_event_sender = BUTTON_EVENT_SENDER.init(button_event_channel.sender());
     let button_event_receiver = BUTTON_EVENT_RECEIVER.init(button_event_channel.receiver());
+
+    let time_source = EmbassyTimeSource::default();
 
     let app = APP.init(
         ApplicationBuilder::new()
@@ -237,6 +243,7 @@ async fn main(spawner: Spawner) -> ! {
             .with_midi_writer(midi_writer)
             .with_storage_manager(storage_manager)
             .with_button_event_receiver(button_event_receiver)
+            .with_time_source(&time_source)
             .build(),
     );
 

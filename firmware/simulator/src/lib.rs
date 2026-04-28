@@ -1,9 +1,11 @@
 mod midi;
 mod sleep;
 mod storage;
+mod time;
 
 use crate::midi::{FakeMidiReader, FakeMidiWriter};
 use crate::storage::LocalStorageManager;
+use crate::time::BrowserTimeSource;
 use embedded_graphics::draw_target::DrawTarget;
 use embedded_graphics::mono_font::ascii::FONT_10X20;
 use embedded_graphics::prelude::Primitive;
@@ -24,6 +26,7 @@ use log::{Level, info};
 use static_cell::StaticCell;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
+use web_sys::js_sys::Date;
 use web_sys::js_sys::futures::spawn_local;
 use web_sys::{Document, Element, EventListener, HtmlButtonElement, Storage, window};
 
@@ -282,12 +285,15 @@ pub fn main() {
     display_1.flush().unwrap();
     display_2.flush().unwrap();
 
+    let time_source = BrowserTimeSource::default();
+
     let app = APP.init(
         ApplicationBuilder::new()
             .with_midi_reader(midi_reader)
             .with_midi_writer(midi_writer)
             .with_storage_manager(storage_manager)
             .with_button_event_receiver(button_event_receiver)
+            .with_time_source(&time_source)
             .build(),
     );
     let displays = DISPLAYS.init(Displays::new(display_1, display_2, display_3, display_4));

@@ -2,6 +2,7 @@ use crate::application::channels::{
     ButtonEvent, ButtonEventReceiver, DisplayIdentifier, DisplayStateUpdateChannel, MidiOutChannel,
     StorageStateEvent, StorageStateUpdateChannel,
 };
+use crate::application::time::TimeSource;
 use crate::layout::DisplayLayout;
 use crate::midi::{MidiReader, MidiWriter};
 use crate::storage::StorageManager;
@@ -45,20 +46,23 @@ pub(crate) struct InternalChannels<'a> {
     button_event: &'a ButtonEventReceiver<'a>,
 }
 
-pub struct Application<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> {
+pub struct Application<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager, TS: TimeSource> {
     pub(crate) midi_streams: MidiStreams<'a, MR, MW>,
     pub(crate) channels: InternalChannels<'a>,
     pub(crate) storage_manager: &'a mut SM,
-    // TODO: Add protocol streams
-    // TODO: Add buttons
+    pub(crate) time_source: &'a TS, // TODO: Add protocol streams
+                                    // TODO: Add buttons
 }
 
-impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR, MW, SM> {
+impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager, TS: TimeSource>
+    Application<'a, MR, MW, SM, TS>
+{
     pub fn new(
         midi_reader: &'a mut MR,
         midi_writer: &'a mut MW,
         storage_manager: &'a mut SM,
         button_event_receiver: &'a mut ButtonEventReceiver,
+        time_source: &'a TS,
     ) -> Self {
         Self {
             midi_streams: MidiStreams {
@@ -72,6 +76,7 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR,
                 button_event: button_event_receiver,
             },
             storage_manager,
+            time_source,
         }
     }
 
@@ -169,20 +174,30 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> Application<'a, MR,
 }
 
 #[derive(Default)]
-pub struct ApplicationBuilder<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> {
+pub struct ApplicationBuilder<
+    'a,
+    MR: MidiReader,
+    MW: MidiWriter,
+    SM: StorageManager,
+    TS: TimeSource,
+> {
     midi_reader: Option<&'a mut MR>,
     midi_writer: Option<&'a mut MW>,
     storage_manager: Option<&'a mut SM>,
     button_event_receiver: Option<&'a mut ButtonEventReceiver<'a>>,
+    time_source: Option<&'a TS>,
 }
 
-impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> ApplicationBuilder<'a, MR, MW, SM> {
+impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager, TS: TimeSource>
+    ApplicationBuilder<'a, MR, MW, SM, TS>
+{
     pub fn new() -> Self {
         Self {
             midi_reader: None,
             midi_writer: None,
             storage_manager: None,
             button_event_receiver: None,
+            time_source: None,
         }
     }
 
@@ -209,13 +224,19 @@ impl<'a, MR: MidiReader, MW: MidiWriter, SM: StorageManager> ApplicationBuilder<
         self
     }
 
-    pub fn build(self) -> Application<'a, MR, MW, SM> {
+    pub fn with_time_source(mut self, time_source: &'a TS) -> Self {
+        self.time_source = Some(time_source);
+        self
+    }
+
+    pub fn build(self) -> Application<'a, MR, MW, SM, TS> {
         Application::new(
             self.midi_reader.expect("MIDI reader is required"),
             self.midi_writer.expect("MIDI writer is required"),
             self.storage_manager.expect("Storage manager is required"),
             self.button_event_receiver
                 .expect("Button event channel is required"),
+            self.time_source.expect("Time source is required"),
         )
     }
 }

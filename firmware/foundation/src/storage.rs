@@ -3,6 +3,24 @@ use crate::protocol::Colour;
 use heapless::{String, Vec};
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug)]
+pub enum StorageManagerLoadError {
+    ErrorReadingFromStorage,
+    NoValueStored,
+    ErrorDeserializingData,
+}
+
+#[derive(Debug)]
+pub enum StorageManagerSaveError {
+    ErrorDeserializingData,
+    ErrorWritingToStorage,
+}
+
+pub trait StorageManager {
+    fn load_presets(&self) -> Result<Presets, StorageManagerLoadError>;
+    fn save_presets(&mut self, presets: &Presets) -> Result<(), StorageManagerSaveError>;
+}
+
 pub const MAX_PRESETS: usize = 128;
 pub const MAX_STRING_LENGTH: usize = 16;
 pub const NUM_OF_BUTTONS: usize = 8;

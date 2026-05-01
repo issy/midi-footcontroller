@@ -1,5 +1,6 @@
-use foundation::storage::state::Presets;
-use foundation::storage::{StorageManager, StorageManagerLoadError, StorageManagerSaveError};
+use foundation::storage::{
+    Presets, StorageManager, StorageManagerLoadError, StorageManagerSaveError,
+};
 
 #[derive(Default)]
 pub struct FakeStorageManager;

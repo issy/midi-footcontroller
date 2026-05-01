@@ -212,9 +212,9 @@ impl Convertible<foundation::storage::state::ButtonConfig> for ButtonConfig {
     }
 }
 
-impl Convertible<foundation::storage::state::StoredPreset> for Preset {
+impl Convertible<StoredPreset> for Preset {
     fn to(self) -> StoredPreset {
-        foundation::storage::state::StoredPreset {
+        StoredPreset {
             name: heapless::String::from_str(self.name.as_str()).unwrap(),
             buttons: heapless::Vec::from_iter(
                 self.buttons

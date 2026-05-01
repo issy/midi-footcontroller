@@ -20,7 +20,7 @@ use embedded_graphics::{
 use embedded_graphics_web_simulator::{
     display::WebSimulatorDisplay, output_settings::OutputSettingsBuilder,
 };
-use foundation::application::state::{Application, ApplicationBuilder, Displays};
+use foundation::application::{Application, ApplicationBuilder, Displays};
 use foundation::channels::{ButtonEvent, ButtonEventReceiver, ButtonIdentifier};
 use log::info;
 use static_cell::StaticCell;

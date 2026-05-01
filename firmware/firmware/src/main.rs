@@ -46,7 +46,7 @@ use esp_hal::time::Rate;
 use esp_hal::timer::timg::TimerGroup;
 use esp_hal::uart::{Config as UartConfig, DataBits, Parity, StopBits, Uart, UartRx, UartTx};
 use esp_hal::{Async, Blocking};
-use foundation::application::state::{Application, ApplicationBuilder, Displays};
+use foundation::application::{Application, ApplicationBuilder, Displays};
 use foundation::channels::{ButtonEvent, ButtonEventReceiver};
 use log::info;
 use midi::{UartMidiReader, UartMidiWriter};

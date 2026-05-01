@@ -2,10 +2,10 @@ use crate::application::channels::{
     ButtonEvent, ButtonEventReceiver, ButtonIdentifier, DisplayIdentifier,
     DisplayStateUpdateChannel, MidiOutChannel, StorageStateEvent, StorageStateUpdateChannel,
 };
-use crate::application::time::TimeSource;
 use crate::layout::DisplayLayout;
 use crate::midi::{MidiReader, MidiWriter};
 use crate::storage::StorageManager;
+use crate::time::TimeSource;
 use core::cell::RefCell;
 use embedded_graphics::draw_target::DrawTarget;
 use embedded_graphics::pixelcolor::Rgb565;

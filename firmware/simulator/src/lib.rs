@@ -22,11 +22,10 @@ use embedded_graphics_web_simulator::{
 };
 use foundation::application::channels::{ButtonEvent, ButtonEventReceiver, ButtonIdentifier};
 use foundation::application::state::{Application, ApplicationBuilder, Displays};
-use log::{Level, info};
+use log::info;
 use static_cell::StaticCell;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
-use web_sys::js_sys::Date;
 use web_sys::js_sys::futures::spawn_local;
 use web_sys::{Document, Element, EventListener, HtmlButtonElement, Storage, window};
 

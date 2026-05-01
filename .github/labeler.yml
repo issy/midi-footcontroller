@@ -1,0 +1,14 @@
+Firmware:
+  - changed-files:
+    - any-glob-to-any-file: 'firmware/**'
+    - all-globs-to-all-files: '!firmware/foundation/src/generated/**'
+Protocol:
+  - changed-files:
+    - any-glob-to-any-file:
+      - 'firmware/foundation/src/generated/**'
+      - 'proto/**'
+      - 'web/src/generated/**'
+Web:
+  - changed-files:
+    - any-glob-to-any-file: 'web/**'
+    - all-globs-to-all-files: '!web/src/generated/**'

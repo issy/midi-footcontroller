@@ -50,16 +50,16 @@ impl<T, const N: usize> AppChannel<T, N> {
     }
 }
 
-pub type MidiOutChannel = AppChannel<MidiPacket, 128>;
+pub(crate) type MidiOutChannel = AppChannel<MidiPacket, 128>;
 
-pub enum DisplayIdentifier {
+pub(crate) enum DisplayIdentifier {
     Display1,
     Display2,
     Display3,
     Display4,
 }
 
-pub struct DisplayStateUpdateMessage {
+pub(crate) struct DisplayStateUpdateMessage {
     pub(crate) display_identifier: DisplayIdentifier,
     pub(crate) top_row_text: DisplayText,
     pub(crate) top_row_color: Colour,
@@ -67,7 +67,7 @@ pub struct DisplayStateUpdateMessage {
     pub(crate) bottom_row_color: Colour,
 }
 
-pub type DisplayStateUpdateChannel = AppChannel<DisplayStateUpdateMessage, 16>;
+pub(crate) type DisplayStateUpdateChannel = AppChannel<DisplayStateUpdateMessage, 16>;
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub enum ButtonIdentifier {
@@ -88,9 +88,9 @@ pub enum ButtonEvent {
 }
 
 #[cfg(target_arch = "wasm32")]
-type Receiver<'a, T, const N: usize> = async_channel::Receiver<T>;
+pub type Receiver<'a, T, const N: usize> = async_channel::Receiver<T>;
 #[cfg(not(target_arch = "wasm32"))]
-type Receiver<'a, T, const N: usize> = embassy_sync::channel::Receiver<
+pub type Receiver<'a, T, const N: usize> = embassy_sync::channel::Receiver<
     'a,
     embassy_sync::blocking_mutex::raw::CriticalSectionRawMutex,
     T,

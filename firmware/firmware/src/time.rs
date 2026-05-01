@@ -1,4 +1,4 @@
-use foundation::application::time::TimeSource;
+use foundation::time::TimeSource;
 
 #[derive(Default)]
 pub struct EmbassyTimeSource;

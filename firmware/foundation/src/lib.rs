@@ -8,10 +8,12 @@ mod generated {
 }
 
 pub mod application;
+pub mod channels;
 pub mod layout;
 pub mod midi;
 pub mod protocol;
 pub mod storage;
+pub mod time;
 
 /// A trait for types that can be converted to and from another type `T`
 pub trait Convertible<T>: Sized {

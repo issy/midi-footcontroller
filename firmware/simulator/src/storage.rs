@@ -1,6 +1,7 @@
 use foundation::Convertible;
-use foundation::storage::state::{Presets, StoredPreset};
-use foundation::storage::{StorageManager, StorageManagerLoadError, StorageManagerSaveError};
+use foundation::storage::{
+    Presets, StorageManager, StorageManagerLoadError, StorageManagerSaveError, StoredPreset,
+};
 use serde::{Deserialize, Serialize};
 use std::str::FromStr;
 use std::vec::Vec;
@@ -62,18 +63,18 @@ pub struct Preset {
     buttons: Vec<ButtonConfig>,
 }
 
-impl Convertible<foundation::storage::state::ButtonType> for ButtonType {
-    fn to(self) -> foundation::storage::state::ButtonType {
+impl Convertible<foundation::storage::ButtonType> for ButtonType {
+    fn to(self) -> foundation::storage::ButtonType {
         match self {
-            ButtonType::Momentary => foundation::storage::state::ButtonType::Momentary,
-            ButtonType::Toggle => foundation::storage::state::ButtonType::Toggle,
+            ButtonType::Momentary => foundation::storage::ButtonType::Momentary,
+            ButtonType::Toggle => foundation::storage::ButtonType::Toggle,
         }
     }
 
-    fn from(value: foundation::storage::state::ButtonType) -> Self {
+    fn from(value: foundation::storage::ButtonType) -> Self {
         match value {
-            foundation::storage::state::ButtonType::Momentary => ButtonType::Momentary,
-            foundation::storage::state::ButtonType::Toggle => ButtonType::Toggle,
+            foundation::storage::ButtonType::Momentary => ButtonType::Momentary,
+            foundation::storage::ButtonType::Toggle => ButtonType::Toggle,
         }
     }
 }
@@ -106,17 +107,17 @@ impl Convertible<foundation::protocol::Colour> for Colour {
     }
 }
 
-impl Convertible<foundation::storage::state::MidiCommand> for MidiCommand {
-    fn to(self) -> foundation::storage::state::MidiCommand {
+impl Convertible<foundation::storage::MidiCommand> for MidiCommand {
+    fn to(self) -> foundation::storage::MidiCommand {
         match self {
             MidiCommand::ProgramChange { channel, program } => {
-                foundation::storage::state::MidiCommand::ProgramChange { channel, program }
+                foundation::storage::MidiCommand::ProgramChange { channel, program }
             }
             MidiCommand::ControllerChange {
                 channel,
                 controller,
                 value,
-            } => foundation::storage::state::MidiCommand::ControllerChange {
+            } => foundation::storage::MidiCommand::ControllerChange {
                 channel,
                 controller,
                 value,
@@ -125,7 +126,7 @@ impl Convertible<foundation::storage::state::MidiCommand> for MidiCommand {
                 channel,
                 note,
                 velocity,
-            } => foundation::storage::state::MidiCommand::NoteOn {
+            } => foundation::storage::MidiCommand::NoteOn {
                 channel,
                 note,
                 velocity,
@@ -134,7 +135,7 @@ impl Convertible<foundation::storage::state::MidiCommand> for MidiCommand {
                 channel,
                 note,
                 velocity,
-            } => foundation::storage::state::MidiCommand::NoteOff {
+            } => foundation::storage::MidiCommand::NoteOff {
                 channel,
                 note,
                 velocity,
@@ -142,12 +143,12 @@ impl Convertible<foundation::storage::state::MidiCommand> for MidiCommand {
         }
     }
 
-    fn from(value: foundation::storage::state::MidiCommand) -> Self {
+    fn from(value: foundation::storage::MidiCommand) -> Self {
         match value {
-            foundation::storage::state::MidiCommand::ProgramChange { channel, program } => {
+            foundation::storage::MidiCommand::ProgramChange { channel, program } => {
                 MidiCommand::ProgramChange { channel, program }
             }
-            foundation::storage::state::MidiCommand::ControllerChange {
+            foundation::storage::MidiCommand::ControllerChange {
                 channel,
                 controller,
                 value,
@@ -156,7 +157,7 @@ impl Convertible<foundation::storage::state::MidiCommand> for MidiCommand {
                 controller,
                 value,
             },
-            foundation::storage::state::MidiCommand::NoteOn {
+            foundation::storage::MidiCommand::NoteOn {
                 channel,
                 note,
                 velocity,
@@ -165,7 +166,7 @@ impl Convertible<foundation::storage::state::MidiCommand> for MidiCommand {
                 note,
                 velocity,
             },
-            foundation::storage::state::MidiCommand::NoteOff {
+            foundation::storage::MidiCommand::NoteOff {
                 channel,
                 note,
                 velocity,
@@ -178,9 +179,9 @@ impl Convertible<foundation::storage::state::MidiCommand> for MidiCommand {
     }
 }
 
-impl Convertible<foundation::storage::state::ButtonConfig> for ButtonConfig {
-    fn to(self) -> foundation::storage::state::ButtonConfig {
-        foundation::storage::state::ButtonConfig {
+impl Convertible<foundation::storage::ButtonConfig> for ButtonConfig {
+    fn to(self) -> foundation::storage::ButtonConfig {
+        foundation::storage::ButtonConfig {
             name: heapless::String::from_str(self.name.as_str()).unwrap(),
             button_type: self.button_type.to(),
             colour: self.colour.to(),
@@ -193,7 +194,7 @@ impl Convertible<foundation::storage::state::ButtonConfig> for ButtonConfig {
         }
     }
 
-    fn from(value: foundation::storage::state::ButtonConfig) -> Self {
+    fn from(value: foundation::storage::ButtonConfig) -> Self {
         ButtonConfig {
             name: value.name.to_string(),
             button_type: Convertible::from(value.button_type),
@@ -212,9 +213,9 @@ impl Convertible<foundation::storage::state::ButtonConfig> for ButtonConfig {
     }
 }
 
-impl Convertible<foundation::storage::state::StoredPreset> for Preset {
+impl Convertible<StoredPreset> for Preset {
     fn to(self) -> StoredPreset {
-        foundation::storage::state::StoredPreset {
+        StoredPreset {
             name: heapless::String::from_str(self.name.as_str()).unwrap(),
             buttons: heapless::Vec::from_iter(
                 self.buttons

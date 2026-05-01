@@ -1,4 +1,4 @@
-use foundation::application::time::TimeSource;
+use foundation::time::TimeSource;
 use web_sys::js_sys::Date;
 
 #[derive(Default)]

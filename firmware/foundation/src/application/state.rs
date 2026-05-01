@@ -1,4 +1,4 @@
-use crate::application::channels::{
+use crate::channels::{
     ButtonEvent, ButtonEventReceiver, ButtonIdentifier, DisplayIdentifier,
     DisplayStateUpdateChannel, MidiOutChannel, StorageStateEvent, StorageStateUpdateChannel,
 };

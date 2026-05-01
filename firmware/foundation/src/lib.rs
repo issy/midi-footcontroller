@@ -8,6 +8,7 @@ mod generated {
 }
 
 pub mod application;
+pub mod channels;
 pub mod layout;
 pub mod midi;
 pub mod protocol;

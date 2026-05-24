@@ -16,7 +16,6 @@ RUN cargo build --target wasm32-unknown-unknown
 
 WORKDIR /app/firmware
 
-# This failed
 RUN cargo build --target riscv32imac-unknown-none-elf
 
 WORKDIR /app/simulator

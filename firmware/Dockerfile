@@ -1,4 +1,4 @@
-FROM rust:1.94.0-alpine AS base
+FROM rust:1.93.1-alpine AS base
 LABEL authors="issy"
 
 WORKDIR /app

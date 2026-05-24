@@ -6,7 +6,8 @@ RUN rustup target add wasm32-unknown-unknown
 
 FROM builder
 
-COPY . /app
+WORKDIR /app
+COPY . .
 
 WORKDIR /app/foundation
 

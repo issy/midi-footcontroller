@@ -1,0 +1,19 @@
+name: docker.yml
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Build Firmware Image
+        run: docker build ./firmware
+
+      - name: Create Simulator Label
+        run: docker build -t simulator-wasm-pack-artefacts --target simulator-wasm-pack-artefacts ./firmware
+
+      - name: Build Web Image
+        run: docker build -t web-artefacts ./web

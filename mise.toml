@@ -17,8 +17,8 @@ rust = {
 buf = "1.65.0"
 
 # Web
-node = "24"
-pnpm = "10.29.3"
+node = "24.13.1"
+pnpm = "11.2.2"
 
 [tasks]
 pre-commit = ["hk fix"]

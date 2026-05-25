@@ -20,10 +20,11 @@ RUN cargo build --target wasm32-unknown-unknown
 WORKDIR /app/simulator
 RUN cargo build --target wasm32-unknown-unknown
 
-FROM simulator AS wasm-pack
-
-WORKDIR /app/simulator
 RUN cargo install wasm-pack
 
 # resulting wasm file will be in /app/simulator/pkg/simulator_bg.wasm
 RUN wasm-pack build --target web .
+
+FROM scratch AS simulator-wasm-pack-artefacts
+
+COPY --from=simulator /app/simulator/pkg /out/

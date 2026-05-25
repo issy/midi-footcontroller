@@ -28,3 +28,8 @@ RUN wasm-pack build --target web .
 FROM scratch AS simulator-wasm-pack-artefacts
 
 COPY --from=simulator /app/simulator/pkg /out/
+
+FROM base AS check-formatting
+
+WORKDIR /app
+CMD ["cargo", "fmt", "--all", "--check"]
